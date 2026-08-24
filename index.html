@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.7</title>
+  <title>DeBlockle v0.8</title>
   <style>
     :root {
       --ink: #101828;
@@ -375,6 +375,35 @@
       padding: 10px;
       box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
       position: relative;
+    }
+
+    .score-burst {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      top: 45%;
+      transform: translate(-50%, -50%) scale(.72);
+      padding: 9px 15px;
+      border-radius: 999px;
+      color: var(--navy);
+      background: var(--lime);
+      box-shadow: 0 12px 28px rgba(0,0,0,.3);
+      font-size: clamp(18px, 5vw, 28px);
+      font-weight: 1000;
+      letter-spacing: -.035em;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .score-burst.special { background: linear-gradient(135deg, var(--pink), var(--orange), var(--lime)); }
+    .score-burst.show { animation: scoreBurst .82s cubic-bezier(.2,.8,.2,1) both; }
+
+    @keyframes scoreBurst {
+      0% { opacity: 0; transform: translate(-50%, -25%) scale(.7); }
+      18% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+      68% { opacity: 1; transform: translate(-50%, -66%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -105%) scale(.9); }
     }
 
     .board {
@@ -870,6 +899,31 @@
     .summary-box span { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 850; }
     .summary-box strong { font-size: 21px; }
 
+    .summary-grid.detailed { grid-template-columns: repeat(3, 1fr); margin-top: 10px; }
+    .summary-grid.detailed .summary-box { padding: 10px 6px; }
+    .summary-grid.detailed .summary-box span { font-size: 8px; line-height: 1.25; }
+    .summary-grid.detailed .summary-box strong { font-size: 17px; }
+
+    .achievement-count { color: var(--lime) !important; font-weight: 900; }
+    .lifetime-title { margin: 15px 0 7px !important; color: white !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: .12em; font-weight: 950; }
+    .lifetime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .lifetime-stat { display: flex; justify-content: space-between; gap: 9px; padding: 8px 10px; border-radius: 11px; background: rgba(255,255,255,.055); }
+    .lifetime-stat span { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .07em; font-weight: 850; }
+    .lifetime-stat strong { color: white; font-size: 12px; }
+    .achievement-list { display: grid; gap: 9px; margin-top: 16px; }
+    .achievement-card { display: grid; grid-template-columns: 42px 1fr; gap: 11px; align-items: center; padding: 11px; border-radius: 15px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.08); opacity: .48; }
+    .achievement-card.unlocked { opacity: 1; border-color: rgba(216,255,79,.24); background: rgba(216,255,79,.075); }
+    .achievement-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: rgba(255,255,255,.08); font-size: 21px; }
+    .achievement-card.unlocked .achievement-icon { background: var(--lime); color: var(--navy); }
+    .achievement-copy strong { display: block; font-size: 14px; }
+    .achievement-copy span { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; margin-top: 2px; }
+
+    .achievement-toast { position: fixed; z-index: 60; top: max(70px, calc(env(safe-area-inset-top) + 58px)); left: 50%; width: min(calc(100% - 28px), 390px); display: grid; grid-template-columns: 46px 1fr; gap: 11px; align-items: center; padding: 12px 14px; border-radius: 17px; color: var(--navy); background: linear-gradient(135deg, var(--lime), var(--cyan)); box-shadow: 0 18px 48px rgba(0,0,0,.38); transform: translate(-50%, -150%); opacity: 0; pointer-events: none; transition: transform .34s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
+    .achievement-toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .achievement-toast-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: rgba(14,22,37,.14); font-size: 24px; }
+    .achievement-toast small { display: block; font-size: 9px; letter-spacing: .13em; font-weight: 1000; }
+    .achievement-toast strong { display: block; font-size: 17px; margin-top: 2px; }
+
     .error-banner {
       display: none;
       position: fixed;
@@ -924,9 +978,10 @@
       <div class="home-best"><span>Best score</span><strong id="homeBest">0</strong></div>
       <div class="button-stack">
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
+        <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.7 • LAST CHANCE</div>
+      <div class="version">DEBLOCKLE BUILD v0.8 • PROGRESSION</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -950,6 +1005,7 @@
 
       <div class="board-shell">
         <div class="board" id="board" role="grid" aria-label="8 by 8 game board"></div>
+        <div class="score-burst" id="scoreBurst" aria-live="polite"></div>
       </div>
       <div class="toast" id="toast">Press and drag a block onto the board.</div>
 
@@ -984,6 +1040,7 @@
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
+      <p>Scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
     </div>
   </div>
@@ -995,7 +1052,15 @@
       <div class="final-score"><span>Final score</span><strong id="finalScore">0</strong></div>
       <div class="summary-grid">
         <div class="summary-box"><span>Lines cleared</span><strong id="finalLines">0</strong></div>
-        <div class="summary-box"><span>Blocks placed</span><strong id="finalBlocks">0</strong></div>
+        <div class="summary-box"><span>Tiles placed</span><strong id="finalBlocks">0</strong></div>
+      </div>
+      <div class="summary-grid detailed">
+        <div class="summary-box"><span>Sets completed</span><strong id="finalSets">0</strong></div>
+        <div class="summary-box"><span>Highest combo</span><strong id="finalCombo">—</strong></div>
+        <div class="summary-box"><span>Largest clear</span><strong id="finalLargest">0</strong></div>
+        <div class="summary-box"><span>Blasts / Crosses</span><strong id="finalSpecials">0 / 0</strong></div>
+        <div class="summary-box"><span>Highest tier</span><strong id="finalTier">—</strong></div>
+        <div class="summary-box"><span>Run type</span><strong id="finalRunType">Clean</strong></div>
       </div>
       <p class="run-status" id="runStatus">Clean best: 0</p>
       <div class="button-stack">
@@ -1003,6 +1068,26 @@
         <button class="secondary-btn" id="againButton">PLAY AGAIN</button>
         <button class="secondary-btn" id="homeButton">BACK TO HOME</button>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="achievementsOverlay" role="dialog" aria-modal="true" aria-labelledby="achievementsTitle">
+    <div class="modal">
+      <h2 id="achievementsTitle">Achievements</h2>
+      <p class="achievement-count" id="achievementCount">0 / 12 unlocked</p>
+      <p class="lifetime-title">Lifetime stats</p>
+      <div class="lifetime-grid">
+        <div class="lifetime-stat"><span>Runs</span><strong id="lifetimeRuns">0</strong></div>
+        <div class="lifetime-stat"><span>Points</span><strong id="lifetimeScore">0</strong></div>
+        <div class="lifetime-stat"><span>Lines</span><strong id="lifetimeLines">0</strong></div>
+        <div class="lifetime-stat"><span>Tiles</span><strong id="lifetimeTiles">0</strong></div>
+        <div class="lifetime-stat"><span>Blasts</span><strong id="lifetimeBombs">0</strong></div>
+        <div class="lifetime-stat"><span>Crosses</span><strong id="lifetimeCrosses">0</strong></div>
+        <div class="lifetime-stat"><span>Continues</span><strong id="lifetimeContinues">0</strong></div>
+        <div class="lifetime-stat"><span>Best combo / tier</span><strong id="lifetimePeak">— / —</strong></div>
+      </div>
+      <div class="achievement-list" id="achievementList"></div>
+      <div class="button-stack"><button class="primary-btn" id="closeAchievementsButton">DONE</button></div>
     </div>
   </div>
 
@@ -1020,12 +1105,16 @@
     </div>
   </div>
 
+  <div class="achievement-toast" id="achievementToast" role="status">
+    <span class="achievement-toast-icon" id="achievementToastIcon">★</span>
+    <span><small>ACHIEVEMENT UNLOCKED</small><strong id="achievementToastName">First Break</strong></span>
+  </div>
   <div class="error-banner" id="errorBanner" role="alert"></div>
 
   <script>
     "use strict";
 
-    const BUILD = "v0.7";
+    const BUILD = "v0.8";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
@@ -1033,6 +1122,8 @@
     const POWER_MAX = TIER_3_ENERGY;
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
+    const ACHIEVEMENTS_KEY = "deblockle_v08_achievements";
+    const LIFETIME_STATS_KEY = "deblockle_v08_lifetime_stats";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
@@ -1060,6 +1151,36 @@
       { name: "Z Block", cells: [[0,0],[0,1],[1,1],[1,2]], weight: 4 }
     ];
 
+    const ACHIEVEMENTS = [
+      { id: "first_break", name: "First Break", description: "Clear your first line.", icon: "▰" },
+      { id: "double_trouble", name: "Double Trouble", description: "Clear two or more lines at once.", icon: "Ⅱ" },
+      { id: "kaboom", name: "Kaboom", description: "Detonate a Blast Block.", icon: "✹" },
+      { id: "chain_reaction", name: "Chain Reaction", description: "Detonate two or more Blast Blocks in one clear.", icon: "✦" },
+      { id: "crossed_out", name: "Crossed Out", description: "Activate a Cross Block.", icon: "✚" },
+      { id: "cross_blast", name: "Cross Blast", description: "Combine Cross and Blast effects in one clear.", icon: "※" },
+      { id: "power_up", name: "Power Up", description: "Activate Tier I power.", icon: "Ⅰ" },
+      { id: "chainstorm", name: "Chainstorm", description: "Activate Tier II power.", icon: "Ⅱ" },
+      { id: "full_deblockle", name: "Full DeBlockle", description: "Activate Tier III power.", icon: "Ⅲ" },
+      { id: "five_alive", name: "Five Alive", description: "Reach a ×5 clear combo.", icon: "5" },
+      { id: "clean_slate", name: "Clean Slate", description: "Empty the entire board with a clear.", icon: "□" },
+      { id: "high_roller", name: "High Roller", description: "Score 10,000 points in one run.", icon: "★" }
+    ];
+
+    const DEFAULT_LIFETIME = {
+      runs: 0, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0,
+      continues: 0, highestCombo: 0, highestTier: 0
+    };
+
+    function readJSON(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return value && typeof value === "object" ? value : fallback;
+      } catch (error) {
+        console.warn(`Could not read ${key}`, error);
+        return fallback;
+      }
+    }
+
     const state = {
       board: [],
       pieces: [],
@@ -1070,6 +1191,12 @@
       combo: 0,
       lines: 0,
       blocks: 0,
+      setsCompleted: 0,
+      highestCombo: 0,
+      largestClear: 0,
+      bombsDetonated: 0,
+      crossesActivated: 0,
+      highestTierReached: 0,
       rerolls: 2,
       setPlaced: 0,
       energy: 0,
@@ -1079,6 +1206,9 @@
       continueUsed: false,
       locked: false,
       running: false,
+      achievements: readJSON(ACHIEVEMENTS_KEY, {}),
+      lifetime: { ...DEFAULT_LIFETIME, ...readJSON(LIFETIME_STATS_KEY, {}) },
+      recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
     };
 
@@ -1088,6 +1218,8 @@
     const toastEl = $("toast");
     let audioContext = null;
     let dragState = null;
+    let achievementQueue = [];
+    let achievementShowing = false;
 
     function safeAction(name, action) {
       try { return action(); }
@@ -1115,6 +1247,93 @@
     function closeOverlay(id) { $(id).classList.remove("open"); }
 
     function formatScore(value) { return Math.max(0, value).toLocaleString("en-GB"); }
+
+    function showScoreBurst(text, special = false) {
+      const burst = $("scoreBurst");
+      burst.textContent = text;
+      burst.classList.remove("show", "special");
+      void burst.offsetWidth;
+      burst.classList.toggle("special", special);
+      burst.classList.add("show");
+    }
+
+    function renderAchievements() {
+      const unlockedCount = ACHIEVEMENTS.filter((achievement) => state.achievements[achievement.id]).length;
+      $("achievementCount").textContent = `${unlockedCount} / ${ACHIEVEMENTS.length} unlocked`;
+      $("lifetimeRuns").textContent = formatScore(state.lifetime.runs);
+      $("lifetimeScore").textContent = formatScore(state.lifetime.score);
+      $("lifetimeLines").textContent = formatScore(state.lifetime.lines);
+      $("lifetimeTiles").textContent = formatScore(state.lifetime.tiles);
+      $("lifetimeBombs").textContent = formatScore(state.lifetime.bombs);
+      $("lifetimeCrosses").textContent = formatScore(state.lifetime.crosses);
+      $("lifetimeContinues").textContent = formatScore(state.lifetime.continues);
+      $("lifetimePeak").textContent = `${state.lifetime.highestCombo ? `×${state.lifetime.highestCombo}` : "—"} / ${state.lifetime.highestTier ? `T${state.lifetime.highestTier}` : "—"}`;
+      $("achievementList").innerHTML = ACHIEVEMENTS.map((achievement) => {
+        const unlocked = Boolean(state.achievements[achievement.id]);
+        return `<div class="achievement-card${unlocked ? " unlocked" : ""}">
+          <span class="achievement-icon">${unlocked ? achievement.icon : "?"}</span>
+          <span class="achievement-copy"><strong>${achievement.name}</strong><span>${achievement.description}</span></span>
+        </div>`;
+      }).join("");
+    }
+
+    function showNextAchievement() {
+      if (achievementShowing || !achievementQueue.length) return;
+      achievementShowing = true;
+      const achievement = achievementQueue.shift();
+      $("achievementToastIcon").textContent = achievement.icon;
+      $("achievementToastName").textContent = achievement.name;
+      $("achievementToast").classList.add("show");
+      sound("achievement");
+      window.setTimeout(() => {
+        $("achievementToast").classList.remove("show");
+        window.setTimeout(() => {
+          achievementShowing = false;
+          showNextAchievement();
+        }, 350);
+      }, 2600);
+    }
+
+    function unlockAchievement(id) {
+      if (TEST_MODE || TEST_CONTINUE || state.achievements[id]) return;
+      const achievement = ACHIEVEMENTS.find((item) => item.id === id);
+      if (!achievement) return;
+      state.achievements[id] = Date.now();
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(state.achievements));
+      achievementQueue.push(achievement);
+      renderAchievements();
+      showNextAchievement();
+    }
+
+    function checkScoreAchievement() {
+      if (state.score >= 10000) unlockAchievement("high_roller");
+    }
+
+    function recordRunProgress() {
+      if (TEST_MODE || TEST_CONTINUE) return;
+      if (!state.recorded.run) {
+        state.lifetime.runs += 1;
+        state.recorded.run = true;
+      }
+      state.lifetime.score += Math.max(0, state.score - state.recorded.score);
+      state.lifetime.lines += Math.max(0, state.lines - state.recorded.lines);
+      state.lifetime.tiles += Math.max(0, state.blocks - state.recorded.tiles);
+      state.lifetime.bombs += Math.max(0, state.bombsDetonated - state.recorded.bombs);
+      state.lifetime.crosses += Math.max(0, state.crossesActivated - state.recorded.crosses);
+      if (state.continueUsed && !state.recorded.continue) {
+        state.lifetime.continues += 1;
+        state.recorded.continue = true;
+      }
+      state.lifetime.highestCombo = Math.max(state.lifetime.highestCombo, state.highestCombo);
+      state.lifetime.highestTier = Math.max(state.lifetime.highestTier, state.highestTierReached);
+      state.recorded.score = state.score;
+      state.recorded.lines = state.lines;
+      state.recorded.tiles = state.blocks;
+      state.recorded.bombs = state.bombsDetonated;
+      state.recorded.crosses = state.crossesActivated;
+      localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
+      renderAchievements();
+    }
 
     function updateStats() {
       $("scoreValue").textContent = formatScore(state.score);
@@ -1241,6 +1460,8 @@
       state.powerActive = true;
       state.powerTier = tier;
       state.powerSetsRemaining = tierSetCount(tier);
+      state.highestTierReached = Math.max(state.highestTierReached, tier);
+      unlockAchievement(tier === 3 ? "full_deblockle" : tier === 2 ? "chainstorm" : "power_up");
 
       if (tier === 3) {
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
@@ -1693,7 +1914,10 @@
       piece.used = true;
       state.setPlaced += 1;
       state.blocks += piece.cells.length;
-      state.score += piece.cells.length * 5 * powerMultiplier();
+      const placementScore = piece.cells.length * 5 * powerMultiplier();
+      state.score += placementScore;
+      showScoreBurst(`+${formatScore(placementScore)} PLACE`, state.powerActive);
+      checkScoreAchievement();
       state.selected = null;
       renderBoard();
       renderTray();
@@ -1706,6 +1930,7 @@
       }
 
       if (state.pieces.every((item) => item.used)) {
+        state.setsCompleted += 1;
         let deliveryMessage = "Fresh blocks delivered!";
         if (state.powerActive) {
           state.powerSetsRemaining -= 1;
@@ -1752,6 +1977,10 @@
 
       state.combo += 1;
       state.lines += lineCount;
+      state.highestCombo = Math.max(state.highestCombo, state.combo);
+      unlockAchievement("first_break");
+      if (lineCount >= 2) unlockAchievement("double_trouble");
+      if (state.combo >= 5) unlockAchievement("five_alive");
       const lineCells = new Set();
       fullRows.forEach((row) => { for (let col = 0; col < SIZE; col += 1) lineCells.add(`${row},${col}`); });
       fullCols.forEach((col) => { for (let row = 0; row < SIZE; row += 1) lineCells.add(`${row},${col}`); });
@@ -1812,6 +2041,13 @@
       }
 
       const removedCells = new Set([...lineCells, ...crossCells, ...blastCells]);
+      state.largestClear = Math.max(state.largestClear, removedCells.size);
+      state.bombsDetonated += triggeredBombs.size;
+      state.crossesActivated += triggeredCrosses.size;
+      if (triggeredBombs.size) unlockAchievement("kaboom");
+      if (triggeredBombs.size >= 2) unlockAchievement("chain_reaction");
+      if (triggeredCrosses.size) unlockAchievement("crossed_out");
+      if (triggeredCrosses.size && triggeredBombs.size) unlockAchievement("cross_blast");
       const crossOnlyCount = [...crossCells].filter((key) => !lineCells.has(key)).length;
       const explosionOnlyCount = [...blastCells].filter((key) => !lineCells.has(key) && !crossCells.has(key)).length;
       const chainBonus = Math.max(0, triggeredBombs.size - 1) * 100;
@@ -1819,6 +2055,8 @@
       const multiplier = Math.max(1, state.combo);
       const clearScore = (lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus) * multiplier * powerMultiplier();
       state.score += clearScore;
+      showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
+      checkScoreAchievement();
 
       removedCells.forEach((key) => {
         const [row, col] = key.split(",").map(Number);
@@ -1854,6 +2092,7 @@
         state.board[row][col] = 0;
       });
       renderBoard();
+      if (state.board.every((row) => row.every((cell) => cell === 0))) unlockAchievement("clean_slate");
       addEnergy(removedCells.size + lineCount * 4);
       return lineCount;
     }
@@ -1894,6 +2133,12 @@
       state.combo = 0;
       state.lines = 0;
       state.blocks = 0;
+      state.setsCompleted = 0;
+      state.highestCombo = 0;
+      state.largestClear = 0;
+      state.bombsDetonated = 0;
+      state.crossesActivated = 0;
+      state.highestTierReached = 0;
       state.rerolls = 2;
       state.setPlaced = 0;
       state.energy = TEST_MODE ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
@@ -1901,6 +2146,7 @@
       state.powerTier = 0;
       state.powerSetsRemaining = 0;
       state.continueUsed = false;
+      state.recorded = { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false };
       state.locked = false;
       state.running = true;
       if (TEST_CONTINUE) {
@@ -1924,11 +2170,18 @@
       const isNewBest = !TEST_MODE && !TEST_CONTINUE && state.score >= previousBest && state.score > 0;
       updateBest(true);
       updateCleanBest();
+      recordRunProgress();
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
       $("finalBlocks").textContent = formatScore(state.blocks);
+      $("finalSets").textContent = formatScore(state.setsCompleted);
+      $("finalCombo").textContent = state.highestCombo ? `×${state.highestCombo}` : "—";
+      $("finalLargest").textContent = formatScore(state.largestClear);
+      $("finalSpecials").textContent = `${formatScore(state.bombsDetonated)} / ${formatScore(state.crossesActivated)}`;
+      $("finalTier").textContent = state.highestTierReached ? `Tier ${state.highestTierReached}` : "—";
+      $("finalRunType").textContent = state.continueUsed ? "Continued" : "Clean";
       $("newBest").textContent = isNewBest ? "★ NEW BEST SCORE ★" : "";
-      $("runStatus").textContent = `${state.continueUsed ? "Continued run" : "Clean run"} • Clean best: ${formatScore(state.cleanBest)}`;
+      $("runStatus").textContent = `${state.continueUsed ? "Continued run" : "Clean run"} • Clean best ${formatScore(state.cleanBest)} • Overall best ${formatScore(state.best)}`;
       $("continueButton").classList.toggle("hidden", state.continueUsed);
       updateStats();
       sound("gameOver");
@@ -1964,7 +2217,7 @@
         const gain = audioContext.createGain();
         const tones = {
           select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07], reroll: [710, .16],
-          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], powerReady: [760, .2], powerOn: [1040, .34], powerOff: [360, .18], continue: [680, .24], start: [520, .12], gameOver: [125, .22]
+          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], powerReady: [760, .2], powerOn: [1040, .34], powerOff: [360, .18], achievement: [1180, .22], continue: [680, .24], start: [520, .12], gameOver: [125, .22]
         };
         const [frequency, duration] = tones[type] || tones.select;
         oscillator.type = type === "gameOver" || type === "deny" ? "sawtooth" : "sine";
@@ -1984,6 +2237,8 @@
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
     $("againButton").addEventListener("click", () => safeAction("Restart game", startGame));
     $("homeButton").addEventListener("click", () => safeAction("Return home", goHome));
+    $("achievementsButton").addEventListener("click", () => { renderAchievements(); openOverlay("achievementsOverlay"); });
+    $("closeAchievementsButton").addEventListener("click", () => closeOverlay("achievementsOverlay"));
     $("howButton").addEventListener("click", () => openOverlay("howOverlay"));
     $("closeHowButton").addEventListener("click", () => closeOverlay("howOverlay"));
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
@@ -1993,13 +2248,18 @@
     $("completeAdButton").addEventListener("click", () => safeAction("Complete test rewarded ad", completeTestAd));
     $("cancelAdButton").addEventListener("click", () => safeAction("Cancel test rewarded ad", cancelTestAd));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
+    $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeOverlay("howOverlay");
+      if (event.key === "Escape") {
+        closeOverlay("howOverlay");
+        closeOverlay("achievementsOverlay");
+      }
     });
 
     createBoard();
     updateStats();
+    renderAchievements();
     updateSoundButton();
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     if (TEST_CONTINUE) document.querySelector(".version").textContent += " • CONTINUE TEST";
