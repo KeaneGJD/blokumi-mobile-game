@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.5</title>
+  <title>DeBlockle v0.6</title>
   <style>
     :root {
       --ink: #101828;
@@ -278,6 +278,7 @@
       background: #0d1523;
       border: 1px solid rgba(255,255,255,.07);
       box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+      position: relative;
     }
 
     .meter-fill {
@@ -288,6 +289,20 @@
       box-shadow: 0 0 12px rgba(57,231,208,.45);
       transition: width .35s cubic-bezier(.2,.75,.2,1);
     }
+
+    .tier-marker {
+      position: absolute;
+      z-index: 3;
+      top: -2px;
+      bottom: -2px;
+      width: 2px;
+      background: rgba(255,255,255,.65);
+      box-shadow: 0 0 4px rgba(0,0,0,.55);
+      pointer-events: none;
+    }
+
+    .tier-marker.one { left: 27.78%; }
+    .tier-marker.two { left: 61.11%; }
 
     .power-button {
       min-height: 40px;
@@ -867,7 +882,7 @@
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.5 • POWER METER</div>
+      <div class="version">DEBLOCKLE BUILD v0.6 • POWER TIERS</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -879,9 +894,11 @@
 
       <div class="power-panel" id="powerPanel">
         <div>
-          <div class="meter-copy"><span>DeBlockle Meter</span><strong id="powerStatus">0 / 80</strong></div>
-          <div class="meter-track" role="progressbar" aria-label="DeBlockle Meter" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0">
+          <div class="meter-copy"><span>DeBlockle Meter</span><strong id="powerStatus">0 / 360</strong></div>
+          <div class="meter-track" role="progressbar" aria-label="DeBlockle Meter" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0">
             <div class="meter-fill" id="meterFill"></div>
+            <span class="tier-marker one" aria-hidden="true"></span>
+            <span class="tier-marker two" aria-hidden="true"></span>
           </div>
         </div>
         <button class="power-button" id="powerButton" disabled>Build power</button>
@@ -919,7 +936,7 @@
         <li>Before placing from a set, pull the lever to randomise all three blocks. You have two pulls per run.</li>
         <li>Orange Blast Blocks detonate when their row or column clears, destroying occupied tiles within two spaces.</li>
         <li>Purple Cross Blocks clear occupied tiles along their opposite axis when their row or column clears.</li>
-        <li>Clear tiles to fill the DeBlockle Meter, then activate three powered sets with double scoring and guaranteed special blocks.</li>
+        <li>Activate the meter at Tier I, or risk holding it for stronger Tier II and Tier III powers.</li>
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
@@ -948,13 +965,16 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.5";
+    const BUILD = "v0.6";
     const SIZE = 8;
-    const POWER_MAX = 80;
-    const POWER_SETS = 3;
+    const TIER_1_ENERGY = 100;
+    const TIER_2_ENERGY = 220;
+    const TIER_3_ENERGY = 360;
+    const POWER_MAX = TIER_3_ENERGY;
     const BEST_KEY = "deblockle_v01_best";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
+    const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 5 },
@@ -991,6 +1011,7 @@
       setPlaced: 0,
       energy: 0,
       powerActive: false,
+      powerTier: 0,
       powerSetsRemaining: 0,
       locked: false,
       running: false,
@@ -1041,6 +1062,18 @@
       updatePowerUI();
     }
 
+    function unlockedPowerTier(energy = state.energy) {
+      if (energy >= TIER_3_ENERGY) return 3;
+      if (energy >= TIER_2_ENERGY) return 2;
+      if (energy >= TIER_1_ENERGY) return 1;
+      return 0;
+    }
+
+    function tierSetCount(tier) { return tier === 3 ? 5 : tier === 2 ? 4 : 3; }
+    function powerMultiplier() { return !state.powerActive ? 1 : state.powerTier === 3 ? 3 : 2; }
+    function poweredSpecialCount() { return !state.powerActive ? 0 : state.powerTier === 3 ? 2 : 1; }
+    function crossChainsEnabled() { return state.powerActive && state.powerTier >= 2; }
+
     function updatePowerUI() {
       const panel = $("powerPanel");
       const fill = $("meterFill");
@@ -1048,6 +1081,7 @@
       const button = $("powerButton");
       const track = panel.querySelector('[role="progressbar"]');
       const percentage = Math.min(100, (state.energy / POWER_MAX) * 100);
+      const unlockedTier = unlockedPowerTier();
 
       panel.classList.toggle("active", state.powerActive);
       $("gameScreen").classList.toggle("powered", state.powerActive);
@@ -1055,18 +1089,21 @@
       track.setAttribute("aria-valuenow", String(state.energy));
 
       if (state.powerActive) {
-        status.textContent = `POWER ×2`;
+        status.textContent = `TIER ${state.powerTier} • ×${powerMultiplier()}`;
         button.textContent = `${state.powerSetsRemaining} SET${state.powerSetsRemaining === 1 ? "" : "S"} LEFT`;
         button.disabled = true;
         button.classList.remove("ready");
-      } else if (state.energy >= POWER_MAX) {
-        status.textContent = "READY";
+      } else if (unlockedTier > 0) {
+        const nextTarget = unlockedTier === 1 ? TIER_2_ENERGY : TIER_3_ENERGY;
+        status.textContent = unlockedTier === 3 ? "FULL DEBLOCKLE" : `TIER ${unlockedTier} • ${state.energy}/${nextTarget}`;
         const canActivate = state.running && !state.locked && state.setPlaced === 0;
-        button.textContent = canActivate ? "ACTIVATE" : "READY NEXT SET";
+        button.textContent = canActivate
+          ? unlockedTier === 3 ? "FULL DEBLOCKLE" : `ACTIVATE TIER ${unlockedTier}`
+          : `TIER ${unlockedTier} NEXT SET`;
         button.disabled = !canActivate;
         button.classList.toggle("ready", canActivate);
       } else {
-        status.textContent = `${state.energy} / ${POWER_MAX}`;
+        status.textContent = `${state.energy} / ${TIER_1_ENERGY}`;
         button.textContent = "BUILD POWER";
         button.disabled = true;
         button.classList.remove("ready");
@@ -1075,39 +1112,85 @@
 
     function addEnergy(amount) {
       if (state.powerActive || amount <= 0) return;
-      const wasFull = state.energy >= POWER_MAX;
-      state.energy = Math.min(POWER_MAX, state.energy + amount);
+      const previousTier = unlockedPowerTier();
+      state.energy = Math.min(POWER_MAX, state.energy + Math.min(30, amount));
+      const newTier = unlockedPowerTier();
       updatePowerUI();
-      if (!wasFull && state.energy >= POWER_MAX) {
-        setToast(state.setPlaced === 0 ? "DEBLOCKLE MODE READY!" : "POWER READY FOR YOUR NEXT SET!", true);
+      if (newTier > previousTier) {
+        const message = newTier === 3 ? "FULL DEBLOCKLE READY!" : `POWER TIER ${newTier} READY!`;
+        setToast(state.setPlaced === 0 ? message : `${message} ACTIVATE NEXT SET.`, true);
         sound("powerReady");
         vibrate([20, 25, 20, 25, 45]);
       }
     }
 
-    function ensureSpecialBlock(pieces) {
-      if (pieces.some((piece) => piece.bombCell || piece.crossCell)) return pieces;
-      const piece = pieces[Math.floor(Math.random() * pieces.length)];
-      const specialCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
-      if (Math.random() < .55) piece.bombCell = [...specialCell];
-      else piece.crossCell = [...specialCell];
+    function specialTargets(pieces) {
+      const targets = [];
+      pieces.forEach((piece, pieceIndex) => {
+        piece.cells.forEach((cell) => {
+          const occupiedBySpecial = (piece.bombCell && piece.bombCell[0] === cell[0] && piece.bombCell[1] === cell[1])
+            || (piece.crossCell && piece.crossCell[0] === cell[0] && piece.crossCell[1] === cell[1]);
+          if (!occupiedBySpecial) targets.push({ piece, pieceIndex, cell });
+        });
+      });
+      return targets;
+    }
+
+    function addSpecialType(pieces, type) {
+      const alreadyPresent = pieces.some((piece) => type === "bomb" ? piece.bombCell : piece.crossCell);
+      if (alreadyPresent) return;
+      const targets = specialTargets(pieces);
+      if (!targets.length) return;
+      const target = targets[Math.floor(Math.random() * targets.length)];
+      if (type === "bomb") target.piece.bombCell = [...target.cell];
+      else target.piece.crossCell = [...target.cell];
+    }
+
+    function ensurePoweredSpecials(pieces, count) {
+      if (count >= 2) {
+        addSpecialType(pieces, "bomb");
+        addSpecialType(pieces, "cross");
+      } else if (count === 1 && !pieces.some((piece) => piece.bombCell || piece.crossCell)) {
+        addSpecialType(pieces, Math.random() < .55 ? "bomb" : "cross");
+      }
       return pieces;
     }
 
-    function activatePowerMode() {
-      if (!state.running || state.locked || state.powerActive || state.energy < POWER_MAX || state.setPlaced !== 0) return;
-      state.energy = 0;
-      state.powerActive = true;
-      state.powerSetsRemaining = POWER_SETS;
-      ensureSpecialBlock(state.pieces);
-      renderTray();
-      updatePowerUI();
-      setToast("DEBLOCKLE MODE! DOUBLE SCORE!", true);
-      sound("powerOn");
-      vibrate([30, 30, 50, 30, 80]);
+    function seedBoardBombs(amount) {
+      const candidates = [];
+      for (let row = 0; row < SIZE; row += 1) {
+        for (let col = 0; col < SIZE; col += 1) {
+          if (state.board[row][col] === 1) candidates.push([row, col]);
+        }
+      }
+      for (let count = 0; count < amount && candidates.length; count += 1) {
+        const index = Math.floor(Math.random() * candidates.length);
+        const [row, col] = candidates.splice(index, 1)[0];
+        state.board[row][col] = 2;
+      }
     }
 
-    function powerMultiplier() { return state.powerActive ? 2 : 1; }
+    function activatePowerMode() {
+      const tier = unlockedPowerTier();
+      if (!state.running || state.locked || state.powerActive || tier === 0 || state.setPlaced !== 0) return;
+      state.energy = 0;
+      state.powerActive = true;
+      state.powerTier = tier;
+      state.powerSetsRemaining = tierSetCount(tier);
+
+      if (tier === 3) {
+        state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+      } else if (tier === 2) {
+        seedBoardBombs(3);
+      }
+      ensurePoweredSpecials(state.pieces, poweredSpecialCount());
+      renderBoard();
+      renderTray();
+      updatePowerUI();
+      setToast(tier === 3 ? "FULL DEBLOCKLE! BOARD CLEARED • ×3!" : `POWER TIER ${tier}! SCORE ×2!`, true);
+      sound("powerOn");
+      vibrate(tier === 3 ? [45, 30, 70, 30, 110] : [30, 30, 50, 30, 80]);
+    }
 
     function updateRerollControl() {
       const button = $("rerollButton");
@@ -1138,7 +1221,7 @@
       sound("reroll");
       vibrate([18, 25, 18]);
       await delay(430);
-      state.pieces = dealPieceSet(state.powerActive);
+      state.pieces = dealPieceSet(poweredSpecialCount());
       renderTray();
       trayEl.classList.remove("rerolling");
       button.classList.remove("pulling");
@@ -1160,12 +1243,12 @@
       return { name: fallback.name, cells: fallback.cells.map((cell) => [...cell]), used: false };
     }
 
-    function dealPieceSet(forceSpecial = false) {
+    function dealPieceSet(specialCount = 0) {
       const pieces = [weightedShape(), weightedShape(), weightedShape()];
       // A set can contain a Blast Block or a Cross Block, never both.
       const specialRoll = Math.random();
-      if (forceSpecial) {
-        ensureSpecialBlock(pieces);
+      if (specialCount > 0) {
+        ensurePoweredSpecials(pieces, specialCount);
       } else if (specialRoll < (1 / 6)) {
         const piece = pieces[Math.floor(Math.random() * pieces.length)];
         const bombCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
@@ -1480,6 +1563,7 @@
           state.powerSetsRemaining -= 1;
           if (state.powerSetsRemaining <= 0) {
             state.powerActive = false;
+            state.powerTier = 0;
             state.powerSetsRemaining = 0;
             deliveryMessage = "DeBlockle Mode complete.";
             sound("powerOff");
@@ -1487,7 +1571,7 @@
             deliveryMessage = `POWER ACTIVE: ${state.powerSetsRemaining} SET${state.powerSetsRemaining === 1 ? "" : "S"} LEFT!`;
           }
         }
-        state.pieces = dealPieceSet(state.powerActive);
+        state.pieces = dealPieceSet(poweredSpecialCount());
         state.setPlaced = 0;
         setToast(deliveryMessage, state.powerActive);
         sound("deal");
@@ -1524,53 +1608,57 @@
       fullRows.forEach((row) => { for (let col = 0; col < SIZE; col += 1) lineCells.add(`${row},${col}`); });
       fullCols.forEach((col) => { for (let row = 0; row < SIZE; row += 1) lineCells.add(`${row},${col}`); });
 
-      // Only Cross Blocks directly involved in a completed line activate.
-      // Their perpendicular sweep removes occupied tiles, but Cross Blocks
-      // caught by that secondary sweep do not activate again in this version.
       const triggeredCrosses = new Set();
       const crossCells = new Set();
-      lineCells.forEach((key) => {
-        const [crossRow, crossCol] = key.split(",").map(Number);
-        if (state.board[crossRow][crossCol] !== 3) return;
-        const rowCompleted = fullRows.includes(crossRow);
-        const colCompleted = fullCols.includes(crossCol);
-        if (!rowCompleted && !colCompleted) return;
-        triggeredCrosses.add(key);
-
-        if (rowCompleted) {
-          for (let row = 0; row < SIZE; row += 1) {
-            if (state.board[row][crossCol]) crossCells.add(`${row},${crossCol}`);
-          }
-        }
-        if (colCompleted) {
-          for (let col = 0; col < SIZE; col += 1) {
-            if (state.board[crossRow][col]) crossCells.add(`${crossRow},${col}`);
-          }
-        }
-      });
-
-      // Bombs on the completed line or caught by a Cross sweep start a blast.
-      // Bombs inside a blast area are queued too, producing chain reactions.
-      const bombQueue = [];
-      new Set([...lineCells, ...crossCells]).forEach((key) => {
-        const [row, col] = key.split(",").map(Number);
-        if (state.board[row][col] === 2) bombQueue.push([row, col]);
-      });
-
       const triggeredBombs = new Set();
       const blastCells = new Set();
-      while (bombQueue.length) {
-        const [bombRow, bombCol] = bombQueue.shift();
-        const bombKey = `${bombRow},${bombCol}`;
-        if (triggeredBombs.has(bombKey)) continue;
-        triggeredBombs.add(bombKey);
+      const specialQueue = [];
 
-        for (let row = Math.max(0, bombRow - 2); row <= Math.min(SIZE - 1, bombRow + 2); row += 1) {
-          for (let col = Math.max(0, bombCol - 2); col <= Math.min(SIZE - 1, bombCol + 2); col += 1) {
+      // Completed lines start their own Cross and Blast effects.
+      lineCells.forEach((key) => {
+        const [row, col] = key.split(",").map(Number);
+        if (state.board[row][col] === 3) specialQueue.push({ type: "cross", row, col, source: "line" });
+        if (state.board[row][col] === 2) specialQueue.push({ type: "bomb", row, col });
+      });
+
+      while (specialQueue.length) {
+        const event = specialQueue.shift();
+        const eventKey = `${event.row},${event.col}`;
+
+        if (event.type === "cross") {
+          if (triggeredCrosses.has(eventKey)) continue;
+          triggeredCrosses.add(eventKey);
+          const clearRow = event.source === "blast" || fullCols.includes(event.col);
+          const clearCol = event.source === "blast" || fullRows.includes(event.row);
+
+          if (clearRow) {
+            for (let col = 0; col < SIZE; col += 1) {
+              if (!state.board[event.row][col]) continue;
+              crossCells.add(`${event.row},${col}`);
+              if (state.board[event.row][col] === 2) specialQueue.push({ type: "bomb", row: event.row, col });
+            }
+          }
+          if (clearCol) {
+            for (let row = 0; row < SIZE; row += 1) {
+              if (!state.board[row][event.col]) continue;
+              crossCells.add(`${row},${event.col}`);
+              if (state.board[row][event.col] === 2) specialQueue.push({ type: "bomb", row, col: event.col });
+            }
+          }
+          continue;
+        }
+
+        if (triggeredBombs.has(eventKey)) continue;
+        triggeredBombs.add(eventKey);
+        for (let row = Math.max(0, event.row - 2); row <= Math.min(SIZE - 1, event.row + 2); row += 1) {
+          for (let col = Math.max(0, event.col - 2); col <= Math.min(SIZE - 1, event.col + 2); col += 1) {
             if (!state.board[row][col]) continue;
             const key = `${row},${col}`;
             blastCells.add(key);
-            if (state.board[row][col] === 2 && !triggeredBombs.has(key)) bombQueue.push([row, col]);
+            if (state.board[row][col] === 2 && !triggeredBombs.has(key)) specialQueue.push({ type: "bomb", row, col });
+            if (state.board[row][col] === 3 && crossChainsEnabled() && !triggeredCrosses.has(key)) {
+              specialQueue.push({ type: "cross", row, col, source: "blast" });
+            }
           }
         }
       }
@@ -1608,7 +1696,7 @@
             : lineCount === 2
               ? `DOUBLE CLEAR! ×${multiplier}`
               : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
-      setToast(`${phrase}${state.powerActive ? " • POWER ×2" : ""}  +${formatScore(clearScore)}`, true);
+      setToast(`${phrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}  +${formatScore(clearScore)}`, true);
       sound(triggeredBombs.size ? "blast" : triggeredCrosses.size ? "cross" : lineCount >= 2 ? "bigClear" : "clear");
       vibrate(triggeredBombs.size ? [45, 30, 65] : triggeredCrosses.size ? [22, 24, 22, 24, 40] : lineCount >= 2 ? [25, 35, 45] : 30);
       await delay(triggeredBombs.size || triggeredCrosses.size ? 420 : 260);
@@ -1651,8 +1739,9 @@
       state.blocks = 0;
       state.rerolls = 2;
       state.setPlaced = 0;
-      state.energy = TEST_MODE ? POWER_MAX : 0;
+      state.energy = TEST_MODE ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
       state.powerActive = false;
+      state.powerTier = 0;
       state.powerSetsRemaining = 0;
       state.locked = false;
       state.running = true;
@@ -1741,7 +1830,7 @@
     createBoard();
     updateStats();
     updateSoundButton();
-    if (TEST_MODE) document.querySelector(".version").textContent += " • TEST MODE";
+    if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     console.info(`DeBlockle ${BUILD} loaded`);
   </script>
 </body>
