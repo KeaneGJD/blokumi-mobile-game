@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.9</title>
+  <title>DeBlockle v0.10</title>
   <style>
     :root {
       --ink: #101828;
@@ -69,6 +69,7 @@
       font-weight: 950;
       letter-spacing: -.04em;
       font-size: 20px;
+      margin-right: auto;
     }
 
     .logo-cube {
@@ -106,6 +107,8 @@
     }
 
     .icon-btn:active, .primary-btn:active, .secondary-btn:active, .piece-card:active { transform: scale(.97); }
+    .back-btn { display: none; font-size: 25px; line-height: 1; }
+    .back-btn.visible { display: grid; }
 
     .screen { display: none; flex: 1; }
     .screen.active { display: flex; flex-direction: column; }
@@ -1023,6 +1026,7 @@
 <body>
   <main class="app">
     <header class="topbar">
+      <button class="icon-btn back-btn" id="backButton" aria-label="Pause and return to menu" title="Pause">←</button>
       <div class="mini-logo"><span class="logo-cube" aria-hidden="true"></span> DeBlockle</div>
       <button class="icon-btn" id="soundButton" aria-label="Toggle sound" title="Toggle sound">♪</button>
     </header>
@@ -1039,7 +1043,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.9 • POWER POLISH</div>
+      <div class="version">DEBLOCKLE BUILD v0.10 • BALANCE PASS</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1102,6 +1106,17 @@
     </div>
   </div>
 
+  <div class="overlay" id="pauseOverlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="modal">
+      <h2 id="pauseTitle">Game paused</h2>
+      <p>Your current run is still here. Resume playing, or quit and return to the main menu.</p>
+      <div class="button-stack">
+        <button class="primary-btn" id="resumeButton">RESUME GAME</button>
+        <button class="secondary-btn" id="quitRunButton">QUIT TO MENU</button>
+      </div>
+    </div>
+  </div>
+
   <div class="overlay" id="gameOverOverlay" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
     <div class="modal">
       <h2 id="gameOverTitle">Board blocked!</h2>
@@ -1142,6 +1157,8 @@
         <div class="lifetime-stat"><span>Crosses</span><strong id="lifetimeCrosses">0</strong></div>
         <div class="lifetime-stat"><span>Continues</span><strong id="lifetimeContinues">0</strong></div>
         <div class="lifetime-stat"><span>Best combo / tier</span><strong id="lifetimePeak">— / —</strong></div>
+        <div class="lifetime-stat"><span>Tier II uses</span><strong id="lifetimeTier2">0</strong></div>
+        <div class="lifetime-stat"><span>Tier III uses</span><strong id="lifetimeTier3">0</strong></div>
       </div>
       <div class="achievement-list" id="achievementList"></div>
       <div class="button-stack"><button class="primary-btn" id="closeAchievementsButton">DONE</button></div>
@@ -1171,7 +1188,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.9";
+    const BUILD = "v0.10";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
@@ -1179,8 +1196,8 @@
     const POWER_MAX = TIER_3_ENERGY;
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
-    const ACHIEVEMENTS_KEY = "deblockle_v08_achievements";
-    const LIFETIME_STATS_KEY = "deblockle_v08_lifetime_stats";
+    const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
+    const LIFETIME_STATS_KEY = "deblockle_v010_lifetime_stats";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
@@ -1211,21 +1228,21 @@
     const ACHIEVEMENTS = [
       { id: "first_break", name: "First Break", description: "Clear your first line.", icon: "▰" },
       { id: "double_trouble", name: "Double Trouble", description: "Clear two or more lines at once.", icon: "Ⅱ" },
-      { id: "kaboom", name: "Kaboom", description: "Detonate a Blast Block.", icon: "✹" },
-      { id: "chain_reaction", name: "Chain Reaction", description: "Detonate two or more Blast Blocks in one clear.", icon: "✦" },
-      { id: "crossed_out", name: "Crossed Out", description: "Activate a Cross Block.", icon: "✚" },
+      { id: "kaboom", name: "Kaboom", description: "Detonate 10 Blast Blocks across all runs.", icon: "✹" },
+      { id: "chain_reaction", name: "Chain Reaction", description: "Detonate three or more Blast Blocks in one clear.", icon: "✦" },
+      { id: "crossed_out", name: "Crossed Out", description: "Activate 10 Cross Blocks across all runs.", icon: "✚" },
       { id: "cross_blast", name: "Cross Blast", description: "Combine Cross and Blast effects in one clear.", icon: "※" },
       { id: "power_up", name: "Power Up", description: "Activate Tier I power.", icon: "Ⅰ" },
-      { id: "chainstorm", name: "Chainstorm", description: "Activate Tier II power.", icon: "Ⅱ" },
-      { id: "full_deblockle", name: "Full DeBlockle", description: "Activate Tier III power.", icon: "Ⅲ" },
+      { id: "chainstorm", name: "Chainstorm", description: "Activate Tier II power three times.", icon: "Ⅱ" },
+      { id: "full_deblockle", name: "Full DeBlockle", description: "Activate Tier III power three times.", icon: "Ⅲ" },
       { id: "five_alive", name: "Five Alive", description: "Reach a ×5 clear combo.", icon: "5" },
-      { id: "clean_slate", name: "Clean Slate", description: "Empty the entire board with a clear.", icon: "□" },
-      { id: "high_roller", name: "High Roller", description: "Score 10,000 points in one run.", icon: "★" }
+      { id: "clean_slate", name: "Clean Slate", description: "Empty a board that held at least 32 tiles.", icon: "□" },
+      { id: "high_roller", name: "High Roller", description: "Score 25,000 points in one run.", icon: "★" }
     ];
 
     const DEFAULT_LIFETIME = {
       runs: 0, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0,
-      continues: 0, highestCombo: 0, highestTier: 0
+      continues: 0, highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
     };
 
     function readJSON(key, fallback) {
@@ -1298,6 +1315,7 @@
 
     function showScreen(id) {
       document.querySelectorAll(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === id));
+      $("backButton").classList.toggle("visible", id === "gameScreen");
     }
 
     function openOverlay(id) { $(id).classList.add("open"); }
@@ -1329,6 +1347,8 @@
       $("lifetimeCrosses").textContent = formatScore(state.lifetime.crosses);
       $("lifetimeContinues").textContent = formatScore(state.lifetime.continues);
       $("lifetimePeak").textContent = `${state.lifetime.highestCombo ? `×${state.lifetime.highestCombo}` : "—"} / ${state.lifetime.highestTier ? `T${state.lifetime.highestTier}` : "—"}`;
+      $("lifetimeTier2").textContent = formatScore(state.lifetime.tier2Activations);
+      $("lifetimeTier3").textContent = formatScore(state.lifetime.tier3Activations);
       $("achievementList").innerHTML = ACHIEVEMENTS.map((achievement) => {
         const unlocked = Boolean(state.achievements[achievement.id]);
         return `<div class="achievement-card${unlocked ? " unlocked" : ""}">
@@ -1367,7 +1387,26 @@
     }
 
     function checkScoreAchievement() {
-      if (state.score >= 10000) unlockAchievement("high_roller");
+      if (state.score >= 25000) unlockAchievement("high_roller");
+    }
+
+    function currentLifetimeTotal(field, runValue, recordedValue) {
+      return state.lifetime[field] + Math.max(0, runValue - recordedValue);
+    }
+
+    function recordPowerActivation(tier) {
+      if (TEST_MODE || TEST_CONTINUE) return;
+      if (tier === 1) unlockAchievement("power_up");
+      if (tier === 2) {
+        state.lifetime.tier2Activations += 1;
+        if (state.lifetime.tier2Activations >= 3) unlockAchievement("chainstorm");
+      }
+      if (tier === 3) {
+        state.lifetime.tier3Activations += 1;
+        if (state.lifetime.tier3Activations >= 3) unlockAchievement("full_deblockle");
+      }
+      localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
+      renderAchievements();
     }
 
     function recordRunProgress() {
@@ -1525,7 +1564,7 @@
       state.powerTier = tier;
       state.powerSetsRemaining = tierSetCount(tier);
       state.highestTierReached = Math.max(state.highestTierReached, tier);
-      unlockAchievement(tier === 3 ? "full_deblockle" : tier === 2 ? "chainstorm" : "power_up");
+      recordPowerActivation(tier);
 
       if (tier === 3) {
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
@@ -1594,15 +1633,15 @@
 
     function dealPieceSet(specialCount = 0) {
       const pieces = [weightedShape(), weightedShape(), weightedShape()];
-      // A set can contain a Blast Block or a Cross Block, never both.
+      // Outside Power Mode, only 15% of sets contain a special block.
       const specialRoll = Math.random();
       if (specialCount > 0) {
         ensurePoweredSpecials(pieces, specialCount);
-      } else if (specialRoll < (1 / 6)) {
+      } else if (specialRoll < .10) {
         const piece = pieces[Math.floor(Math.random() * pieces.length)];
         const bombCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
         piece.bombCell = [...bombCell];
-      } else if (specialRoll < ((1 / 6) + (1 / 8))) {
+      } else if (specialRoll < .15) {
         const piece = pieces[Math.floor(Math.random() * pieces.length)];
         const crossCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
         piece.crossCell = [...crossCell];
@@ -2039,6 +2078,7 @@
 
       const lineCount = fullRows.length + fullCols.length;
       if (!lineCount) return 0;
+      const occupiedBeforeClear = state.board.reduce((total, row) => total + row.filter(Boolean).length, 0);
 
       state.combo += 1;
       state.lines += lineCount;
@@ -2109,9 +2149,9 @@
       state.largestClear = Math.max(state.largestClear, removedCells.size);
       state.bombsDetonated += triggeredBombs.size;
       state.crossesActivated += triggeredCrosses.size;
-      if (triggeredBombs.size) unlockAchievement("kaboom");
-      if (triggeredBombs.size >= 2) unlockAchievement("chain_reaction");
-      if (triggeredCrosses.size) unlockAchievement("crossed_out");
+      if (currentLifetimeTotal("bombs", state.bombsDetonated, state.recorded.bombs) >= 10) unlockAchievement("kaboom");
+      if (triggeredBombs.size >= 3) unlockAchievement("chain_reaction");
+      if (currentLifetimeTotal("crosses", state.crossesActivated, state.recorded.crosses) >= 10) unlockAchievement("crossed_out");
       if (triggeredCrosses.size && triggeredBombs.size) unlockAchievement("cross_blast");
       const crossOnlyCount = [...crossCells].filter((key) => !lineCells.has(key)).length;
       const explosionOnlyCount = [...blastCells].filter((key) => !lineCells.has(key) && !crossCells.has(key)).length;
@@ -2157,7 +2197,7 @@
         state.board[row][col] = 0;
       });
       renderBoard();
-      if (state.board.every((row) => row.every((cell) => cell === 0))) unlockAchievement("clean_slate");
+      if (occupiedBeforeClear >= 32 && state.board.every((row) => row.every((cell) => cell === 0))) unlockAchievement("clean_slate");
       addEnergy(removedCells.size + lineCount * 4);
       return lineCount;
     }
@@ -2191,6 +2231,7 @@
     function startGame() {
       closeOverlay("gameOverOverlay");
       closeOverlay("testAdOverlay");
+      closeOverlay("pauseOverlay");
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       state.pieces = dealPieceSet();
       state.selected = null;
@@ -2258,6 +2299,30 @@
       state.running = false;
       closeOverlay("gameOverOverlay");
       closeOverlay("testAdOverlay");
+      closeOverlay("pauseOverlay");
+      updateStats();
+      showScreen("homeScreen");
+    }
+
+    function openPauseMenu() {
+      if (!state.running || state.locked) return;
+      cleanUpDrag();
+      openOverlay("pauseOverlay");
+      sound("select");
+    }
+
+    function resumeGame() {
+      closeOverlay("pauseOverlay");
+      setToast("Run resumed.");
+    }
+
+    function quitRunToMenu() {
+      if (!state.running) return;
+      cleanUpDrag();
+      state.running = false;
+      state.locked = false;
+      recordRunProgress();
+      closeOverlay("pauseOverlay");
       updateStats();
       showScreen("homeScreen");
     }
@@ -2302,6 +2367,9 @@
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
     $("againButton").addEventListener("click", () => safeAction("Restart game", startGame));
     $("homeButton").addEventListener("click", () => safeAction("Return home", goHome));
+    $("backButton").addEventListener("click", () => safeAction("Pause game", openPauseMenu));
+    $("resumeButton").addEventListener("click", () => safeAction("Resume game", resumeGame));
+    $("quitRunButton").addEventListener("click", () => safeAction("Quit run", quitRunToMenu));
     $("achievementsButton").addEventListener("click", () => { renderAchievements(); openOverlay("achievementsOverlay"); });
     $("closeAchievementsButton").addEventListener("click", () => closeOverlay("achievementsOverlay"));
     $("howButton").addEventListener("click", () => openOverlay("howOverlay"));
@@ -2314,11 +2382,14 @@
     $("cancelAdButton").addEventListener("click", () => safeAction("Cancel test rewarded ad", cancelTestAd));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
+    $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        closeOverlay("howOverlay");
-        closeOverlay("achievementsOverlay");
+        if ($("pauseOverlay").classList.contains("open")) resumeGame();
+        else if ($("howOverlay").classList.contains("open")) closeOverlay("howOverlay");
+        else if ($("achievementsOverlay").classList.contains("open")) closeOverlay("achievementsOverlay");
+        else if (state.running) openPauseMenu();
       }
     });
 
