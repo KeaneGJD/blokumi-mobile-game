@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.1.2</title>
+  <title>DeBlockle v0.2</title>
   <style>
     :root {
       --ink: #101828;
@@ -331,7 +331,110 @@
       margin-bottom: 9px;
     }
 
+    .tray-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 66px;
+      gap: 9px;
+      align-items: stretch;
+    }
+
     .tray { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+
+    .tray.rerolling .piece-grid { animation: slotSpin .42s cubic-bezier(.2,.8,.2,1); }
+
+    @keyframes slotSpin {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      45% { transform: translateY(18px) scale(.76); opacity: .1; }
+      55% { transform: translateY(-18px) scale(.76); opacity: .1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .reroll-control {
+      min-width: 0;
+      border: 1px solid rgba(255,173,66,.28);
+      border-radius: 16px;
+      background: linear-gradient(155deg, #35425a, #222d40);
+      color: var(--cream);
+      padding: 7px 5px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 7px 14px rgba(0,0,0,.14);
+      touch-action: manipulation;
+      transition: transform .12s ease, opacity .15s ease, border-color .15s ease;
+    }
+
+    .reroll-control:not(:disabled):active { transform: scale(.96); }
+    .reroll-control:disabled { opacity: .38; cursor: not-allowed; }
+    .reroll-control.ready { border-color: var(--orange); }
+
+    .lever-machine {
+      width: 40px;
+      height: 50px;
+      position: relative;
+      display: block;
+    }
+
+    .lever-base {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      bottom: 0;
+      height: 28px;
+      border-radius: 9px;
+      background: var(--orange);
+      box-shadow: inset -5px -5px 0 rgba(16,24,40,.14);
+    }
+
+    .lever-base::after {
+      content: "↻";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--navy);
+      font-size: 17px;
+      font-weight: 1000;
+    }
+
+    .lever-arm {
+      position: absolute;
+      width: 6px;
+      height: 29px;
+      left: 28px;
+      top: 0;
+      border-radius: 5px;
+      background: #dce4ef;
+      transform-origin: 50% 88%;
+      transform: rotate(17deg);
+      transition: transform .2s cubic-bezier(.4,0,.2,1);
+    }
+
+    .lever-arm::before {
+      content: "";
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      left: -4px;
+      top: -5px;
+      background: var(--pink);
+      box-shadow: inset -3px -3px 0 rgba(16,24,40,.16);
+    }
+
+    .reroll-control.pulling .lever-arm { transform: translateY(17px) rotate(76deg); }
+
+    .reroll-count {
+      font-size: 8px;
+      line-height: 1.15;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--orange);
+      font-weight: 1000;
+      text-align: center;
+    }
 
     .piece-card {
       border: 1px solid rgba(255,255,255,.09);
@@ -519,7 +622,7 @@
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.1.2 • DRAG PLACEMENT</div>
+      <div class="version">DEBLOCKLE BUILD v0.2 • RANDOMISER LEVER</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -536,7 +639,16 @@
 
       <div class="tray-panel">
         <div class="tray-label">Place all three blocks</div>
-        <div class="tray" id="tray" aria-label="Available blocks"></div>
+        <div class="tray-row">
+          <div class="tray" id="tray" aria-label="Available blocks"></div>
+          <button class="reroll-control" id="rerollButton" aria-label="Randomise all three blocks">
+            <span class="lever-machine" aria-hidden="true">
+              <span class="lever-base"></span>
+              <span class="lever-arm"></span>
+            </span>
+            <span class="reroll-count" id="rerollCount">2 pulls</span>
+          </button>
+        </div>
       </div>
     </section>
   </main>
@@ -549,6 +661,7 @@
         <li>The highlighted cells show exactly where it will be placed.</li>
         <li>Fill a complete row or column to clear it and score.</li>
         <li>Place all three blocks to receive a fresh set.</li>
+        <li>Before placing from a set, pull the lever to randomise all three blocks. You have two pulls per run.</li>
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
@@ -577,7 +690,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.1.2";
+    const BUILD = "v0.2";
     const SIZE = 8;
     const BEST_KEY = "deblockle_v01_best";
     const SOUND_KEY = "deblockle_v01_sound";
@@ -613,6 +726,8 @@
       combo: 0,
       lines: 0,
       blocks: 0,
+      rerolls: 2,
+      setPlaced: 0,
       locked: false,
       running: false,
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -658,6 +773,47 @@
       $("homeBest").textContent = formatScore(state.best);
       $("comboValue").textContent = state.combo > 1 ? `×${state.combo}` : "—";
       $("comboValue").classList.toggle("hot", state.combo > 1);
+      updateRerollControl();
+    }
+
+    function updateRerollControl() {
+      const button = $("rerollButton");
+      const label = $("rerollCount");
+      if (!button || !label) return;
+      const setLocked = state.setPlaced > 0;
+      const available = state.running && !state.locked && !setLocked && state.rerolls > 0;
+      button.disabled = !available;
+      button.classList.toggle("ready", available);
+      if (state.rerolls <= 0) label.textContent = "empty";
+      else if (setLocked) label.textContent = `${state.rerolls} saved`;
+      else label.textContent = `${state.rerolls} pull${state.rerolls === 1 ? "" : "s"}`;
+      button.setAttribute("aria-label", available
+        ? `Randomise all three blocks. ${state.rerolls} pull${state.rerolls === 1 ? "" : "s"} remaining.`
+        : setLocked ? "Randomiser locked until the next set" : "No randomiser pulls remaining");
+    }
+
+    async function useReroll() {
+      if (!state.running || state.locked || state.setPlaced > 0 || state.rerolls <= 0) return;
+      state.locked = true;
+      state.rerolls -= 1;
+      state.selected = null;
+      const button = $("rerollButton");
+      button.classList.add("pulling");
+      trayEl.classList.add("rerolling");
+      updateRerollControl();
+      setToast("Randomising your blocks…", true);
+      sound("reroll");
+      vibrate([18, 25, 18]);
+      await delay(430);
+      state.pieces = [weightedShape(), weightedShape(), weightedShape()];
+      renderTray();
+      trayEl.classList.remove("rerolling");
+      button.classList.remove("pulling");
+      state.locked = false;
+      updateRerollControl();
+      setToast(state.rerolls > 0 ? `${state.rerolls} randomiser pull remaining.` : "Randomiser empty for this run.");
+
+      if (!state.pieces.some(canShapeFitAnywhere)) endGame();
     }
 
     function weightedShape() {
@@ -943,6 +1099,7 @@
         state.board[row + offsetRow][col + offsetCol] = 1;
       });
       piece.used = true;
+      state.setPlaced += 1;
       state.blocks += piece.cells.length;
       state.score += piece.cells.length * 5;
       state.selected = null;
@@ -958,6 +1115,7 @@
 
       if (state.pieces.every((item) => item.used)) {
         state.pieces = [weightedShape(), weightedShape(), weightedShape()];
+        state.setPlaced = 0;
         setToast("Fresh blocks delivered!");
         sound("deal");
       }
@@ -966,6 +1124,7 @@
       updateStats();
       renderTray();
       state.locked = false;
+      updateRerollControl();
 
       const remaining = state.pieces.filter((item) => !item.used);
       if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame();
@@ -1038,6 +1197,8 @@
       state.combo = 0;
       state.lines = 0;
       state.blocks = 0;
+      state.rerolls = 2;
+      state.setPlaced = 0;
       state.locked = false;
       state.running = true;
       showScreen("gameScreen");
@@ -1090,7 +1251,7 @@
         const oscillator = audioContext.createOscillator();
         const gain = audioContext.createGain();
         const tones = {
-          select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07],
+          select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07], reroll: [710, .16],
           clear: [620, .12], bigClear: [820, .18], start: [520, .12], gameOver: [125, .22]
         };
         const [frequency, duration] = tones[type] || tones.select;
@@ -1114,6 +1275,7 @@
     $("howButton").addEventListener("click", () => openOverlay("howOverlay"));
     $("closeHowButton").addEventListener("click", () => closeOverlay("howOverlay"));
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
+    $("rerollButton").addEventListener("click", () => safeAction("Randomise blocks", useReroll));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
 
     document.addEventListener("keydown", (event) => {
