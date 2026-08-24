@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.11</title>
+  <title>DeBlockle v0.19</title>
   <style>
     :root {
       --ink: #101828;
@@ -20,6 +20,7 @@
       --pink: #ff5ca8;
       --orange: #ffad42;
       --red: #ff6470;
+      --bomb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M38 23 C41 15 47 11 53 14' fill='none' stroke='%23101828' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M34 19 L44 24 L40 31 L31 25 Z' fill='%23101828'/%3E%3Ccircle cx='28' cy='38' r='19' fill='%23101828'/%3E%3Ccircle cx='21' cy='31' r='4' fill='%23fff7e8' opacity='.24'/%3E%3Cpath d='M54 4 L57 9 L63 9 L58 13 L60 19 L54 15 L49 19 L50 13 L45 9 L51 9 Z' fill='%23d8ff4f'/%3E%3C/svg%3E");
       --shadow: 0 16px 42px rgba(0, 0, 0, .28);
       --radius: 22px;
     }
@@ -52,6 +53,16 @@
       display: flex;
       flex-direction: column;
       position: relative;
+    }
+
+    .app.bomb-shake { animation: bombShake .28s ease-out; }
+
+    @keyframes bombShake {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      20% { transform: translate3d(-1.7px, 1.15px, 0); }
+      40% { transform: translate3d(2.25px, -1.15px, 0); }
+      60% { transform: translate3d(-1.15px, -.6px, 0); }
+      80% { transform: translate3d(1.15px, .6px, 0); }
     }
 
     .topbar {
@@ -107,8 +118,16 @@
     }
 
     .icon-btn:active, .primary-btn:active, .secondary-btn:active, .piece-card:active { transform: scale(.97); }
-    .back-btn { display: none; font-size: 25px; line-height: 1; }
-    .back-btn.visible { display: grid; }
+    .back-btn {
+      display: grid;
+      flex: 0 0 46px;
+      font-size: 25px;
+      line-height: 1;
+      color: var(--lime);
+      border-color: rgba(216,255,79,.3);
+      background: rgba(216,255,79,.09);
+    }
+    .back-btn[hidden] { display: none !important; }
 
     .screen { display: none; flex: 1; }
     .screen.active { display: flex; flex-direction: column; }
@@ -476,6 +495,8 @@
       touch-action: none;
     }
 
+    .board.instant-clear .cell { transition: none !important; }
+
     .cell {
       min-width: 0;
       border: 1px solid var(--cell-border);
@@ -509,41 +530,21 @@
 
     .cell.bomb::before {
       content: "";
-      position: absolute;
-      width: 48%;
-      height: 48%;
-      border-radius: 50%;
-      left: 26%;
-      top: 29%;
-      background: var(--navy);
-      box-shadow: inset -2px -2px 0 rgba(255,255,255,.12);
-      z-index: 2;
+      display: none;
     }
 
     .cell.bomb::after {
-      content: "✦";
+      content: "";
       position: absolute;
-      inset: -9% -8% auto auto;
-      width: 42%;
-      height: 42%;
-      display: grid;
-      place-items: center;
-      color: var(--lime);
-      font-size: clamp(10px, 3.2vw, 17px);
-      font-weight: 1000;
-      z-index: 3;
+      inset: 5%;
+      background: var(--bomb-icon) center / contain no-repeat;
       border: 0;
-      animation: fuseSpark .65s steps(2,end) infinite;
+      z-index: 3;
     }
 
     @keyframes bombPulse {
       0%, 100% { filter: brightness(1); }
       50% { filter: brightness(1.18); }
-    }
-
-    @keyframes fuseSpark {
-      0%, 100% { transform: scale(.8) rotate(0deg); opacity: .7; }
-      50% { transform: scale(1.18) rotate(35deg); opacity: 1; }
     }
 
     .cell.cross {
@@ -576,34 +577,113 @@
 
     .cell.preview-valid { background: rgba(216,255,79,.7); border-color: var(--lime); }
     .cell.preview-invalid { background: rgba(255,100,112,.58); border-color: var(--red); }
-    .cell.clearing { animation: clearPop .26s ease forwards; }
+    .cell.clearing,
+    .cell.cross-fire,
+    .cell.exploding {
+      background: var(--cell) !important;
+      border-color: var(--cell-border) !important;
+      box-shadow: none !important;
+      animation: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
 
-    .cell.exploding { animation: bombBurst .42s ease forwards !important; z-index: 4; }
+    .cell.clearing::before,
+    .cell.cross-fire::before,
+    .cell.exploding::before {
+      content: "";
+      display: block;
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 6;
+    }
 
-    .cell.cross-clearing { animation: crossSweep .4s ease forwards !important; z-index: 3; }
-    .cell.cross-triggering { animation: crossTrigger .4s ease forwards !important; z-index: 5; }
+    .cell.clearing::after,
+    .cell.cross-fire::after,
+    .cell.exploding::after {
+      opacity: 0 !important;
+      animation: none !important;
+    }
+
+    .cell.clearing::before {
+      background: var(--cyan);
+      box-shadow: inset -4px -4px 0 rgba(16,24,40,.13);
+      animation: clearPop .26s ease forwards !important;
+    }
+
+    .cell.cross-fire { z-index: 6; --cross-start: rgba(155,114,255,.18); }
+
+    .cell.cross-fire::before {
+      animation: crossFireSweep .36s cubic-bezier(.18,.78,.24,1) var(--cross-delay, 0ms) both !important;
+    }
+
+    .cell.cross-fire-occupied { --cross-start: var(--cyan); }
+
+    .cell.cross-fire-occupied::before {
+      box-shadow: inset -4px -4px 0 rgba(16,24,40,.13);
+    }
+
+    .cell.cross-fire-origin { z-index: 7; --cross-start: #9b72ff; }
+
+    .cell.cross-fire-origin::before {
+      box-shadow: 0 0 18px rgba(155,114,255,.95), inset 0 0 0 2px var(--cream);
+    }
+
+    @keyframes crossFireSweep {
+      0% { transform: scale(1); opacity: 1; background: var(--cross-start); filter: brightness(1); }
+      28% {
+        transform: scale(1.16) translateY(-1px);
+        opacity: 1;
+        background: var(--cream);
+        border-color: var(--cream);
+        box-shadow: 0 0 16px rgba(255,247,232,.9), 0 0 28px rgba(255,92,168,.55);
+        filter: brightness(1.35);
+      }
+      62% {
+        transform: scale(.88) translateY(1px);
+        opacity: .9;
+        background: var(--pink);
+        border-color: #9b72ff;
+        box-shadow: 0 0 13px rgba(155,114,255,.88);
+      }
+      100% { transform: scale(.06); opacity: 0; background: #9b72ff; }
+    }
+
+    .cell.exploding { z-index: 4; }
+
+    .cell.exploding::before {
+      background: var(--orange);
+      animation: bombBurst .42s ease forwards !important;
+    }
+
+    .cell.tier3-wave {
+      animation: tier3BoardWave .38s cubic-bezier(.2,.8,.2,1) var(--wave-delay, 0ms) both !important;
+      z-index: 7;
+    }
+
+    @keyframes tier3BoardWave {
+      0% { transform: scale(1); filter: brightness(1); }
+      48% {
+        transform: scale(1.13) rotate(3deg);
+        background: var(--lime);
+        border-color: var(--lime);
+        box-shadow: 0 0 15px rgba(216,255,79,.72), inset -4px -4px 0 rgba(16,24,40,.13);
+        filter: brightness(1.18);
+      }
+      100% { transform: scale(.9); filter: brightness(.72); }
+    }
 
     @keyframes bombBurst {
-      0% { transform: scale(1); filter: brightness(1); opacity: 1; }
+      0% { transform: scale(1); background: var(--orange); filter: brightness(1); opacity: 1; }
       35% { transform: scale(1.42) rotate(7deg); background: #fff5a8; filter: brightness(1.5); opacity: 1; }
       70% { transform: scale(.72) rotate(-5deg); background: var(--pink); opacity: .75; }
       100% { transform: scale(.05); opacity: 0; }
     }
 
-    @keyframes crossSweep {
-      0% { transform: scale(1); opacity: 1; background: var(--cyan); }
-      45% { transform: scale(1.14); opacity: 1; background: #cab8ff; filter: brightness(1.35); }
-      100% { transform: scale(.08); opacity: 0; }
-    }
-
-    @keyframes crossTrigger {
-      0% { transform: scale(1) rotate(0); opacity: 1; }
-      50% { transform: scale(1.5) rotate(90deg); background: var(--cream); filter: brightness(1.45); }
-      100% { transform: scale(.08) rotate(180deg); opacity: 0; }
-    }
-
     @keyframes clearPop {
-      0% { transform: scale(1); filter: brightness(1); }
+      0% { transform: scale(1); background: var(--cyan); filter: brightness(1); }
       45% { transform: scale(1.15); background: var(--lime); filter: brightness(1.35); }
       100% { transform: scale(.2); opacity: 0; }
     }
@@ -811,12 +891,16 @@
     }
 
     .piece-dot.on.bomb-dot::after {
-      content: "✦";
+      content: "";
       position: absolute;
-      inset: -45% -35% auto auto;
-      color: var(--lime);
-      font-size: clamp(8px, 2.5vw, 13px);
-      text-shadow: 0 1px 2px var(--navy);
+      z-index: 3;
+      inset: -19%;
+      background: var(--bomb-icon) center / contain no-repeat;
+    }
+
+    .piece-dot.on.bomb-dot::before {
+      content: "";
+      display: none;
     }
 
     .piece-dot.on.cross-dot {
@@ -987,6 +1071,42 @@
     .achievement-toast small { display: block; font-size: 9px; letter-spacing: .13em; font-weight: 1000; }
     .achievement-toast strong { display: block; font-size: 17px; margin-top: 2px; }
 
+    .special-tutorial-card { text-align: center; }
+    .tutorial-block {
+      width: 92px;
+      height: 92px;
+      margin: 8px auto 18px;
+      border-radius: 24px;
+      position: relative;
+      box-shadow: inset -9px -9px 0 rgba(16,24,40,.13), 0 16px 34px rgba(0,0,0,.28);
+    }
+    .tutorial-block.blast { background: var(--orange); }
+    .tutorial-block.blast::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      background: var(--bomb-icon) center / contain no-repeat;
+    }
+    .tutorial-block.blast::after {
+      content: "";
+      display: none;
+    }
+    .tutorial-block.cross-demo { background: #9b72ff; }
+    .tutorial-block.cross-demo::before,
+    .tutorial-block.cross-demo::after {
+      content: "";
+      position: absolute;
+      left: 19px;
+      right: 19px;
+      top: 40px;
+      height: 13px;
+      border-radius: 6px;
+      background: var(--cream);
+      box-shadow: 0 0 12px rgba(255,247,232,.55);
+    }
+    .tutorial-block.cross-demo::after { transform: rotate(90deg); }
+    .tutorial-hint { margin: 2px 0 0 !important; font-size: 12px !important; }
+
     .error-banner {
       display: none;
       position: fixed;
@@ -1028,7 +1148,7 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <button class="icon-btn back-btn" id="backButton" aria-label="Pause and return to menu" title="Pause">←</button>
+      <button class="icon-btn back-btn" id="backButton" aria-label="Pause game or quit to menu" title="Pause or quit" hidden>←</button>
       <div class="mini-logo"><span class="logo-cube" aria-hidden="true"></span> DeBlockle</div>
       <button class="icon-btn" id="soundButton" aria-label="Toggle sound" title="Toggle sound">♪</button>
     </header>
@@ -1045,7 +1165,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.11 • GAME OVER FLOW</div>
+      <div class="version">DEBLOCKLE BUILD v0.19 • PERSISTENT BOARD SLOTS</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1116,6 +1236,16 @@
         <button class="primary-btn" id="resumeButton">RESUME GAME</button>
         <button class="secondary-btn" id="quitRunButton">QUIT TO MENU</button>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="specialTutorialOverlay" role="dialog" aria-modal="true" aria-labelledby="specialTutorialTitle">
+    <div class="modal special-tutorial-card">
+      <div class="tutorial-block blast" id="specialTutorialBlock" aria-hidden="true"></div>
+      <h2 id="specialTutorialTitle">Blast Block</h2>
+      <p id="specialTutorialCopy">Clear the Blast Block’s row or column to detonate it. The explosion destroys occupied tiles up to two spaces away.</p>
+      <p class="tutorial-hint">You can review special blocks later in How to Play.</p>
+      <div class="button-stack"><button class="primary-btn" id="closeSpecialTutorialButton">GOT IT</button></div>
     </div>
   </div>
 
@@ -1192,23 +1322,29 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.11";
+    const BUILD = "v0.19";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
     const TIER_3_ENERGY = 360;
     const POWER_MAX = TIER_3_ENERGY;
+    const OPENING_SPECIAL_FREE_SETS = 1;
+    const CROSS_FIRE_STEP_MS = 38;
+    const CROSS_FIRE_DURATION_MS = 380;
     const MIN_INTERSTITIAL_RUN_MS = 5 * 60 * 1000;
     const MIN_INTERSTITIAL_GAP_MS = 5 * 60 * 1000;
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
     const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
     const LIFETIME_STATS_KEY = "deblockle_v010_lifetime_stats";
+    const SPECIAL_TUTORIAL_KEY = "deblockle_v013_special_tutorials";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
     const TEST_INTERSTITIAL = new URLSearchParams(window.location.search).get("adtest") === "1";
     const TEST_GAME_OVER = new URLSearchParams(window.location.search).get("continue") === "1" || TEST_INTERSTITIAL;
+    const TEST_TUTORIAL = new URLSearchParams(window.location.search).get("tutorial") === "1";
+    const TEST_SAVE_DISABLED = TEST_MODE || TEST_GAME_OVER || TEST_TUTORIAL;
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 5 },
@@ -1292,6 +1428,7 @@
       running: false,
       achievements: readJSON(ACHIEVEMENTS_KEY, {}),
       lifetime: { ...DEFAULT_LIFETIME, ...readJSON(LIFETIME_STATS_KEY, {}) },
+      specialTutorials: { bomb: false, cross: false, ...readJSON(SPECIAL_TUTORIAL_KEY, {}) },
       recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
     };
@@ -1304,6 +1441,9 @@
     let dragState = null;
     let achievementQueue = [];
     let achievementShowing = false;
+    let specialTutorialQueue = [];
+    let activeSpecialTutorial = null;
+    let tutorialSessionSeen = new Set();
 
     function safeAction(name, action) {
       try { return action(); }
@@ -1323,13 +1463,59 @@
     window.addEventListener("error", (event) => showError(event.message || "Unexpected error"));
     window.addEventListener("unhandledrejection", (event) => showError(event.reason?.message || "Unexpected promise error"));
 
+    function setGameBackVisible(visible) {
+      const button = $("backButton");
+      button.hidden = !visible;
+      button.setAttribute("aria-hidden", visible ? "false" : "true");
+    }
+
     function showScreen(id) {
       document.querySelectorAll(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === id));
-      $("backButton").classList.toggle("visible", id === "gameScreen");
     }
 
     function openOverlay(id) { $(id).classList.add("open"); }
     function closeOverlay(id) { $(id).classList.remove("open"); }
+
+    function queueSpecialTutorial(type) {
+      if (!state.running || tutorialSessionSeen.has(type)) return;
+      if (!TEST_TUTORIAL && state.specialTutorials[type]) return;
+      if (activeSpecialTutorial === type || specialTutorialQueue.includes(type)) return;
+      specialTutorialQueue.push(type);
+      showNextSpecialTutorial();
+    }
+
+    function checkSpecialTutorials() {
+      if (!state.running) return;
+      const hasBomb = state.board.some((row) => row.includes(2)) || state.pieces.some((piece) => piece.bombCell);
+      const hasCross = state.board.some((row) => row.includes(3)) || state.pieces.some((piece) => piece.crossCell);
+      if (hasBomb) queueSpecialTutorial("bomb");
+      if (hasCross) queueSpecialTutorial("cross");
+    }
+
+    function showNextSpecialTutorial() {
+      if (activeSpecialTutorial || !specialTutorialQueue.length) return;
+      activeSpecialTutorial = specialTutorialQueue.shift();
+      const isBomb = activeSpecialTutorial === "bomb";
+      $("specialTutorialBlock").className = `tutorial-block ${isBomb ? "blast" : "cross-demo"}`;
+      $("specialTutorialTitle").textContent = isBomb ? "Blast Block" : "Cross Block";
+      $("specialTutorialCopy").textContent = isBomb
+        ? "Clear the Blast Block’s row or column to detonate it. The explosion destroys occupied tiles up to two spaces away."
+        : "Clear its row to sweep the column, or clear its column to sweep the row.";
+      openOverlay("specialTutorialOverlay");
+      sound("select");
+    }
+
+    function closeSpecialTutorial() {
+      if (!activeSpecialTutorial) return;
+      tutorialSessionSeen.add(activeSpecialTutorial);
+      if (!TEST_TUTORIAL) {
+        state.specialTutorials[activeSpecialTutorial] = true;
+        localStorage.setItem(SPECIAL_TUTORIAL_KEY, JSON.stringify(state.specialTutorials));
+      }
+      activeSpecialTutorial = null;
+      closeOverlay("specialTutorialOverlay");
+      showNextSpecialTutorial();
+    }
 
     function formatScore(value) { return Math.max(0, value).toLocaleString("en-GB"); }
 
@@ -1351,6 +1537,27 @@
       score.classList.add("bump");
       burst.classList.toggle("special", special);
       burst.classList.add("show");
+    }
+
+    function shakeForBomb() {
+      const app = document.querySelector(".app");
+      if (!app) return;
+      app.classList.remove("bomb-shake");
+      void app.offsetWidth;
+      app.classList.add("bomb-shake");
+      window.setTimeout(() => app.classList.remove("bomb-shake"), 300);
+    }
+
+    async function playTierThreeBoardWave() {
+      if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+      const cells = [...boardEl.children];
+      cells.forEach((cell, index) => {
+        const row = Math.floor(index / SIZE);
+        const col = index % SIZE;
+        cell.style.setProperty("--wave-delay", `${(row + col) * 26}ms`);
+        cell.classList.add("tier3-wave");
+      });
+      await delay(760);
     }
 
     function renderAchievements() {
@@ -1393,7 +1600,7 @@
     }
 
     function unlockAchievement(id) {
-      if (TEST_MODE || TEST_GAME_OVER || state.achievements[id]) return;
+      if (TEST_SAVE_DISABLED || state.achievements[id]) return;
       const achievement = ACHIEVEMENTS.find((item) => item.id === id);
       if (!achievement) return;
       state.achievements[id] = Date.now();
@@ -1412,7 +1619,7 @@
     }
 
     function recordPowerActivation(tier) {
-      if (TEST_MODE || TEST_GAME_OVER) return;
+      if (TEST_SAVE_DISABLED) return;
       if (tier === 1) unlockAchievement("power_up");
       if (tier === 2) {
         state.lifetime.tier2Activations += 1;
@@ -1427,7 +1634,7 @@
     }
 
     function recordRunProgress() {
-      if (TEST_MODE || TEST_GAME_OVER) return;
+      if (TEST_SAVE_DISABLED) return;
       if (!state.recorded.run) {
         state.lifetime.runs += 1;
         state.recorded.run = true;
@@ -1569,9 +1776,10 @@
       }
     }
 
-    function activatePowerMode() {
+    async function activatePowerMode() {
       const tier = unlockedPowerTier();
       if (!state.running || state.locked || state.powerActive || tier === 0 || state.setPlaced !== 0) return;
+      state.locked = true;
       state.energy = 0;
       state.powerActive = true;
       state.powerTier = tier;
@@ -1580,17 +1788,31 @@
       recordPowerActivation(tier);
 
       if (tier === 3) {
+        updatePowerUI();
+        setToast("FULL DEBLOCKLE! BOARD WIPE • ×3!", true);
+        sound("powerOn");
+        vibrate([45, 30, 70, 30, 110]);
+        await playTierThreeBoardWave();
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       } else if (tier === 2) {
         seedBoardBombs(3);
       }
       ensurePoweredSpecials(state.pieces, poweredSpecialCount());
+      if (tier === 3) boardEl.classList.add("instant-clear");
       renderBoard();
+      if (tier === 3) {
+        void boardEl.offsetWidth;
+        boardEl.classList.remove("instant-clear");
+      }
       renderTray();
+      state.locked = false;
       updatePowerUI();
-      setToast(tier === 3 ? "FULL DEBLOCKLE! BOARD CLEARED • ×3!" : `POWER TIER ${tier}! SCORE ×2!`, true);
-      sound("powerOn");
-      vibrate(tier === 3 ? [45, 30, 70, 30, 110] : [30, 30, 50, 30, 80]);
+      updateRerollControl();
+      if (tier !== 3) {
+        setToast(`POWER TIER ${tier}! SCORE ×2!`, true);
+        sound("powerOn");
+        vibrate([30, 30, 50, 30, 80]);
+      }
     }
 
     function updateRerollControl() {
@@ -1646,10 +1868,13 @@
 
     function dealPieceSet(specialCount = 0) {
       const pieces = [weightedShape(), weightedShape(), weightedShape()];
-      // Outside Power Mode, only 15% of sets contain a special block.
+      // The opening set is always ordinary so players can learn the board first.
+      // After that, outside Power Mode, only 15% of sets contain a special block.
       const specialRoll = Math.random();
       if (specialCount > 0) {
         ensurePoweredSpecials(pieces, specialCount);
+      } else if (state.setsCompleted < OPENING_SPECIAL_FREE_SETS) {
+        return pieces;
       } else if (specialRoll < .10) {
         const piece = pieces[Math.floor(Math.random() * pieces.length)];
         const bombCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
@@ -1696,11 +1921,14 @@
         const col = index % SIZE;
         // Clearing is a temporary animation state. Removing it here restores
         // the cleared board spaces so they can immediately accept new blocks.
-        cell.classList.remove("clearing", "exploding", "cross-clearing", "cross-triggering");
+        cell.classList.remove("clearing", "exploding", "cross-clearing", "cross-triggering", "cross-fire", "cross-fire-occupied", "cross-fire-origin", "tier3-wave");
+        cell.style.removeProperty("--cross-delay");
+        cell.style.removeProperty("--wave-delay");
         cell.classList.toggle("filled", Boolean(state.board[row][col]));
         cell.classList.toggle("bomb", state.board[row][col] === 2);
         cell.classList.toggle("cross", state.board[row][col] === 3);
       });
+      checkSpecialTutorials();
     }
 
     function shapeBounds(cells) {
@@ -1745,6 +1973,7 @@
         card.appendChild(grid);
         trayEl.appendChild(card);
       });
+      checkSpecialTutorials();
     }
 
     function selectPiece(index) {
@@ -2030,6 +2259,7 @@
 
       const triggeredCrosses = new Set();
       const crossCells = new Set();
+      const crossPathDelays = new Map();
       const triggeredBombs = new Set();
       const blastCells = new Set();
       const specialQueue = [];
@@ -2051,17 +2281,32 @@
           const clearRow = event.source === "blast" || fullCols.includes(event.col);
           const clearCol = event.source === "blast" || fullRows.includes(event.row);
 
+          // The completed line and the extra Cross line both disappear, so the
+          // fire travels along both axes from the Cross Block itself.
+          for (let col = 0; col < SIZE; col += 1) {
+            const key = `${event.row},${col}`;
+            const delayMs = Math.abs(col - event.col) * CROSS_FIRE_STEP_MS;
+            crossPathDelays.set(key, Math.min(crossPathDelays.get(key) ?? Infinity, delayMs));
+          }
+          for (let row = 0; row < SIZE; row += 1) {
+            const key = `${row},${event.col}`;
+            const delayMs = Math.abs(row - event.row) * CROSS_FIRE_STEP_MS;
+            crossPathDelays.set(key, Math.min(crossPathDelays.get(key) ?? Infinity, delayMs));
+          }
+
           if (clearRow) {
             for (let col = 0; col < SIZE; col += 1) {
+              const key = `${event.row},${col}`;
               if (!state.board[event.row][col]) continue;
-              crossCells.add(`${event.row},${col}`);
+              crossCells.add(key);
               if (state.board[event.row][col] === 2) specialQueue.push({ type: "bomb", row: event.row, col });
             }
           }
           if (clearCol) {
             for (let row = 0; row < SIZE; row += 1) {
+              const key = `${row},${event.col}`;
               if (!state.board[row][event.col]) continue;
-              crossCells.add(`${row},${event.col}`);
+              crossCells.add(key);
               if (state.board[row][event.col] === 2) specialQueue.push({ type: "bomb", row, col: event.col });
             }
           }
@@ -2101,14 +2346,25 @@
       showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
       checkScoreAchievement();
 
+      crossPathDelays.forEach((delayMs, key) => {
+        const [row, col] = key.split(",").map(Number);
+        const cell = boardEl.children[(row * SIZE) + col];
+        if (!cell) return;
+        cell.style.setProperty("--cross-delay", `${delayMs}ms`);
+        cell.classList.add("cross-fire");
+        if (state.board[row][col]) cell.classList.add("cross-fire-occupied");
+        if (triggeredCrosses.has(key)) cell.classList.add("cross-fire-origin");
+      });
+
       removedCells.forEach((key) => {
         const [row, col] = key.split(",").map(Number);
         const cell = boardEl.children[(row * SIZE) + col];
-        if (triggeredCrosses.has(key)) cell.classList.add("cross-triggering");
+        if (triggeredBombs.has(key)) cell.classList.add("exploding");
+        else if (crossPathDelays.has(key)) return;
         else if (blastCells.has(key)) cell.classList.add("exploding");
-        else if (crossCells.has(key) && !lineCells.has(key)) cell.classList.add("cross-clearing");
         else cell.classList.add("clearing");
       });
+      if (triggeredBombs.size) shakeForBomb();
 
       const phrase = triggeredCrosses.size && triggeredBombs.size
         ? "CROSS BLAST!"
@@ -2128,7 +2384,12 @@
       setToast(`${phrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}  +${formatScore(clearScore)}`, true);
       sound(triggeredBombs.size ? "blast" : triggeredCrosses.size ? "cross" : lineCount >= 2 ? "bigClear" : "clear");
       vibrate(triggeredBombs.size ? [45, 30, 65] : triggeredCrosses.size ? [22, 24, 22, 24, 40] : lineCount >= 2 ? [25, 35, 45] : 30);
-      await delay(triggeredBombs.size || triggeredCrosses.size ? 420 : 260);
+      const maxCrossDelay = crossPathDelays.size ? Math.max(...crossPathDelays.values()) : 0;
+      const effectDuration = Math.max(
+        triggeredBombs.size ? 420 : 0,
+        triggeredCrosses.size ? maxCrossDelay + CROSS_FIRE_DURATION_MS : 0
+      );
+      await delay(effectDuration || 260);
 
       removedCells.forEach((key) => {
         const [row, col] = key.split(",").map(Number);
@@ -2150,7 +2411,7 @@
     }
 
     function updateBest(forceSave) {
-      if (TEST_MODE || TEST_GAME_OVER) return;
+      if (TEST_SAVE_DISABLED) return;
       if (state.score > state.best) {
         state.best = state.score;
         localStorage.setItem(BEST_KEY, String(state.best));
@@ -2160,7 +2421,7 @@
     }
 
     function updateCleanBest() {
-      if (TEST_MODE || TEST_GAME_OVER) return;
+      if (TEST_SAVE_DISABLED) return;
       if (state.score <= state.cleanBest) return;
       state.cleanBest = state.score;
       localStorage.setItem(CLEAN_BEST_KEY, String(state.cleanBest));
@@ -2170,8 +2431,12 @@
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
+      closeOverlay("specialTutorialOverlay");
+      specialTutorialQueue = [];
+      activeSpecialTutorial = null;
+      if (TEST_TUTORIAL) tutorialSessionSeen.clear();
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
-      state.pieces = dealPieceSet();
+      state.pieces = [];
       state.selected = null;
       state.score = 0;
       state.combo = 0;
@@ -2194,12 +2459,18 @@
       state.recorded = { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false };
       state.locked = false;
       state.running = true;
+      state.pieces = dealPieceSet();
+      if (TEST_TUTORIAL) {
+        addSpecialType(state.pieces, "bomb");
+        addSpecialType(state.pieces, "cross");
+      }
       if (TEST_GAME_OVER) {
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
         state.score = 1250;
         state.blocks = 64;
       }
       showScreen("gameScreen");
+      setGameBackVisible(true);
       renderBoard();
       renderTray();
       updateStats();
@@ -2212,10 +2483,11 @@
       if (!state.running) return;
       state.running = false;
       state.locked = true;
+      setGameBackVisible(false);
       state.runDurationMs = Date.now() - state.runStartedAt;
       state.sessionCompletedRuns += 1;
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
-      const isNewBest = !TEST_MODE && !TEST_GAME_OVER && state.score >= previousBest && state.score > 0;
+      const isNewBest = !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
       updateBest(true);
       recordRunProgress();
       $("finalScore").textContent = formatScore(state.score);
@@ -2239,7 +2511,7 @@
 
     function shouldShowInterstitial() {
       if (TEST_INTERSTITIAL) return true;
-      if (TEST_MODE || TEST_GAME_OVER) return false;
+      if (TEST_SAVE_DISABLED) return false;
       const enoughRuns = state.sessionCompletedRuns > 1;
       const longEnough = state.runDurationMs >= MIN_INTERSTITIAL_RUN_MS;
       const gapPassed = !state.lastInterstitialAt || (Date.now() - state.lastInterstitialAt) >= MIN_INTERSTITIAL_GAP_MS;
@@ -2258,7 +2530,7 @@
 
     function closeInterstitial(wasShown) {
       closeOverlay("interstitialOverlay");
-      if (wasShown && !TEST_MODE && !TEST_GAME_OVER) {
+      if (wasShown && !TEST_SAVE_DISABLED) {
         state.lastInterstitialAt = Date.now();
         state.lifetime.interstitials += 1;
         localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
@@ -2274,6 +2546,7 @@
       closeOverlay("pauseOverlay");
       updateStats();
       showScreen("homeScreen");
+      setGameBackVisible(false);
     }
 
     function openPauseMenu() {
@@ -2297,6 +2570,7 @@
       closeOverlay("pauseOverlay");
       updateStats();
       showScreen("homeScreen");
+      setGameBackVisible(false);
     }
 
     function toggleSound() {
@@ -2344,6 +2618,7 @@
     $("quitRunButton").addEventListener("click", () => safeAction("Quit run", quitRunToMenu));
     $("achievementsButton").addEventListener("click", () => { renderAchievements(); openOverlay("achievementsOverlay"); });
     $("closeAchievementsButton").addEventListener("click", () => closeOverlay("achievementsOverlay"));
+    $("closeSpecialTutorialButton").addEventListener("click", () => safeAction("Close special tutorial", closeSpecialTutorial));
     $("howButton").addEventListener("click", () => openOverlay("howOverlay"));
     $("closeHowButton").addEventListener("click", () => closeOverlay("howOverlay"));
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
@@ -2358,7 +2633,8 @@
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        if ($("pauseOverlay").classList.contains("open")) resumeGame();
+        if ($("specialTutorialOverlay").classList.contains("open")) closeSpecialTutorial();
+        else if ($("pauseOverlay").classList.contains("open")) resumeGame();
         else if ($("howOverlay").classList.contains("open")) closeOverlay("howOverlay");
         else if ($("achievementsOverlay").classList.contains("open")) closeOverlay("achievementsOverlay");
         else if (state.running) openPauseMenu();
@@ -2366,11 +2642,13 @@
     });
 
     createBoard();
+    setGameBackVisible(false);
     updateStats();
     renderAchievements();
     updateSoundButton();
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
+    if (TEST_TUTORIAL) document.querySelector(".version").textContent += " • TUTORIAL TEST";
     console.info(`DeBlockle ${BUILD} loaded`);
   </script>
 </body>
