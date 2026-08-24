@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.10</title>
+  <title>DeBlockle v0.11</title>
   <style>
     :root {
       --ink: #101828;
@@ -921,6 +921,8 @@
 
     .continue-btn { background: linear-gradient(135deg, var(--lime), var(--cyan)); }
     .continue-btn.hidden { display: none; }
+    .post-run-choices { display: grid; gap: 12px; }
+    .post-run-choices.hidden { display: none; }
 
     .test-ad-card { text-align: center; }
 
@@ -1043,7 +1045,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.10 • BALANCE PASS</div>
+      <div class="version">DEBLOCKLE BUILD v0.11 • GAME OVER FLOW</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1132,13 +1134,15 @@
         <div class="summary-box"><span>Largest clear</span><strong id="finalLargest">0</strong></div>
         <div class="summary-box"><span>Blasts / Crosses</span><strong id="finalSpecials">0 / 0</strong></div>
         <div class="summary-box"><span>Highest tier</span><strong id="finalTier">—</strong></div>
-        <div class="summary-box"><span>Run type</span><strong id="finalRunType">Clean</strong></div>
+        <div class="summary-box"><span>Run time</span><strong id="finalRunType">0:00</strong></div>
       </div>
-      <p class="run-status" id="runStatus">Clean best: 0</p>
+      <p class="run-status" id="runStatus">Best score: 0</p>
       <div class="button-stack">
-        <button class="primary-btn continue-btn" id="continueButton">WATCH TEST AD TO CONTINUE</button>
-        <button class="secondary-btn" id="againButton">PLAY AGAIN</button>
-        <button class="secondary-btn" id="homeButton">BACK TO HOME</button>
+        <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
+        <div class="post-run-choices hidden" id="postRunChoices">
+          <button class="primary-btn" id="againButton">PLAY AGAIN</button>
+          <button class="secondary-btn" id="homeButton">BACK TO HOME</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1155,7 +1159,7 @@
         <div class="lifetime-stat"><span>Tiles</span><strong id="lifetimeTiles">0</strong></div>
         <div class="lifetime-stat"><span>Blasts</span><strong id="lifetimeBombs">0</strong></div>
         <div class="lifetime-stat"><span>Crosses</span><strong id="lifetimeCrosses">0</strong></div>
-        <div class="lifetime-stat"><span>Continues</span><strong id="lifetimeContinues">0</strong></div>
+        <div class="lifetime-stat"><span>Ads shown</span><strong id="lifetimeAds">0</strong></div>
         <div class="lifetime-stat"><span>Best combo / tier</span><strong id="lifetimePeak">— / —</strong></div>
         <div class="lifetime-stat"><span>Tier II uses</span><strong id="lifetimeTier2">0</strong></div>
         <div class="lifetime-stat"><span>Tier III uses</span><strong id="lifetimeTier3">0</strong></div>
@@ -1165,16 +1169,16 @@
     </div>
   </div>
 
-  <div class="overlay" id="testAdOverlay" role="dialog" aria-modal="true" aria-labelledby="testAdTitle">
+  <div class="overlay" id="interstitialOverlay" role="dialog" aria-modal="true" aria-labelledby="interstitialTitle">
     <div class="modal test-ad-card">
       <span class="ad-badge">DEVELOPMENT ONLY</span>
       <div class="test-ad-screen">
-        <strong id="testAdTitle">TEST REWARDED AD</strong>
-        <span>A real rewarded advert would play here in the Android build.</span>
+        <strong id="interstitialTitle">TEST INTERSTITIAL AD</strong>
+        <span>A standard interstitial advert would appear here in the Android build.</span>
       </div>
       <div class="button-stack">
-        <button class="primary-btn" id="completeAdButton">COMPLETE TEST AD</button>
-        <button class="secondary-btn" id="cancelAdButton">CLOSE WITHOUT REWARD</button>
+        <button class="primary-btn" id="closeInterstitialButton">CLOSE TEST AD</button>
+        <button class="secondary-btn" id="adUnavailableButton">SIMULATE AD UNAVAILABLE</button>
       </div>
     </div>
   </div>
@@ -1188,12 +1192,14 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.10";
+    const BUILD = "v0.11";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
     const TIER_3_ENERGY = 360;
     const POWER_MAX = TIER_3_ENERGY;
+    const MIN_INTERSTITIAL_RUN_MS = 5 * 60 * 1000;
+    const MIN_INTERSTITIAL_GAP_MS = 5 * 60 * 1000;
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
     const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
@@ -1201,7 +1207,8 @@
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
-    const TEST_CONTINUE = new URLSearchParams(window.location.search).get("continue") === "1";
+    const TEST_INTERSTITIAL = new URLSearchParams(window.location.search).get("adtest") === "1";
+    const TEST_GAME_OVER = new URLSearchParams(window.location.search).get("continue") === "1" || TEST_INTERSTITIAL;
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 5 },
@@ -1242,7 +1249,7 @@
 
     const DEFAULT_LIFETIME = {
       runs: 0, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0,
-      continues: 0, highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
+      continues: 0, interstitials: 0, highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
     };
 
     function readJSON(key, fallback) {
@@ -1277,7 +1284,10 @@
       powerActive: false,
       powerTier: 0,
       powerSetsRemaining: 0,
-      continueUsed: false,
+      runStartedAt: 0,
+      runDurationMs: 0,
+      sessionCompletedRuns: 0,
+      lastInterstitialAt: 0,
       locked: false,
       running: false,
       achievements: readJSON(ACHIEVEMENTS_KEY, {}),
@@ -1323,6 +1333,13 @@
 
     function formatScore(value) { return Math.max(0, value).toLocaleString("en-GB"); }
 
+    function formatDuration(milliseconds) {
+      const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${String(seconds).padStart(2, "0")}`;
+    }
+
     function showScoreBurst(text, special = false) {
       const burst = $("scoreBurst");
       const score = $("scoreValue");
@@ -1345,7 +1362,7 @@
       $("lifetimeTiles").textContent = formatScore(state.lifetime.tiles);
       $("lifetimeBombs").textContent = formatScore(state.lifetime.bombs);
       $("lifetimeCrosses").textContent = formatScore(state.lifetime.crosses);
-      $("lifetimeContinues").textContent = formatScore(state.lifetime.continues);
+      $("lifetimeAds").textContent = formatScore(state.lifetime.interstitials);
       $("lifetimePeak").textContent = `${state.lifetime.highestCombo ? `×${state.lifetime.highestCombo}` : "—"} / ${state.lifetime.highestTier ? `T${state.lifetime.highestTier}` : "—"}`;
       $("lifetimeTier2").textContent = formatScore(state.lifetime.tier2Activations);
       $("lifetimeTier3").textContent = formatScore(state.lifetime.tier3Activations);
@@ -1376,7 +1393,7 @@
     }
 
     function unlockAchievement(id) {
-      if (TEST_MODE || TEST_CONTINUE || state.achievements[id]) return;
+      if (TEST_MODE || TEST_GAME_OVER || state.achievements[id]) return;
       const achievement = ACHIEVEMENTS.find((item) => item.id === id);
       if (!achievement) return;
       state.achievements[id] = Date.now();
@@ -1395,7 +1412,7 @@
     }
 
     function recordPowerActivation(tier) {
-      if (TEST_MODE || TEST_CONTINUE) return;
+      if (TEST_MODE || TEST_GAME_OVER) return;
       if (tier === 1) unlockAchievement("power_up");
       if (tier === 2) {
         state.lifetime.tier2Activations += 1;
@@ -1410,7 +1427,7 @@
     }
 
     function recordRunProgress() {
-      if (TEST_MODE || TEST_CONTINUE) return;
+      if (TEST_MODE || TEST_GAME_OVER) return;
       if (!state.recorded.run) {
         state.lifetime.runs += 1;
         state.recorded.run = true;
@@ -1420,10 +1437,6 @@
       state.lifetime.tiles += Math.max(0, state.blocks - state.recorded.tiles);
       state.lifetime.bombs += Math.max(0, state.bombsDetonated - state.recorded.bombs);
       state.lifetime.crosses += Math.max(0, state.crossesActivated - state.recorded.crosses);
-      if (state.continueUsed && !state.recorded.continue) {
-        state.lifetime.continues += 1;
-        state.recorded.continue = true;
-      }
       state.lifetime.highestCombo = Math.max(state.lifetime.highestCombo, state.highestCombo);
       state.lifetime.highestTier = Math.max(state.lifetime.highestTier, state.highestTierReached);
       state.recorded.score = state.score;
@@ -1656,81 +1669,6 @@
         [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
       }
       return copy;
-    }
-
-    function createRescueSet() {
-      const safeShapes = SHAPES.filter((shape) => shape.cells.length <= 4 && shape.name !== "T Block" && shape.name !== "Z Block");
-      const pieces = Array.from({ length: 3 }, () => {
-        const shape = safeShapes[Math.floor(Math.random() * safeShapes.length)];
-        return { name: shape.name, cells: shape.cells.map((cell) => [...cell]), used: false };
-      });
-      return ensurePoweredSpecials(pieces, poweredSpecialCount());
-    }
-
-    function prepareContinueRescue() {
-      const occupied = [];
-      for (let row = 0; row < SIZE; row += 1) {
-        for (let col = 0; col < SIZE; col += 1) {
-          if (state.board[row][col]) occupied.push([row, col]);
-        }
-      }
-
-      const removalOrder = shuffled(occupied);
-      const initialRemovalCount = Math.ceil(occupied.length * .4);
-      for (let index = 0; index < initialRemovalCount; index += 1) {
-        const [row, col] = removalOrder[index];
-        state.board[row][col] = 0;
-      }
-
-      let pieces = createRescueSet();
-      let removalIndex = initialRemovalCount;
-      let attempts = 0;
-      while (!pieces.every(canShapeFitAnywhere) && attempts < 80) {
-        if (removalIndex < removalOrder.length) {
-          const [row, col] = removalOrder[removalIndex];
-          state.board[row][col] = 0;
-          removalIndex += 1;
-        } else {
-          pieces = createRescueSet();
-        }
-        attempts += 1;
-      }
-
-      // Absolute fallback: an empty board and friendly pieces can always continue.
-      if (!pieces.every(canShapeFitAnywhere)) {
-        state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
-        pieces = createRescueSet();
-      }
-      return pieces;
-    }
-
-    function openTestAd() {
-      if (state.continueUsed || state.running) return;
-      openOverlay("testAdOverlay");
-    }
-
-    function cancelTestAd() {
-      closeOverlay("testAdOverlay");
-      setToast("Test ad closed. No continue awarded.");
-    }
-
-    function completeTestAd() {
-      if (state.continueUsed || state.running) return;
-      state.continueUsed = true;
-      state.combo = 0;
-      state.selected = null;
-      state.pieces = prepareContinueRescue();
-      state.setPlaced = 0;
-      state.running = true;
-      state.locked = false;
-      closeOverlay("testAdOverlay");
-      closeOverlay("gameOverOverlay");
-      renderBoard();
-      renderTray();
-      updateStats();
-      setToast("LAST CHANCE! Your board has been rescued.", true);
-      sound("continue");
-      vibrate([30, 30, 65]);
     }
 
     function createBoard() {
@@ -2212,7 +2150,7 @@
     }
 
     function updateBest(forceSave) {
-      if (TEST_MODE || TEST_CONTINUE) return;
+      if (TEST_MODE || TEST_GAME_OVER) return;
       if (state.score > state.best) {
         state.best = state.score;
         localStorage.setItem(BEST_KEY, String(state.best));
@@ -2222,15 +2160,15 @@
     }
 
     function updateCleanBest() {
-      if (TEST_MODE || TEST_CONTINUE) return;
-      if (state.continueUsed || state.score <= state.cleanBest) return;
+      if (TEST_MODE || TEST_GAME_OVER) return;
+      if (state.score <= state.cleanBest) return;
       state.cleanBest = state.score;
       localStorage.setItem(CLEAN_BEST_KEY, String(state.cleanBest));
     }
 
     function startGame() {
       closeOverlay("gameOverOverlay");
-      closeOverlay("testAdOverlay");
+      closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       state.pieces = dealPieceSet();
@@ -2251,11 +2189,12 @@
       state.powerActive = false;
       state.powerTier = 0;
       state.powerSetsRemaining = 0;
-      state.continueUsed = false;
+      state.runStartedAt = Date.now();
+      state.runDurationMs = 0;
       state.recorded = { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false };
       state.locked = false;
       state.running = true;
-      if (TEST_CONTINUE) {
+      if (TEST_GAME_OVER) {
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
         state.score = 1250;
         state.blocks = 64;
@@ -2266,16 +2205,18 @@
       updateStats();
       setToast("Press and drag a block onto the board.");
       sound("start");
-      if (TEST_CONTINUE) window.setTimeout(endGame, 250);
+      if (TEST_GAME_OVER) window.setTimeout(endGame, 250);
     }
 
     function endGame() {
+      if (!state.running) return;
       state.running = false;
       state.locked = true;
+      state.runDurationMs = Date.now() - state.runStartedAt;
+      state.sessionCompletedRuns += 1;
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
-      const isNewBest = !TEST_MODE && !TEST_CONTINUE && state.score >= previousBest && state.score > 0;
+      const isNewBest = !TEST_MODE && !TEST_GAME_OVER && state.score >= previousBest && state.score > 0;
       updateBest(true);
-      updateCleanBest();
       recordRunProgress();
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
@@ -2285,20 +2226,51 @@
       $("finalLargest").textContent = formatScore(state.largestClear);
       $("finalSpecials").textContent = `${formatScore(state.bombsDetonated)} / ${formatScore(state.crossesActivated)}`;
       $("finalTier").textContent = state.highestTierReached ? `Tier ${state.highestTierReached}` : "—";
-      $("finalRunType").textContent = state.continueUsed ? "Continued" : "Clean";
+      $("finalRunType").textContent = formatDuration(state.runDurationMs);
       $("newBest").textContent = isNewBest ? "★ NEW BEST SCORE ★" : "";
-      $("runStatus").textContent = `${state.continueUsed ? "Continued run" : "Clean run"} • Clean best ${formatScore(state.cleanBest)} • Overall best ${formatScore(state.best)}`;
-      $("continueButton").classList.toggle("hidden", state.continueUsed);
+      $("runStatus").textContent = `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
+      $("postRunContinueButton").classList.remove("hidden");
+      $("postRunChoices").classList.add("hidden");
       updateStats();
       sound("gameOver");
       vibrate([45, 70, 45]);
       window.setTimeout(() => openOverlay("gameOverOverlay"), 180);
     }
 
+    function shouldShowInterstitial() {
+      if (TEST_INTERSTITIAL) return true;
+      if (TEST_MODE || TEST_GAME_OVER) return false;
+      const enoughRuns = state.sessionCompletedRuns > 1;
+      const longEnough = state.runDurationMs >= MIN_INTERSTITIAL_RUN_MS;
+      const gapPassed = !state.lastInterstitialAt || (Date.now() - state.lastInterstitialAt) >= MIN_INTERSTITIAL_GAP_MS;
+      return enoughRuns && longEnough && gapPassed;
+    }
+
+    function revealPostRunChoices() {
+      $("postRunContinueButton").classList.add("hidden");
+      $("postRunChoices").classList.remove("hidden");
+    }
+
+    function continueAfterRun() {
+      if (shouldShowInterstitial()) openOverlay("interstitialOverlay");
+      else revealPostRunChoices();
+    }
+
+    function closeInterstitial(wasShown) {
+      closeOverlay("interstitialOverlay");
+      if (wasShown && !TEST_MODE && !TEST_GAME_OVER) {
+        state.lastInterstitialAt = Date.now();
+        state.lifetime.interstitials += 1;
+        localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
+        renderAchievements();
+      }
+      revealPostRunChoices();
+    }
+
     function goHome() {
       state.running = false;
       closeOverlay("gameOverOverlay");
-      closeOverlay("testAdOverlay");
+      closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
       updateStats();
       showScreen("homeScreen");
@@ -2377,9 +2349,9 @@
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
     $("rerollButton").addEventListener("click", () => safeAction("Randomise blocks", useReroll));
     $("powerButton").addEventListener("click", () => safeAction("Activate DeBlockle Mode", activatePowerMode));
-    $("continueButton").addEventListener("click", () => safeAction("Open test rewarded ad", openTestAd));
-    $("completeAdButton").addEventListener("click", () => safeAction("Complete test rewarded ad", completeTestAd));
-    $("cancelAdButton").addEventListener("click", () => safeAction("Cancel test rewarded ad", cancelTestAd));
+    $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
+    $("closeInterstitialButton").addEventListener("click", () => safeAction("Close test interstitial", () => closeInterstitial(true)));
+    $("adUnavailableButton").addEventListener("click", () => safeAction("Simulate unavailable ad", () => closeInterstitial(false)));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
@@ -2398,7 +2370,7 @@
     renderAchievements();
     updateSoundButton();
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
-    if (TEST_CONTINUE) document.querySelector(".version").textContent += " • CONTINUE TEST";
+    if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
     console.info(`DeBlockle ${BUILD} loaded`);
   </script>
 </body>
