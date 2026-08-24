@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.2</title>
+  <title>DeBlockle v0.3</title>
   <style>
     :root {
       --ink: #101828;
@@ -284,9 +284,63 @@
       box-shadow: inset -4px -4px 0 rgba(16,24,40,.13);
     }
 
+    .cell.bomb {
+      background: var(--orange);
+      overflow: visible;
+      animation: bombPulse 1.25s ease-in-out infinite;
+    }
+
+    .cell.bomb::before {
+      content: "";
+      position: absolute;
+      width: 48%;
+      height: 48%;
+      border-radius: 50%;
+      left: 26%;
+      top: 29%;
+      background: var(--navy);
+      box-shadow: inset -2px -2px 0 rgba(255,255,255,.12);
+      z-index: 2;
+    }
+
+    .cell.bomb::after {
+      content: "✦";
+      position: absolute;
+      inset: -9% -8% auto auto;
+      width: 42%;
+      height: 42%;
+      display: grid;
+      place-items: center;
+      color: var(--lime);
+      font-size: clamp(10px, 3.2vw, 17px);
+      font-weight: 1000;
+      z-index: 3;
+      border: 0;
+      animation: fuseSpark .65s steps(2,end) infinite;
+    }
+
+    @keyframes bombPulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.18); }
+    }
+
+    @keyframes fuseSpark {
+      0%, 100% { transform: scale(.8) rotate(0deg); opacity: .7; }
+      50% { transform: scale(1.18) rotate(35deg); opacity: 1; }
+    }
+
     .cell.preview-valid { background: rgba(216,255,79,.7); border-color: var(--lime); }
     .cell.preview-invalid { background: rgba(255,100,112,.58); border-color: var(--red); }
     .cell.clearing { animation: clearPop .26s ease forwards; }
+
+    .cell.exploding { animation: bombBurst .42s ease forwards !important; z-index: 4; }
+
+    @keyframes bombBurst {
+      0% { transform: scale(1); filter: brightness(1); opacity: 1; }
+      35% { transform: scale(1.42) rotate(7deg); background: #fff5a8; filter: brightness(1.5); opacity: 1; }
+      70% { transform: scale(.72) rotate(-5deg); background: var(--pink); opacity: .75; }
+      100% { transform: scale(.05); opacity: 0; }
+    }
 
     @keyframes clearPop {
       0% { transform: scale(1); filter: brightness(1); }
@@ -489,6 +543,21 @@
       box-shadow: inset -3px -3px 0 rgba(16,24,40,.14), 0 3px 7px rgba(57,231,208,.1);
     }
 
+    .piece-dot.on.bomb-dot {
+      background: var(--orange) !important;
+      position: relative;
+      overflow: visible;
+    }
+
+    .piece-dot.on.bomb-dot::after {
+      content: "✦";
+      position: absolute;
+      inset: -45% -35% auto auto;
+      color: var(--lime);
+      font-size: clamp(8px, 2.5vw, 13px);
+      text-shadow: 0 1px 2px var(--navy);
+    }
+
     .piece-card:nth-child(2) .piece-dot.on { background: var(--lime); }
     .piece-card:nth-child(3) .piece-dot.on { background: var(--pink); }
 
@@ -622,7 +691,7 @@
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.2 • RANDOMISER LEVER</div>
+      <div class="version">DEBLOCKLE BUILD v0.3 • BLAST BLOCKS</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -662,6 +731,7 @@
         <li>Fill a complete row or column to clear it and score.</li>
         <li>Place all three blocks to receive a fresh set.</li>
         <li>Before placing from a set, pull the lever to randomise all three blocks. You have two pulls per run.</li>
+        <li>Orange Blast Blocks detonate when their row or column clears, destroying occupied tiles within two spaces.</li>
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
@@ -690,7 +760,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.2";
+    const BUILD = "v0.3";
     const SIZE = 8;
     const BEST_KEY = "deblockle_v01_best";
     const SOUND_KEY = "deblockle_v01_sound";
@@ -805,7 +875,7 @@
       sound("reroll");
       vibrate([18, 25, 18]);
       await delay(430);
-      state.pieces = [weightedShape(), weightedShape(), weightedShape()];
+      state.pieces = dealPieceSet();
       renderTray();
       trayEl.classList.remove("rerolling");
       button.classList.remove("pulling");
@@ -825,6 +895,17 @@
       }
       const fallback = SHAPES[0];
       return { name: fallback.name, cells: fallback.cells.map((cell) => [...cell]), used: false };
+    }
+
+    function dealPieceSet() {
+      const pieces = [weightedShape(), weightedShape(), weightedShape()];
+      // Roughly one set in six contains a single naturally generated Blast Block.
+      if (Math.random() < (1 / 6)) {
+        const piece = pieces[Math.floor(Math.random() * pieces.length)];
+        const bombCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
+        piece.bombCell = [...bombCell];
+      }
+      return pieces;
     }
 
     function createBoard() {
@@ -852,8 +933,9 @@
         const col = index % SIZE;
         // Clearing is a temporary animation state. Removing it here restores
         // the cleared board spaces so they can immediately accept new blocks.
-        cell.classList.remove("clearing");
+        cell.classList.remove("clearing", "exploding");
         cell.classList.toggle("filled", Boolean(state.board[row][col]));
+        cell.classList.toggle("bomb", state.board[row][col] === 2);
       });
     }
 
@@ -891,6 +973,7 @@
             const dot = document.createElement("span");
             dot.className = "piece-dot";
             if (piece.cells.some(([r, c]) => r === row && c === col)) dot.classList.add("on");
+            if (piece.bombCell && piece.bombCell[0] === row && piece.bombCell[1] === col) dot.classList.add("bomb-dot");
             grid.appendChild(dot);
           }
         }
@@ -917,6 +1000,7 @@
           const dot = document.createElement("span");
           dot.className = "piece-dot";
           if (piece.cells.some(([r, c]) => r === row && c === col)) dot.classList.add("on");
+          if (piece.bombCell && piece.bombCell[0] === row && piece.bombCell[1] === col) dot.classList.add("bomb-dot");
           grid.appendChild(dot);
         }
       }
@@ -944,7 +1028,8 @@
         anchorCol: null,
         valid: false,
         startX: event.clientX,
-        startY: event.clientY
+        startY: event.clientY,
+        lift: event.pointerType === "touch" || event.pointerType === "pen" ? 76 : 22
       };
 
       window.addEventListener("pointermove", moveDrag, { passive: false });
@@ -976,11 +1061,12 @@
     function moveDrag(event) {
       if (!dragState || event.pointerId !== dragState.pointerId) return;
       event.preventDefault();
+      const liftedY = event.clientY - dragState.lift;
       dragState.ghost.style.left = `${event.clientX}px`;
-      dragState.ghost.style.top = `${event.clientY}px`;
+      dragState.ghost.style.top = `${liftedY}px`;
 
       const piece = state.pieces[dragState.index];
-      const anchor = dragAnchorForPointer(event.clientX, event.clientY, piece);
+      const anchor = dragAnchorForPointer(event.clientX, liftedY, piece);
       if (!anchor) {
         dragState.anchorRow = null;
         dragState.anchorCol = null;
@@ -1013,7 +1099,7 @@
       const moved = Math.hypot(event.clientX - dragState.startX, event.clientY - dragState.startY) > 8;
       cleanUpDrag();
 
-      if (valid) {
+      if (valid && moved) {
         safeAction("Drop block", () => placeSelected(anchorRow, anchorCol));
       } else if (moved && anchorRow !== null) {
         setToast("That block won't fit there.");
@@ -1096,7 +1182,8 @@
       state.locked = true;
       clearPreview();
       piece.cells.forEach(([offsetRow, offsetCol]) => {
-        state.board[row + offsetRow][col + offsetCol] = 1;
+        const isBomb = piece.bombCell && piece.bombCell[0] === offsetRow && piece.bombCell[1] === offsetCol;
+        state.board[row + offsetRow][col + offsetCol] = isBomb ? 2 : 1;
       });
       piece.used = true;
       state.setPlaced += 1;
@@ -1114,7 +1201,7 @@
       }
 
       if (state.pieces.every((item) => item.used)) {
-        state.pieces = [weightedShape(), weightedShape(), weightedShape()];
+        state.pieces = dealPieceSet();
         state.setPlaced = 0;
         setToast("Fresh blocks delivered!");
         sound("deal");
@@ -1146,26 +1233,66 @@
 
       state.combo += 1;
       state.lines += lineCount;
-      const uniqueCells = new Set();
-      fullRows.forEach((row) => { for (let col = 0; col < SIZE; col += 1) uniqueCells.add(`${row},${col}`); });
-      fullCols.forEach((col) => { for (let row = 0; row < SIZE; row += 1) uniqueCells.add(`${row},${col}`); });
-      const multiplier = Math.max(1, state.combo);
-      const clearScore = (uniqueCells.size * 10 + lineCount * 75) * multiplier;
-      state.score += clearScore;
+      const lineCells = new Set();
+      fullRows.forEach((row) => { for (let col = 0; col < SIZE; col += 1) lineCells.add(`${row},${col}`); });
+      fullCols.forEach((col) => { for (let row = 0; row < SIZE; row += 1) lineCells.add(`${row},${col}`); });
 
-      uniqueCells.forEach((key) => {
+      // Any bomb on a completed line starts a blast. Bombs caught in that
+      // two-cell area are queued too, producing true chain reactions.
+      const bombQueue = [];
+      lineCells.forEach((key) => {
         const [row, col] = key.split(",").map(Number);
-        boardEl.children[(row * SIZE) + col].classList.add("clearing");
+        if (state.board[row][col] === 2) bombQueue.push([row, col]);
       });
 
-      const phrase = lineCount >= 3 ? `${lineCount} LINES! ×${multiplier}` : lineCount === 2 ? `DOUBLE CLEAR! ×${multiplier}` : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
-      setToast(`${phrase}  +${formatScore(clearScore)}`, true);
-      sound(lineCount >= 2 ? "bigClear" : "clear");
-      vibrate(lineCount >= 2 ? [25, 35, 45] : 30);
-      await delay(260);
+      const triggeredBombs = new Set();
+      const blastCells = new Set();
+      while (bombQueue.length) {
+        const [bombRow, bombCol] = bombQueue.shift();
+        const bombKey = `${bombRow},${bombCol}`;
+        if (triggeredBombs.has(bombKey)) continue;
+        triggeredBombs.add(bombKey);
 
-      fullRows.forEach((row) => { for (let col = 0; col < SIZE; col += 1) state.board[row][col] = 0; });
-      fullCols.forEach((col) => { for (let row = 0; row < SIZE; row += 1) state.board[row][col] = 0; });
+        for (let row = Math.max(0, bombRow - 2); row <= Math.min(SIZE - 1, bombRow + 2); row += 1) {
+          for (let col = Math.max(0, bombCol - 2); col <= Math.min(SIZE - 1, bombCol + 2); col += 1) {
+            if (!state.board[row][col]) continue;
+            const key = `${row},${col}`;
+            blastCells.add(key);
+            if (state.board[row][col] === 2 && !triggeredBombs.has(key)) bombQueue.push([row, col]);
+          }
+        }
+      }
+
+      const removedCells = new Set([...lineCells, ...blastCells]);
+      const explosionOnlyCount = [...blastCells].filter((key) => !lineCells.has(key)).length;
+      const chainBonus = Math.max(0, triggeredBombs.size - 1) * 100;
+      const multiplier = Math.max(1, state.combo);
+      const clearScore = (lineCells.size * 10 + lineCount * 75 + explosionOnlyCount * 10 + chainBonus) * multiplier;
+      state.score += clearScore;
+
+      removedCells.forEach((key) => {
+        const [row, col] = key.split(",").map(Number);
+        boardEl.children[(row * SIZE) + col].classList.add(blastCells.has(key) ? "exploding" : "clearing");
+      });
+
+      const phrase = triggeredBombs.size > 1
+        ? `BLAST CHAIN ×${triggeredBombs.size}!`
+        : triggeredBombs.size === 1
+          ? "BLAST BLOCK!"
+          : lineCount >= 3
+            ? `${lineCount} LINES! ×${multiplier}`
+            : lineCount === 2
+              ? `DOUBLE CLEAR! ×${multiplier}`
+              : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
+      setToast(`${phrase}  +${formatScore(clearScore)}`, true);
+      sound(triggeredBombs.size ? "blast" : lineCount >= 2 ? "bigClear" : "clear");
+      vibrate(triggeredBombs.size ? [45, 30, 65] : lineCount >= 2 ? [25, 35, 45] : 30);
+      await delay(triggeredBombs.size ? 420 : 260);
+
+      removedCells.forEach((key) => {
+        const [row, col] = key.split(",").map(Number);
+        state.board[row][col] = 0;
+      });
       renderBoard();
       return lineCount;
     }
@@ -1191,7 +1318,7 @@
     function startGame() {
       closeOverlay("gameOverOverlay");
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
-      state.pieces = [weightedShape(), weightedShape(), weightedShape()];
+      state.pieces = dealPieceSet();
       state.selected = null;
       state.score = 0;
       state.combo = 0;
@@ -1252,7 +1379,7 @@
         const gain = audioContext.createGain();
         const tones = {
           select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07], reroll: [710, .16],
-          clear: [620, .12], bigClear: [820, .18], start: [520, .12], gameOver: [125, .22]
+          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], start: [520, .12], gameOver: [125, .22]
         };
         const [frequency, duration] = tones[type] || tones.select;
         oscillator.type = type === "gameOver" || type === "deny" ? "sawtooth" : "sine";
