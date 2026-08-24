@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.4</title>
+  <title>DeBlockle v0.5</title>
   <style>
     :root {
       --ink: #101828;
@@ -239,6 +239,119 @@
     .stat-value { font-size: 20px; font-weight: 1000; letter-spacing: -.04em; margin-top: 2px; }
     .stat.main .stat-value { color: var(--lime); font-size: 25px; }
     #comboValue.hot { color: var(--pink); }
+
+    .power-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: 9px;
+      align-items: center;
+      margin: -2px 0 11px;
+      padding: 9px 9px 9px 12px;
+      border: 1px solid rgba(57,231,208,.18);
+      border-radius: 16px;
+      background: rgba(57,231,208,.055);
+      transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .meter-copy {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .meter-copy span {
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      font-weight: 950;
+    }
+
+    .meter-copy strong { color: var(--cyan); font-size: 11px; font-weight: 1000; }
+
+    .meter-track {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #0d1523;
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+    }
+
+    .meter-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--lime));
+      box-shadow: 0 0 12px rgba(57,231,208,.45);
+      transition: width .35s cubic-bezier(.2,.75,.2,1);
+    }
+
+    .power-button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 12px;
+      padding: 5px 7px;
+      background: rgba(255,255,255,.08);
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.12;
+      letter-spacing: .08em;
+      font-weight: 1000;
+      cursor: not-allowed;
+      text-transform: uppercase;
+      transition: transform .12s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+    }
+
+    .power-button.ready {
+      cursor: pointer;
+      color: var(--ink);
+      background: var(--lime);
+      box-shadow: 0 0 18px rgba(216,255,79,.28), inset 0 -4px 0 rgba(16,24,40,.13);
+      animation: readyPulse 1.1s ease-in-out infinite;
+    }
+
+    .power-button.ready:active { transform: scale(.96); }
+
+    @keyframes readyPulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.18); }
+    }
+
+    .power-panel.active {
+      border-color: var(--lime);
+      background: rgba(216,255,79,.11);
+      box-shadow: 0 0 20px rgba(216,255,79,.13);
+    }
+
+    .power-panel.active .meter-fill {
+      width: 100% !important;
+      background: linear-gradient(90deg, var(--pink), var(--orange), var(--lime), var(--cyan));
+      background-size: 220% 100%;
+      animation: powerFlow .8s linear infinite;
+    }
+
+    @keyframes powerFlow { to { background-position: -220% 0; } }
+
+    #gameScreen.powered .board-shell {
+      border-color: rgba(216,255,79,.58);
+      box-shadow: 0 0 26px rgba(216,255,79,.2), var(--shadow), inset 0 1px 0 rgba(255,255,255,.08);
+      animation: boardPower 1.35s ease-in-out infinite;
+    }
+
+    #gameScreen.powered .stat.main {
+      border-color: var(--pink);
+      background: rgba(255,92,168,.13);
+    }
+
+    #gameScreen.powered .stat.main .stat-value { color: var(--pink); }
+
+    @keyframes boardPower {
+      0%, 100% { filter: saturate(1); }
+      50% { filter: saturate(1.2) brightness(1.04); }
+    }
 
     .board-shell {
       background: linear-gradient(145deg, #29364c, #1d283a);
@@ -723,6 +836,7 @@
       .topbar { min-height: 40px; }
       .icon-btn { width: 40px; height: 40px; }
       .stats { margin: 4px 0 8px; }
+      .power-panel { margin-bottom: 7px; padding-top: 7px; padding-bottom: 7px; }
       .stat { min-height: 50px; }
       .board-shell { padding: 8px; }
       .toast { min-height: 23px; margin: 3px 0; }
@@ -753,7 +867,7 @@
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.4 • CROSS BLOCKS</div>
+      <div class="version">DEBLOCKLE BUILD v0.5 • POWER METER</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -761,6 +875,16 @@
         <div class="stat"><span class="stat-label">Best</span><strong class="stat-value" id="bestValue">0</strong></div>
         <div class="stat main"><span class="stat-label">Score</span><strong class="stat-value" id="scoreValue">0</strong></div>
         <div class="stat"><span class="stat-label">Combo</span><strong class="stat-value" id="comboValue">—</strong></div>
+      </div>
+
+      <div class="power-panel" id="powerPanel">
+        <div>
+          <div class="meter-copy"><span>DeBlockle Meter</span><strong id="powerStatus">0 / 80</strong></div>
+          <div class="meter-track" role="progressbar" aria-label="DeBlockle Meter" aria-valuemin="0" aria-valuemax="80" aria-valuenow="0">
+            <div class="meter-fill" id="meterFill"></div>
+          </div>
+        </div>
+        <button class="power-button" id="powerButton" disabled>Build power</button>
       </div>
 
       <div class="board-shell">
@@ -795,6 +919,7 @@
         <li>Before placing from a set, pull the lever to randomise all three blocks. You have two pulls per run.</li>
         <li>Orange Blast Blocks detonate when their row or column clears, destroying occupied tiles within two spaces.</li>
         <li>Purple Cross Blocks clear occupied tiles along their opposite axis when their row or column clears.</li>
+        <li>Clear tiles to fill the DeBlockle Meter, then activate three powered sets with double scoring and guaranteed special blocks.</li>
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
@@ -823,10 +948,13 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.4";
+    const BUILD = "v0.5";
     const SIZE = 8;
+    const POWER_MAX = 80;
+    const POWER_SETS = 3;
     const BEST_KEY = "deblockle_v01_best";
     const SOUND_KEY = "deblockle_v01_sound";
+    const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 5 },
@@ -861,6 +989,9 @@
       blocks: 0,
       rerolls: 2,
       setPlaced: 0,
+      energy: 0,
+      powerActive: false,
+      powerSetsRemaining: 0,
       locked: false,
       running: false,
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -907,7 +1038,76 @@
       $("comboValue").textContent = state.combo > 1 ? `×${state.combo}` : "—";
       $("comboValue").classList.toggle("hot", state.combo > 1);
       updateRerollControl();
+      updatePowerUI();
     }
+
+    function updatePowerUI() {
+      const panel = $("powerPanel");
+      const fill = $("meterFill");
+      const status = $("powerStatus");
+      const button = $("powerButton");
+      const track = panel.querySelector('[role="progressbar"]');
+      const percentage = Math.min(100, (state.energy / POWER_MAX) * 100);
+
+      panel.classList.toggle("active", state.powerActive);
+      $("gameScreen").classList.toggle("powered", state.powerActive);
+      fill.style.width = `${percentage}%`;
+      track.setAttribute("aria-valuenow", String(state.energy));
+
+      if (state.powerActive) {
+        status.textContent = `POWER ×2`;
+        button.textContent = `${state.powerSetsRemaining} SET${state.powerSetsRemaining === 1 ? "" : "S"} LEFT`;
+        button.disabled = true;
+        button.classList.remove("ready");
+      } else if (state.energy >= POWER_MAX) {
+        status.textContent = "READY";
+        const canActivate = state.running && !state.locked && state.setPlaced === 0;
+        button.textContent = canActivate ? "ACTIVATE" : "READY NEXT SET";
+        button.disabled = !canActivate;
+        button.classList.toggle("ready", canActivate);
+      } else {
+        status.textContent = `${state.energy} / ${POWER_MAX}`;
+        button.textContent = "BUILD POWER";
+        button.disabled = true;
+        button.classList.remove("ready");
+      }
+    }
+
+    function addEnergy(amount) {
+      if (state.powerActive || amount <= 0) return;
+      const wasFull = state.energy >= POWER_MAX;
+      state.energy = Math.min(POWER_MAX, state.energy + amount);
+      updatePowerUI();
+      if (!wasFull && state.energy >= POWER_MAX) {
+        setToast(state.setPlaced === 0 ? "DEBLOCKLE MODE READY!" : "POWER READY FOR YOUR NEXT SET!", true);
+        sound("powerReady");
+        vibrate([20, 25, 20, 25, 45]);
+      }
+    }
+
+    function ensureSpecialBlock(pieces) {
+      if (pieces.some((piece) => piece.bombCell || piece.crossCell)) return pieces;
+      const piece = pieces[Math.floor(Math.random() * pieces.length)];
+      const specialCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
+      if (Math.random() < .55) piece.bombCell = [...specialCell];
+      else piece.crossCell = [...specialCell];
+      return pieces;
+    }
+
+    function activatePowerMode() {
+      if (!state.running || state.locked || state.powerActive || state.energy < POWER_MAX || state.setPlaced !== 0) return;
+      state.energy = 0;
+      state.powerActive = true;
+      state.powerSetsRemaining = POWER_SETS;
+      ensureSpecialBlock(state.pieces);
+      renderTray();
+      updatePowerUI();
+      setToast("DEBLOCKLE MODE! DOUBLE SCORE!", true);
+      sound("powerOn");
+      vibrate([30, 30, 50, 30, 80]);
+    }
+
+    function powerMultiplier() { return state.powerActive ? 2 : 1; }
 
     function updateRerollControl() {
       const button = $("rerollButton");
@@ -938,7 +1138,7 @@
       sound("reroll");
       vibrate([18, 25, 18]);
       await delay(430);
-      state.pieces = dealPieceSet();
+      state.pieces = dealPieceSet(state.powerActive);
       renderTray();
       trayEl.classList.remove("rerolling");
       button.classList.remove("pulling");
@@ -960,11 +1160,13 @@
       return { name: fallback.name, cells: fallback.cells.map((cell) => [...cell]), used: false };
     }
 
-    function dealPieceSet() {
+    function dealPieceSet(forceSpecial = false) {
       const pieces = [weightedShape(), weightedShape(), weightedShape()];
       // A set can contain a Blast Block or a Cross Block, never both.
       const specialRoll = Math.random();
-      if (specialRoll < (1 / 6)) {
+      if (forceSpecial) {
+        ensureSpecialBlock(pieces);
+      } else if (specialRoll < (1 / 6)) {
         const piece = pieces[Math.floor(Math.random() * pieces.length)];
         const bombCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
         piece.bombCell = [...bombCell];
@@ -1260,7 +1462,7 @@
       piece.used = true;
       state.setPlaced += 1;
       state.blocks += piece.cells.length;
-      state.score += piece.cells.length * 5;
+      state.score += piece.cells.length * 5 * powerMultiplier();
       state.selected = null;
       renderBoard();
       renderTray();
@@ -1273,9 +1475,21 @@
       }
 
       if (state.pieces.every((item) => item.used)) {
-        state.pieces = dealPieceSet();
+        let deliveryMessage = "Fresh blocks delivered!";
+        if (state.powerActive) {
+          state.powerSetsRemaining -= 1;
+          if (state.powerSetsRemaining <= 0) {
+            state.powerActive = false;
+            state.powerSetsRemaining = 0;
+            deliveryMessage = "DeBlockle Mode complete.";
+            sound("powerOff");
+          } else {
+            deliveryMessage = `POWER ACTIVE: ${state.powerSetsRemaining} SET${state.powerSetsRemaining === 1 ? "" : "S"} LEFT!`;
+          }
+        }
+        state.pieces = dealPieceSet(state.powerActive);
         state.setPlaced = 0;
-        setToast("Fresh blocks delivered!");
+        setToast(deliveryMessage, state.powerActive);
         sound("deal");
       }
 
@@ -1284,6 +1498,7 @@
       renderTray();
       state.locked = false;
       updateRerollControl();
+      updatePowerUI();
 
       const remaining = state.pieces.filter((item) => !item.used);
       if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame();
@@ -1366,7 +1581,7 @@
       const chainBonus = Math.max(0, triggeredBombs.size - 1) * 100;
       const crossBonus = triggeredCrosses.size * 100;
       const multiplier = Math.max(1, state.combo);
-      const clearScore = (lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus) * multiplier;
+      const clearScore = (lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus) * multiplier * powerMultiplier();
       state.score += clearScore;
 
       removedCells.forEach((key) => {
@@ -1393,7 +1608,7 @@
             : lineCount === 2
               ? `DOUBLE CLEAR! ×${multiplier}`
               : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
-      setToast(`${phrase}  +${formatScore(clearScore)}`, true);
+      setToast(`${phrase}${state.powerActive ? " • POWER ×2" : ""}  +${formatScore(clearScore)}`, true);
       sound(triggeredBombs.size ? "blast" : triggeredCrosses.size ? "cross" : lineCount >= 2 ? "bigClear" : "clear");
       vibrate(triggeredBombs.size ? [45, 30, 65] : triggeredCrosses.size ? [22, 24, 22, 24, 40] : lineCount >= 2 ? [25, 35, 45] : 30);
       await delay(triggeredBombs.size || triggeredCrosses.size ? 420 : 260);
@@ -1403,6 +1618,7 @@
         state.board[row][col] = 0;
       });
       renderBoard();
+      addEnergy(removedCells.size + lineCount * 4);
       return lineCount;
     }
 
@@ -1435,6 +1651,9 @@
       state.blocks = 0;
       state.rerolls = 2;
       state.setPlaced = 0;
+      state.energy = TEST_MODE ? POWER_MAX : 0;
+      state.powerActive = false;
+      state.powerSetsRemaining = 0;
       state.locked = false;
       state.running = true;
       showScreen("gameScreen");
@@ -1488,7 +1707,7 @@
         const gain = audioContext.createGain();
         const tones = {
           select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07], reroll: [710, .16],
-          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], start: [520, .12], gameOver: [125, .22]
+          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], powerReady: [760, .2], powerOn: [1040, .34], powerOff: [360, .18], start: [520, .12], gameOver: [125, .22]
         };
         const [frequency, duration] = tones[type] || tones.select;
         oscillator.type = type === "gameOver" || type === "deny" ? "sawtooth" : "sine";
@@ -1512,6 +1731,7 @@
     $("closeHowButton").addEventListener("click", () => closeOverlay("howOverlay"));
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
     $("rerollButton").addEventListener("click", () => safeAction("Randomise blocks", useReroll));
+    $("powerButton").addEventListener("click", () => safeAction("Activate DeBlockle Mode", activatePowerMode));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
 
     document.addEventListener("keydown", (event) => {
@@ -1521,6 +1741,7 @@
     createBoard();
     updateStats();
     updateSoundButton();
+    if (TEST_MODE) document.querySelector(".version").textContent += " • TEST MODE";
     console.info(`DeBlockle ${BUILD} loaded`);
   </script>
 </body>
