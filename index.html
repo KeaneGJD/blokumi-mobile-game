@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.8</title>
+  <title>DeBlockle v0.9</title>
   <style>
     :root {
       --ink: #101828;
@@ -234,7 +234,7 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
 
-    .stat.main { background: rgba(216,255,79,.11); border-color: rgba(216,255,79,.24); }
+    .stat.main { background: rgba(216,255,79,.11); border-color: rgba(216,255,79,.24); position: relative; overflow: visible; }
     .stat-label { color: var(--muted); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; font-weight: 900; }
     .stat-value { font-size: 20px; font-weight: 1000; letter-spacing: -.04em; margin-top: 2px; }
     .stat.main .stat-value { color: var(--lime); font-size: 25px; }
@@ -363,6 +363,56 @@
 
     #gameScreen.powered .stat.main .stat-value { color: var(--pink); }
 
+    #gameScreen.powered[data-power-tier="1"],
+    .drag-ghost.powered.tier-1 {
+      --power-glow: rgba(216,255,79,.55);
+      --power-sheen: linear-gradient(115deg, transparent 24%, rgba(235,255,165,.62) 48%, transparent 72%);
+      --power-speed: 2.8s;
+    }
+
+    #gameScreen.powered[data-power-tier="2"],
+    .drag-ghost.powered.tier-2 {
+      --power-glow: rgba(57,231,208,.66);
+      --power-sheen: linear-gradient(115deg, transparent 20%, rgba(216,255,79,.34) 38%, rgba(143,255,239,.72) 50%, transparent 74%);
+      --power-speed: 2.15s;
+    }
+
+    #gameScreen.powered[data-power-tier="3"],
+    .drag-ghost.powered.tier-3 {
+      --power-glow: rgba(255,92,168,.7);
+      --power-sheen: linear-gradient(115deg, transparent 16%, rgba(255,92,168,.52) 34%, rgba(255,173,66,.7) 47%, rgba(216,255,79,.68) 57%, rgba(57,231,208,.52) 68%, transparent 84%);
+      --power-speed: 1.55s;
+    }
+
+    #gameScreen.powered .cell.filled,
+    #gameScreen.powered .piece-dot.on,
+    .drag-ghost.powered .piece-dot.on {
+      box-shadow: inset -3px -3px 0 rgba(16,24,40,.12), 0 0 9px var(--power-glow);
+    }
+
+    #gameScreen.powered .cell.filled:not(.bomb):not(.cross),
+    #gameScreen.powered .piece-dot.on:not(.bomb-dot):not(.cross-dot),
+    .drag-ghost.powered .piece-dot.on:not(.bomb-dot):not(.cross-dot) { overflow: hidden; }
+
+    #gameScreen.powered .cell.filled:not(.bomb):not(.cross)::before,
+    #gameScreen.powered .piece-dot.on:not(.bomb-dot):not(.cross-dot)::before,
+    .drag-ghost.powered .piece-dot.on:not(.bomb-dot):not(.cross-dot)::before {
+      content: "";
+      position: absolute;
+      z-index: 4;
+      inset: -35%;
+      border-radius: inherit;
+      background: var(--power-sheen);
+      transform: translateX(-145%);
+      animation: powerSheen var(--power-speed) ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes powerSheen {
+      0%, 18% { transform: translateX(-145%); }
+      68%, 100% { transform: translateX(145%); }
+    }
+
     @keyframes boardPower {
       0%, 100% { filter: saturate(1); }
       50% { filter: saturate(1.2) brightness(1.04); }
@@ -379,16 +429,16 @@
 
     .score-burst {
       position: absolute;
-      z-index: 12;
+      z-index: 25;
       left: 50%;
-      top: 45%;
-      transform: translate(-50%, -50%) scale(.72);
-      padding: 9px 15px;
+      bottom: -16px;
+      transform: translate(-50%, 9px) scale(.72);
+      padding: 6px 11px;
       border-radius: 999px;
       color: var(--navy);
       background: var(--lime);
       box-shadow: 0 12px 28px rgba(0,0,0,.3);
-      font-size: clamp(18px, 5vw, 28px);
+      font-size: clamp(15px, 4.2vw, 20px);
       font-weight: 1000;
       letter-spacing: -.035em;
       opacity: 0;
@@ -400,10 +450,17 @@
     .score-burst.show { animation: scoreBurst .82s cubic-bezier(.2,.8,.2,1) both; }
 
     @keyframes scoreBurst {
-      0% { opacity: 0; transform: translate(-50%, -25%) scale(.7); }
-      18% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
-      68% { opacity: 1; transform: translate(-50%, -66%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -105%) scale(.9); }
+      0% { opacity: 0; transform: translate(-50%, 9px) scale(.7); }
+      18% { opacity: 1; transform: translate(-50%, 0) scale(1.08); }
+      68% { opacity: 1; transform: translate(-50%, -31px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -49px) scale(.9); }
+    }
+
+    #scoreValue.bump { animation: scoreBump .36s cubic-bezier(.2,.85,.2,1); }
+    @keyframes scoreBump {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.2); filter: brightness(1.35); }
+      100% { transform: scale(1); }
     }
 
     .board {
@@ -736,6 +793,7 @@
       height: clamp(12px, 3.7vw, 19px);
       border-radius: 5px;
       background: transparent;
+      position: relative;
     }
 
     .piece-dot.on {
@@ -981,13 +1039,13 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.8 • PROGRESSION</div>
+      <div class="version">DEBLOCKLE BUILD v0.9 • POWER POLISH</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
       <div class="stats">
         <div class="stat"><span class="stat-label">Best</span><strong class="stat-value" id="bestValue">0</strong></div>
-        <div class="stat main"><span class="stat-label">Score</span><strong class="stat-value" id="scoreValue">0</strong></div>
+        <div class="stat main"><span class="stat-label">Score</span><strong class="stat-value" id="scoreValue">0</strong><div class="score-burst" id="scoreBurst" aria-live="polite"></div></div>
         <div class="stat"><span class="stat-label">Combo</span><strong class="stat-value" id="comboValue">—</strong></div>
       </div>
 
@@ -1005,7 +1063,6 @@
 
       <div class="board-shell">
         <div class="board" id="board" role="grid" aria-label="8 by 8 game board"></div>
-        <div class="score-burst" id="scoreBurst" aria-live="polite"></div>
       </div>
       <div class="toast" id="toast">Press and drag a block onto the board.</div>
 
@@ -1114,7 +1171,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.8";
+    const BUILD = "v0.9";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
@@ -1250,9 +1307,13 @@
 
     function showScoreBurst(text, special = false) {
       const burst = $("scoreBurst");
+      const score = $("scoreValue");
+      score.textContent = formatScore(state.score);
+      score.classList.remove("bump");
       burst.textContent = text;
       burst.classList.remove("show", "special");
-      void burst.offsetWidth;
+      void score.offsetWidth;
+      score.classList.add("bump");
       burst.classList.toggle("special", special);
       burst.classList.add("show");
     }
@@ -1367,7 +1428,10 @@
       const unlockedTier = unlockedPowerTier();
 
       panel.classList.toggle("active", state.powerActive);
-      $("gameScreen").classList.toggle("powered", state.powerActive);
+      const gameScreen = $("gameScreen");
+      gameScreen.classList.toggle("powered", state.powerActive);
+      if (state.powerActive) gameScreen.dataset.powerTier = String(state.powerTier);
+      else delete gameScreen.dataset.powerTier;
       fill.style.width = `${percentage}%`;
       track.setAttribute("aria-valuenow", String(state.energy));
 
@@ -1741,6 +1805,7 @@
       const cellRect = boardEl.children[0].getBoundingClientRect();
       const ghost = document.createElement("div");
       ghost.className = `drag-ghost piece-${index}`;
+      if (state.powerActive) ghost.classList.add("powered", `tier-${state.powerTier}`);
       ghost.style.setProperty("--ghost-cell", `${cellRect.width}px`);
       ghost.appendChild(makePieceGrid(state.pieces[index]));
       document.body.appendChild(ghost);
@@ -1916,7 +1981,7 @@
       state.blocks += piece.cells.length;
       const placementScore = piece.cells.length * 5 * powerMultiplier();
       state.score += placementScore;
-      showScoreBurst(`+${formatScore(placementScore)} PLACE`, state.powerActive);
+      showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
       checkScoreAchievement();
       state.selected = null;
       renderBoard();
