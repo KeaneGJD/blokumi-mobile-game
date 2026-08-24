@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.19</title>
+  <title>DeBlockle v0.20</title>
   <style>
     :root {
       --ink: #101828;
@@ -1107,6 +1107,29 @@
     .tutorial-block.cross-demo::after { transform: rotate(90deg); }
     .tutorial-hint { margin: 2px 0 0 !important; font-size: 12px !important; }
 
+    .dev-launch {
+      position: fixed;
+      z-index: 29;
+      right: max(12px, env(safe-area-inset-right));
+      bottom: max(12px, env(safe-area-inset-bottom));
+      min-width: 62px;
+      height: 44px;
+      border: 2px solid var(--lime);
+      border-radius: 14px;
+      color: var(--navy);
+      background: var(--lime);
+      box-shadow: 0 10px 25px rgba(0,0,0,.34);
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      cursor: pointer;
+    }
+    .dev-launch[hidden] { display: none; }
+    .dev-card .ad-badge { margin-bottom: 10px; }
+    .dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 16px; }
+    .dev-grid .secondary-btn { min-height: 52px; padding: 8px; font-size: 12px; }
+    .dev-card .dev-note { margin: 10px 0 0; font-size: 11px; }
+
     .error-banner {
       display: none;
       position: fixed;
@@ -1165,7 +1188,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.19 • PERSISTENT BOARD SLOTS</div>
+      <div class="version">DEBLOCKLE BUILD v0.20 • DEVELOPER TEST MENU</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1208,6 +1231,8 @@
     </section>
   </main>
 
+  <button class="dev-launch" id="devMenuButton" type="button" hidden>DEV</button>
+
   <div class="overlay" id="howOverlay" role="dialog" aria-modal="true" aria-labelledby="howTitle">
     <div class="modal">
       <h2 id="howTitle">How to play</h2>
@@ -1236,6 +1261,24 @@
         <button class="primary-btn" id="resumeButton">RESUME GAME</button>
         <button class="secondary-btn" id="quitRunButton">QUIT TO MENU</button>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="devOverlay" role="dialog" aria-modal="true" aria-labelledby="devTitle">
+    <div class="modal dev-card">
+      <span class="ad-badge">DEVELOPMENT ONLY</span>
+      <h2 id="devTitle">Test Menu</h2>
+      <p>Load a prepared board, then place the highlighted Single block to trigger the test.</p>
+      <div class="dev-grid">
+        <button class="secondary-btn" id="devNormalButton">NORMAL CLEAR</button>
+        <button class="secondary-btn" id="devBombButton">BLAST BLOCK</button>
+        <button class="secondary-btn" id="devCrossButton">CROSS BLOCK</button>
+        <button class="secondary-btn" id="devTier3Button">TIER III WIPE</button>
+        <button class="secondary-btn" id="devGameOverButton">GAME OVER</button>
+        <button class="secondary-btn" id="devFreshButton">FRESH RUN</button>
+      </div>
+      <p class="dev-note">Developer runs never update saved scores, achievements, lifetime stats or advert timing.</p>
+      <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
     </div>
   </div>
 
@@ -1322,7 +1365,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.19";
+    const BUILD = "v0.20";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
@@ -1344,7 +1387,8 @@
     const TEST_INTERSTITIAL = new URLSearchParams(window.location.search).get("adtest") === "1";
     const TEST_GAME_OVER = new URLSearchParams(window.location.search).get("continue") === "1" || TEST_INTERSTITIAL;
     const TEST_TUTORIAL = new URLSearchParams(window.location.search).get("tutorial") === "1";
-    const TEST_SAVE_DISABLED = TEST_MODE || TEST_GAME_OVER || TEST_TUTORIAL;
+    const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "1";
+    const TEST_SAVE_DISABLED = TEST_MODE || TEST_GAME_OVER || TEST_TUTORIAL || DEV_MODE;
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 5 },
@@ -1477,6 +1521,7 @@
     function closeOverlay(id) { $(id).classList.remove("open"); }
 
     function queueSpecialTutorial(type) {
+      if (DEV_MODE && !TEST_TUTORIAL) return;
       if (!state.running || tutorialSessionSeen.has(type)) return;
       if (!TEST_TUTORIAL && state.specialTutorials[type]) return;
       if (activeSpecialTutorial === type || specialTutorialQueue.includes(type)) return;
@@ -2427,11 +2472,81 @@
       localStorage.setItem(CLEAN_BEST_KEY, String(state.cleanBest));
     }
 
+    function makeDevPieces() {
+      return [
+        { name: "Single", cells: [[0, 0]], used: false },
+        { name: "Double H", cells: [[0, 0], [0, 1]], used: false },
+        { name: "L Small", cells: [[0, 0], [1, 0], [1, 1]], used: false }
+      ];
+    }
+
+    function prepareDevScenario(type) {
+      if (!DEV_MODE) return;
+      cleanUpDrag();
+      closeOverlay("devOverlay");
+      startGame();
+
+      state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+      state.pieces = makeDevPieces();
+      state.selected = 0;
+      state.setPlaced = 0;
+      state.setsCompleted = 1;
+      state.energy = 0;
+      state.powerActive = false;
+      state.powerTier = 0;
+      state.powerSetsRemaining = 0;
+      state.locked = false;
+      state.running = true;
+
+      let message = "Fresh developer run started.";
+
+      if (type === "normal") {
+        for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+        message = "Normal clear ready: place the Single block in the bottom-right space.";
+      } else if (type === "bomb") {
+        for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+        state.board[SIZE - 1][3] = 2;
+        [[5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [6, 1], [6, 2], [6, 4], [6, 5]]
+          .forEach(([row, col]) => { state.board[row][col] = 1; });
+        message = "Blast test ready: place the Single block in the bottom-right space.";
+      } else if (type === "cross") {
+        for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+        for (let row = 0; row < SIZE - 1; row += 1) state.board[row][3] = 1;
+        state.board[SIZE - 1][3] = 3;
+        message = "Cross test ready: place the Single block in the bottom-right space.";
+      } else if (type === "tier3") {
+        for (let row = 0; row < SIZE; row += 1) {
+          for (let col = 0; col < SIZE; col += 1) {
+            if ((row + col) % 3 === 0 || (row === 6 && col % 2 === 0)) state.board[row][col] = 1;
+          }
+        }
+        state.energy = TIER_3_ENERGY;
+        state.selected = null;
+        message = "Tier III ready: press FULL DEBLOCKLE above the board.";
+      } else if (type === "gameover") {
+        state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
+        state.score = 1250;
+        state.blocks = 64;
+        state.selected = null;
+        message = "Game-over test ready.";
+      } else {
+        state.selected = null;
+      }
+
+      renderBoard();
+      renderTray();
+      updateStats();
+      updatePowerUI();
+      setToast(message, type !== "fresh");
+      if (type === "gameover") window.setTimeout(endGame, 180);
+    }
+
     function startGame() {
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
       closeOverlay("specialTutorialOverlay");
+      closeOverlay("devOverlay");
       specialTutorialQueue = [];
       activeSpecialTutorial = null;
       if (TEST_TUTORIAL) tutorialSessionSeen.clear();
@@ -2544,6 +2659,7 @@
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
+      closeOverlay("devOverlay");
       updateStats();
       showScreen("homeScreen");
       setGameBackVisible(false);
@@ -2627,13 +2743,23 @@
     $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("closeInterstitialButton").addEventListener("click", () => safeAction("Close test interstitial", () => closeInterstitial(true)));
     $("adUnavailableButton").addEventListener("click", () => safeAction("Simulate unavailable ad", () => closeInterstitial(false)));
+    $("devMenuButton").addEventListener("click", () => openOverlay("devOverlay"));
+    $("closeDevButton").addEventListener("click", () => closeOverlay("devOverlay"));
+    $("devNormalButton").addEventListener("click", () => safeAction("Prepare normal clear test", () => prepareDevScenario("normal")));
+    $("devBombButton").addEventListener("click", () => safeAction("Prepare Blast Block test", () => prepareDevScenario("bomb")));
+    $("devCrossButton").addEventListener("click", () => safeAction("Prepare Cross Block test", () => prepareDevScenario("cross")));
+    $("devTier3Button").addEventListener("click", () => safeAction("Prepare Tier III test", () => prepareDevScenario("tier3")));
+    $("devGameOverButton").addEventListener("click", () => safeAction("Prepare game-over test", () => prepareDevScenario("gameover")));
+    $("devFreshButton").addEventListener("click", () => safeAction("Start fresh developer run", () => prepareDevScenario("fresh")));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
+    $("devOverlay").addEventListener("click", (event) => { if (event.target === $("devOverlay")) closeOverlay("devOverlay"); });
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         if ($("specialTutorialOverlay").classList.contains("open")) closeSpecialTutorial();
+        else if ($("devOverlay").classList.contains("open")) closeOverlay("devOverlay");
         else if ($("pauseOverlay").classList.contains("open")) resumeGame();
         else if ($("howOverlay").classList.contains("open")) closeOverlay("howOverlay");
         else if ($("achievementsOverlay").classList.contains("open")) closeOverlay("achievementsOverlay");
@@ -2649,6 +2775,10 @@
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
     if (TEST_TUTORIAL) document.querySelector(".version").textContent += " • TUTORIAL TEST";
+    if (DEV_MODE) {
+      $("devMenuButton").hidden = false;
+      document.querySelector(".version").textContent += " • DEV MODE";
+    }
     console.info(`DeBlockle ${BUILD} loaded`);
   </script>
 </body>
