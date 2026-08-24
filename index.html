@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.6</title>
+  <title>DeBlockle v0.7</title>
   <style>
     :root {
       --ink: #101828;
@@ -821,6 +821,50 @@
     .final-score strong { display: block; color: var(--lime); font-size: 45px; line-height: 1.05; letter-spacing: -.05em; margin-top: 5px; }
     .new-best { color: var(--pink); font-weight: 950; text-align: center; min-height: 23px; }
 
+    .run-status {
+      margin: 11px 0 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .continue-btn { background: linear-gradient(135deg, var(--lime), var(--cyan)); }
+    .continue-btn.hidden { display: none; }
+
+    .test-ad-card { text-align: center; }
+
+    .test-ad-screen {
+      min-height: 205px;
+      margin: 15px 0 18px;
+      padding: 23px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255,92,168,.18), transparent 34%),
+        #080d16;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: inset 0 0 35px rgba(0,0,0,.45);
+    }
+
+    .ad-badge {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: var(--orange);
+      border: 1px solid rgba(255,173,66,.35);
+      background: rgba(255,173,66,.1);
+      font-size: 9px;
+      letter-spacing: .12em;
+      font-weight: 1000;
+    }
+
+    .test-ad-screen strong { margin-top: 18px; font-size: 22px; letter-spacing: -.035em; }
+    .test-ad-screen span:last-child { margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .summary-box { padding: 13px; border-radius: 15px; background: rgba(255,255,255,.06); text-align: center; }
     .summary-box span { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 850; }
@@ -882,7 +926,7 @@
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.6 • POWER TIERS</div>
+      <div class="version">DEBLOCKLE BUILD v0.7 • LAST CHANCE</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -953,9 +997,25 @@
         <div class="summary-box"><span>Lines cleared</span><strong id="finalLines">0</strong></div>
         <div class="summary-box"><span>Blocks placed</span><strong id="finalBlocks">0</strong></div>
       </div>
+      <p class="run-status" id="runStatus">Clean best: 0</p>
       <div class="button-stack">
-        <button class="primary-btn" id="againButton">PLAY AGAIN</button>
+        <button class="primary-btn continue-btn" id="continueButton">WATCH TEST AD TO CONTINUE</button>
+        <button class="secondary-btn" id="againButton">PLAY AGAIN</button>
         <button class="secondary-btn" id="homeButton">BACK TO HOME</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="testAdOverlay" role="dialog" aria-modal="true" aria-labelledby="testAdTitle">
+    <div class="modal test-ad-card">
+      <span class="ad-badge">DEVELOPMENT ONLY</span>
+      <div class="test-ad-screen">
+        <strong id="testAdTitle">TEST REWARDED AD</strong>
+        <span>A real rewarded advert would play here in the Android build.</span>
+      </div>
+      <div class="button-stack">
+        <button class="primary-btn" id="completeAdButton">COMPLETE TEST AD</button>
+        <button class="secondary-btn" id="cancelAdButton">CLOSE WITHOUT REWARD</button>
       </div>
     </div>
   </div>
@@ -965,16 +1025,18 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.6";
+    const BUILD = "v0.7";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
     const TIER_3_ENERGY = 360;
     const POWER_MAX = TIER_3_ENERGY;
     const BEST_KEY = "deblockle_v01_best";
+    const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
+    const TEST_CONTINUE = new URLSearchParams(window.location.search).get("continue") === "1";
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 5 },
@@ -1004,6 +1066,7 @@
       selected: null,
       score: 0,
       best: Number(localStorage.getItem(BEST_KEY) || 0),
+      cleanBest: Number(localStorage.getItem(CLEAN_BEST_KEY) || 0),
       combo: 0,
       lines: 0,
       blocks: 0,
@@ -1013,6 +1076,7 @@
       powerActive: false,
       powerTier: 0,
       powerSetsRemaining: 0,
+      continueUsed: false,
       locked: false,
       running: false,
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -1259,6 +1323,90 @@
         piece.crossCell = [...crossCell];
       }
       return pieces;
+    }
+
+    function shuffled(items) {
+      const copy = [...items];
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+      }
+      return copy;
+    }
+
+    function createRescueSet() {
+      const safeShapes = SHAPES.filter((shape) => shape.cells.length <= 4 && shape.name !== "T Block" && shape.name !== "Z Block");
+      const pieces = Array.from({ length: 3 }, () => {
+        const shape = safeShapes[Math.floor(Math.random() * safeShapes.length)];
+        return { name: shape.name, cells: shape.cells.map((cell) => [...cell]), used: false };
+      });
+      return ensurePoweredSpecials(pieces, poweredSpecialCount());
+    }
+
+    function prepareContinueRescue() {
+      const occupied = [];
+      for (let row = 0; row < SIZE; row += 1) {
+        for (let col = 0; col < SIZE; col += 1) {
+          if (state.board[row][col]) occupied.push([row, col]);
+        }
+      }
+
+      const removalOrder = shuffled(occupied);
+      const initialRemovalCount = Math.ceil(occupied.length * .4);
+      for (let index = 0; index < initialRemovalCount; index += 1) {
+        const [row, col] = removalOrder[index];
+        state.board[row][col] = 0;
+      }
+
+      let pieces = createRescueSet();
+      let removalIndex = initialRemovalCount;
+      let attempts = 0;
+      while (!pieces.every(canShapeFitAnywhere) && attempts < 80) {
+        if (removalIndex < removalOrder.length) {
+          const [row, col] = removalOrder[removalIndex];
+          state.board[row][col] = 0;
+          removalIndex += 1;
+        } else {
+          pieces = createRescueSet();
+        }
+        attempts += 1;
+      }
+
+      // Absolute fallback: an empty board and friendly pieces can always continue.
+      if (!pieces.every(canShapeFitAnywhere)) {
+        state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+        pieces = createRescueSet();
+      }
+      return pieces;
+    }
+
+    function openTestAd() {
+      if (state.continueUsed || state.running) return;
+      openOverlay("testAdOverlay");
+    }
+
+    function cancelTestAd() {
+      closeOverlay("testAdOverlay");
+      setToast("Test ad closed. No continue awarded.");
+    }
+
+    function completeTestAd() {
+      if (state.continueUsed || state.running) return;
+      state.continueUsed = true;
+      state.combo = 0;
+      state.selected = null;
+      state.pieces = prepareContinueRescue();
+      state.setPlaced = 0;
+      state.running = true;
+      state.locked = false;
+      closeOverlay("testAdOverlay");
+      closeOverlay("gameOverOverlay");
+      renderBoard();
+      renderTray();
+      updateStats();
+      setToast("LAST CHANCE! Your board has been rescued.", true);
+      sound("continue");
+      vibrate([30, 30, 65]);
     }
 
     function createBoard() {
@@ -1720,6 +1868,7 @@
     }
 
     function updateBest(forceSave) {
+      if (TEST_MODE || TEST_CONTINUE) return;
       if (state.score > state.best) {
         state.best = state.score;
         localStorage.setItem(BEST_KEY, String(state.best));
@@ -1728,8 +1877,16 @@
       }
     }
 
+    function updateCleanBest() {
+      if (TEST_MODE || TEST_CONTINUE) return;
+      if (state.continueUsed || state.score <= state.cleanBest) return;
+      state.cleanBest = state.score;
+      localStorage.setItem(CLEAN_BEST_KEY, String(state.cleanBest));
+    }
+
     function startGame() {
       closeOverlay("gameOverOverlay");
+      closeOverlay("testAdOverlay");
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       state.pieces = dealPieceSet();
       state.selected = null;
@@ -1743,26 +1900,36 @@
       state.powerActive = false;
       state.powerTier = 0;
       state.powerSetsRemaining = 0;
+      state.continueUsed = false;
       state.locked = false;
       state.running = true;
+      if (TEST_CONTINUE) {
+        state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
+        state.score = 1250;
+        state.blocks = 64;
+      }
       showScreen("gameScreen");
       renderBoard();
       renderTray();
       updateStats();
       setToast("Press and drag a block onto the board.");
       sound("start");
+      if (TEST_CONTINUE) window.setTimeout(endGame, 250);
     }
 
     function endGame() {
       state.running = false;
       state.locked = true;
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
-      const isNewBest = state.score >= previousBest && state.score > 0;
+      const isNewBest = !TEST_MODE && !TEST_CONTINUE && state.score >= previousBest && state.score > 0;
       updateBest(true);
+      updateCleanBest();
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
       $("finalBlocks").textContent = formatScore(state.blocks);
       $("newBest").textContent = isNewBest ? "★ NEW BEST SCORE ★" : "";
+      $("runStatus").textContent = `${state.continueUsed ? "Continued run" : "Clean run"} • Clean best: ${formatScore(state.cleanBest)}`;
+      $("continueButton").classList.toggle("hidden", state.continueUsed);
       updateStats();
       sound("gameOver");
       vibrate([45, 70, 45]);
@@ -1772,6 +1939,7 @@
     function goHome() {
       state.running = false;
       closeOverlay("gameOverOverlay");
+      closeOverlay("testAdOverlay");
       updateStats();
       showScreen("homeScreen");
     }
@@ -1796,7 +1964,7 @@
         const gain = audioContext.createGain();
         const tones = {
           select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07], reroll: [710, .16],
-          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], powerReady: [760, .2], powerOn: [1040, .34], powerOff: [360, .18], start: [520, .12], gameOver: [125, .22]
+          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], powerReady: [760, .2], powerOn: [1040, .34], powerOff: [360, .18], continue: [680, .24], start: [520, .12], gameOver: [125, .22]
         };
         const [frequency, duration] = tones[type] || tones.select;
         oscillator.type = type === "gameOver" || type === "deny" ? "sawtooth" : "sine";
@@ -1821,6 +1989,9 @@
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
     $("rerollButton").addEventListener("click", () => safeAction("Randomise blocks", useReroll));
     $("powerButton").addEventListener("click", () => safeAction("Activate DeBlockle Mode", activatePowerMode));
+    $("continueButton").addEventListener("click", () => safeAction("Open test rewarded ad", openTestAd));
+    $("completeAdButton").addEventListener("click", () => safeAction("Complete test rewarded ad", completeTestAd));
+    $("cancelAdButton").addEventListener("click", () => safeAction("Cancel test rewarded ad", cancelTestAd));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
 
     document.addEventListener("keydown", (event) => {
@@ -1831,6 +2002,7 @@
     updateStats();
     updateSoundButton();
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
+    if (TEST_CONTINUE) document.querySelector(".version").textContent += " • CONTINUE TEST";
     console.info(`DeBlockle ${BUILD} loaded`);
   </script>
 </body>
