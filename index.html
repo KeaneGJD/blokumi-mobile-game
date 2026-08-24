@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.20</title>
+  <title>DeBlockle v0.21</title>
   <style>
     :root {
       --ink: #101828;
@@ -1188,7 +1188,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.20 • DEVELOPER TEST MENU</div>
+      <div class="version">DEBLOCKLE BUILD v0.21 • SMART BLOCK GENERATOR</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1248,6 +1248,7 @@
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
+      <p>Block deliveries become more challenging as your run progresses, with larger shapes joining the pool later.</p>
       <p>Scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
     </div>
@@ -1268,7 +1269,7 @@
     <div class="modal dev-card">
       <span class="ad-badge">DEVELOPMENT ONLY</span>
       <h2 id="devTitle">Test Menu</h2>
-      <p>Load a prepared board, then place the highlighted Single block to trigger the test.</p>
+      <p>Load a prepared effect board, or inspect block generation at different stages of a run.</p>
       <div class="dev-grid">
         <button class="secondary-btn" id="devNormalButton">NORMAL CLEAR</button>
         <button class="secondary-btn" id="devBombButton">BLAST BLOCK</button>
@@ -1276,6 +1277,9 @@
         <button class="secondary-btn" id="devTier3Button">TIER III WIPE</button>
         <button class="secondary-btn" id="devGameOverButton">GAME OVER</button>
         <button class="secondary-btn" id="devFreshButton">FRESH RUN</button>
+        <button class="secondary-btn" id="devEarlyButton">EARLY BLOCKS</button>
+        <button class="secondary-btn" id="devMidButton">MID BLOCKS</button>
+        <button class="secondary-btn" id="devLateButton">LATE BLOCKS</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
@@ -1365,7 +1369,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.20";
+    const BUILD = "v0.21";
     const SIZE = 8;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
@@ -1391,25 +1395,36 @@
     const TEST_SAVE_DISABLED = TEST_MODE || TEST_GAME_OVER || TEST_TUTORIAL || DEV_MODE;
 
     const SHAPES = [
-      { name: "Single", cells: [[0,0]], weight: 5 },
-      { name: "Double H", cells: [[0,0],[0,1]], weight: 7 },
-      { name: "Double V", cells: [[0,0],[1,0]], weight: 7 },
-      { name: "Triple H", cells: [[0,0],[0,1],[0,2]], weight: 8 },
-      { name: "Triple V", cells: [[0,0],[1,0],[2,0]], weight: 8 },
-      { name: "Line 4 H", cells: [[0,0],[0,1],[0,2],[0,3]], weight: 5 },
-      { name: "Line 4 V", cells: [[0,0],[1,0],[2,0],[3,0]], weight: 5 },
-      { name: "Line 5 H", cells: [[0,0],[0,1],[0,2],[0,3],[0,4]], weight: 3 },
-      { name: "Line 5 V", cells: [[0,0],[1,0],[2,0],[3,0],[4,0]], weight: 3 },
-      { name: "Square 2", cells: [[0,0],[0,1],[1,0],[1,1]], weight: 8 },
-      { name: "Square 3", cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]], weight: 2 },
-      { name: "L Small A", cells: [[0,0],[1,0],[1,1]], weight: 7 },
-      { name: "L Small B", cells: [[0,0],[0,1],[1,0]], weight: 7 },
-      { name: "L Small C", cells: [[0,0],[0,1],[1,1]], weight: 7 },
-      { name: "L Small D", cells: [[0,1],[1,0],[1,1]], weight: 7 },
-      { name: "L Large", cells: [[0,0],[1,0],[2,0],[2,1],[2,2]], weight: 4 },
-      { name: "L Large R", cells: [[0,2],[1,2],[2,0],[2,1],[2,2]], weight: 4 },
-      { name: "T Block", cells: [[0,0],[0,1],[0,2],[1,1]], weight: 4 },
-      { name: "Z Block", cells: [[0,0],[0,1],[1,1],[1,2]], weight: 4 }
+      { name: "Single", cells: [[0,0]], weight: 4, tier: 1, family: "dot" },
+      { name: "Double H", cells: [[0,0],[0,1]], weight: 7, tier: 1, family: "short-line" },
+      { name: "Double V", cells: [[0,0],[1,0]], weight: 7, tier: 1, family: "short-line" },
+      { name: "Triple H", cells: [[0,0],[0,1],[0,2]], weight: 8, tier: 1, family: "short-line" },
+      { name: "Triple V", cells: [[0,0],[1,0],[2,0]], weight: 8, tier: 1, family: "short-line" },
+      { name: "Square 2", cells: [[0,0],[0,1],[1,0],[1,1]], weight: 8, tier: 1, family: "square" },
+      { name: "L Small A", cells: [[0,0],[1,0],[1,1]], weight: 7, tier: 1, family: "small-l" },
+      { name: "L Small B", cells: [[0,0],[0,1],[1,0]], weight: 7, tier: 1, family: "small-l" },
+      { name: "L Small C", cells: [[0,0],[0,1],[1,1]], weight: 7, tier: 1, family: "small-l" },
+      { name: "L Small D", cells: [[0,1],[1,0],[1,1]], weight: 7, tier: 1, family: "small-l" },
+
+      { name: "Line 4 H", cells: [[0,0],[0,1],[0,2],[0,3]], weight: 5, tier: 2, family: "long-line" },
+      { name: "Line 4 V", cells: [[0,0],[1,0],[2,0],[3,0]], weight: 5, tier: 2, family: "long-line" },
+      { name: "L Large A", cells: [[0,0],[1,0],[2,0],[2,1],[2,2]], weight: 4, tier: 2, family: "large-l" },
+      { name: "L Large B", cells: [[0,2],[1,2],[2,0],[2,1],[2,2]], weight: 4, tier: 2, family: "large-l" },
+      { name: "L Large C", cells: [[0,0],[0,1],[0,2],[1,0],[2,0]], weight: 4, tier: 2, family: "large-l" },
+      { name: "L Large D", cells: [[0,0],[0,1],[0,2],[1,2],[2,2]], weight: 4, tier: 2, family: "large-l" },
+      { name: "T Down", cells: [[0,0],[0,1],[0,2],[1,1]], weight: 4, tier: 2, family: "t" },
+      { name: "T Up", cells: [[0,1],[1,0],[1,1],[1,2]], weight: 4, tier: 2, family: "t" },
+      { name: "T Left", cells: [[0,0],[1,0],[1,1],[2,0]], weight: 4, tier: 2, family: "t" },
+      { name: "T Right", cells: [[0,1],[1,0],[1,1],[2,1]], weight: 4, tier: 2, family: "t" },
+      { name: "Z Block", cells: [[0,0],[0,1],[1,1],[1,2]], weight: 4, tier: 2, family: "zigzag" },
+      { name: "S Block", cells: [[0,1],[0,2],[1,0],[1,1]], weight: 4, tier: 2, family: "zigzag" },
+
+      { name: "Line 5 H", cells: [[0,0],[0,1],[0,2],[0,3],[0,4]], weight: 3, tier: 3, family: "long-line" },
+      { name: "Line 5 V", cells: [[0,0],[1,0],[2,0],[3,0],[4,0]], weight: 3, tier: 3, family: "long-line" },
+      { name: "Rectangle 2×3", cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]], weight: 3, tier: 3, family: "rectangle" },
+      { name: "Square 3", cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]], weight: 1.5, tier: 3, family: "square" },
+      { name: "Plus", cells: [[0,1],[1,0],[1,1],[1,2],[2,1]], weight: 3, tier: 3, family: "plus" },
+      { name: "U Block", cells: [[0,0],[0,2],[1,0],[1,1],[1,2]], weight: 3, tier: 3, family: "u" }
     ];
 
     const ACHIEVEMENTS = [
@@ -1453,6 +1468,8 @@
       lines: 0,
       blocks: 0,
       setsCompleted: 0,
+      recentShapeNames: [],
+      recentDealSignatures: [],
       highestCombo: 0,
       largestClear: 0,
       bombsDetonated: 0,
@@ -1900,34 +1917,148 @@
       if (!state.pieces.some(canShapeFitAnywhere)) endGame();
     }
 
-    function weightedShape() {
-      const total = SHAPES.reduce((sum, shape) => sum + shape.weight, 0);
+    function generatorStage(setsCompleted = state.setsCompleted) {
+      if (setsCompleted < 4) return "early";
+      if (setsCompleted < 11) return "mid";
+      return "late";
+    }
+
+    function stageTier(stage) {
+      return stage === "early" ? 1 : stage === "mid" ? 2 : 3;
+    }
+
+    function makePiece(shape) {
+      return {
+        name: shape.name,
+        cells: shape.cells.map((cell) => [...cell]),
+        family: shape.family,
+        tier: shape.tier,
+        used: false
+      };
+    }
+
+    function occupiedRatio() {
+      const occupied = state.board.reduce((total, row) => total + row.filter(Boolean).length, 0);
+      return occupied / (SIZE * SIZE);
+    }
+
+    function weightedShape(stage, excludedNames = [], familyCounts = {}) {
+      const maximumTier = stageTier(stage);
+      const recentNames = new Set(state.recentShapeNames);
+      let pool = SHAPES.filter((shape) => shape.tier <= maximumTier && !excludedNames.includes(shape.name));
+      if (!pool.length) pool = SHAPES.filter((shape) => shape.tier <= maximumTier);
+      const occupancy = occupiedRatio();
+      const weighted = pool.map((shape) => {
+        let weight = shape.weight;
+        if (recentNames.has(shape.name)) weight *= .28;
+        if ((familyCounts[shape.family] || 0) > 0) weight *= .38;
+        if (occupancy > .55 && shape.cells.length >= 6) weight *= .45;
+        if (stage === "late" && occupancy < .38 && shape.tier >= 2) weight *= 1.3;
+        return { shape, weight };
+      });
+      const total = weighted.reduce((sum, item) => sum + item.weight, 0);
       let roll = Math.random() * total;
-      for (const shape of SHAPES) {
-        roll -= shape.weight;
-        if (roll <= 0) return { name: shape.name, cells: shape.cells.map((cell) => [...cell]), used: false };
+      for (const item of weighted) {
+        roll -= item.weight;
+        if (roll <= 0) return makePiece(item.shape);
       }
-      const fallback = SHAPES[0];
-      return { name: fallback.name, cells: fallback.cells.map((cell) => [...cell]), used: false };
+      return makePiece(weighted[weighted.length - 1].shape);
+    }
+
+    function buildCandidateSet(stage) {
+      const pieces = [];
+      const familyCounts = {};
+      for (let index = 0; index < 3; index += 1) {
+        const piece = weightedShape(stage, pieces.map((item) => item.name), familyCounts);
+        pieces.push(piece);
+        familyCounts[piece.family] = (familyCounts[piece.family] || 0) + 1;
+      }
+      return pieces;
+    }
+
+    function dealSignature(pieces) {
+      return pieces.map((piece) => piece.name).sort().join("|");
+    }
+
+    function minimumPlayablePieces(stage) {
+      return stage === "early" ? 3 : stage === "mid" ? 2 : 1;
+    }
+
+    function reinforcePlayableSet(pieces, stage) {
+      const required = minimumPlayablePieces(stage);
+      let playableCount = pieces.filter(canShapeFitAnywhere).length;
+      if (playableCount >= required) return pieces;
+
+      const playableShapes = shuffled(SHAPES.filter((shape) => {
+        if (shape.tier > stageTier(stage)) return false;
+        return canShapeFitAnywhere(makePiece(shape));
+      }));
+      if (!playableShapes.length) return pieces;
+
+      const usedNames = new Set(pieces.map((piece) => piece.name));
+      const replacementIndexes = pieces
+        .map((piece, index) => ({ piece, index }))
+        .filter(({ piece }) => !canShapeFitAnywhere(piece))
+        .map(({ index }) => index);
+
+      while (playableCount < required && replacementIndexes.length) {
+        const index = replacementIndexes.shift();
+        const preferred = playableShapes.find((shape) => !usedNames.has(shape.name));
+        const replacement = preferred || playableShapes[playableCount % playableShapes.length];
+        pieces[index] = makePiece(replacement);
+        usedNames.add(replacement.name);
+        playableCount += 1;
+      }
+      return pieces;
+    }
+
+    function rememberDeal(pieces) {
+      state.recentShapeNames.push(...pieces.map((piece) => piece.name));
+      state.recentShapeNames = state.recentShapeNames.slice(-9);
+      state.recentDealSignatures.push(dealSignature(pieces));
+      state.recentDealSignatures = state.recentDealSignatures.slice(-4);
+    }
+
+    function specialChanceForStage(stage) {
+      if (stage === "early") return 0;
+      if (stage === "mid") return .08;
+      return state.setsCompleted >= 20 ? .15 : .12;
     }
 
     function dealPieceSet(specialCount = 0) {
-      const pieces = [weightedShape(), weightedShape(), weightedShape()];
-      // The opening set is always ordinary so players can learn the board first.
-      // After that, outside Power Mode, only 15% of sets contain a special block.
-      const specialRoll = Math.random();
+      const stage = generatorStage();
+      let bestPieces = null;
+      let bestScore = -Infinity;
+
+      for (let attempt = 0; attempt < 18; attempt += 1) {
+        const pieces = reinforcePlayableSet(buildCandidateSet(stage), stage);
+        const signature = dealSignature(pieces);
+        const playable = pieces.filter(canShapeFitAnywhere).length;
+        const uniqueNames = new Set(pieces.map((piece) => piece.name)).size;
+        const uniqueFamilies = new Set(pieces.map((piece) => piece.family)).size;
+        const repeatedSet = state.recentDealSignatures.includes(signature);
+        const score = (playable * 50) + (uniqueNames * 9) + (uniqueFamilies * 5) - (repeatedSet ? 80 : 0) + Math.random();
+        if (score > bestScore) {
+          bestScore = score;
+          bestPieces = pieces;
+        }
+        if (playable >= minimumPlayablePieces(stage) && uniqueNames === 3 && !repeatedSet) break;
+      }
+
+      const pieces = bestPieces || reinforcePlayableSet(buildCandidateSet(stage), stage);
+      rememberDeal(pieces);
+
       if (specialCount > 0) {
         ensurePoweredSpecials(pieces, specialCount);
-      } else if (state.setsCompleted < OPENING_SPECIAL_FREE_SETS) {
         return pieces;
-      } else if (specialRoll < .10) {
+      }
+
+      const specialChance = state.setsCompleted < OPENING_SPECIAL_FREE_SETS ? 0 : specialChanceForStage(stage);
+      if (Math.random() < specialChance) {
         const piece = pieces[Math.floor(Math.random() * pieces.length)];
-        const bombCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
-        piece.bombCell = [...bombCell];
-      } else if (specialRoll < .15) {
-        const piece = pieces[Math.floor(Math.random() * pieces.length)];
-        const crossCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
-        piece.crossCell = [...crossCell];
+        const specialCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
+        if (Math.random() < .68) piece.bombCell = [...specialCell];
+        else piece.crossCell = [...specialCell];
       }
       return pieces;
     }
@@ -2529,6 +2660,27 @@
         state.blocks = 64;
         state.selected = null;
         message = "Game-over test ready.";
+      } else if (type === "earlyBlocks" || type === "midBlocks" || type === "lateBlocks") {
+        const stage = type === "earlyBlocks" ? "early" : type === "midBlocks" ? "mid" : "late";
+        state.setsCompleted = stage === "early" ? 1 : stage === "mid" ? 7 : 16;
+        state.recentShapeNames = [];
+        state.recentDealSignatures = [];
+        if (stage === "early") {
+          [[7, 0], [7, 1], [6, 0]].forEach(([row, col]) => { state.board[row][col] = 1; });
+        } else if (stage === "mid") {
+          [[7,0],[7,1],[7,4],[7,5],[6,0],[6,3],[6,4],[5,1],[5,6],[4,2],[4,5],[3,0],[3,7]]
+            .forEach(([row, col]) => { state.board[row][col] = 1; });
+        } else {
+          for (let row = 0; row < SIZE; row += 1) {
+            for (let col = 0; col < SIZE; col += 1) {
+              if ((row + col) % 3 === 0 || (row > 4 && col < 2)) state.board[row][col] = 1;
+            }
+          }
+        }
+        state.pieces = dealPieceSet();
+        state.selected = null;
+        const fitting = state.pieces.filter(canShapeFitAnywhere).length;
+        message = `${stage.toUpperCase()} POOL • ${fitting}/3 FIT • ${state.pieces.map((piece) => piece.name).join(" / ")}`;
       } else {
         state.selected = null;
       }
@@ -2558,6 +2710,8 @@
       state.lines = 0;
       state.blocks = 0;
       state.setsCompleted = 0;
+      state.recentShapeNames = [];
+      state.recentDealSignatures = [];
       state.highestCombo = 0;
       state.largestClear = 0;
       state.bombsDetonated = 0;
@@ -2751,6 +2905,9 @@
     $("devTier3Button").addEventListener("click", () => safeAction("Prepare Tier III test", () => prepareDevScenario("tier3")));
     $("devGameOverButton").addEventListener("click", () => safeAction("Prepare game-over test", () => prepareDevScenario("gameover")));
     $("devFreshButton").addEventListener("click", () => safeAction("Start fresh developer run", () => prepareDevScenario("fresh")));
+    $("devEarlyButton").addEventListener("click", () => safeAction("Prepare early block test", () => prepareDevScenario("earlyBlocks")));
+    $("devMidButton").addEventListener("click", () => safeAction("Prepare mid block test", () => prepareDevScenario("midBlocks")));
+    $("devLateButton").addEventListener("click", () => safeAction("Prepare late block test", () => prepareDevScenario("lateBlocks")));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
