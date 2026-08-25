@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>Blokumi v0.52</title>
+  <title>Blokumi v0.58</title>
   <style>
     :root {
       --ink: #101828;
@@ -327,6 +327,7 @@
     .theme-swatches i { width: 18px; height: 18px; border-radius: 6px; }
     .theme-card strong { display: block; font-size: 12px; }
     .theme-card small { display: block; margin-top: 3px; color: var(--muted); font-size: 8px; font-weight: 850; }
+    .profile-home-actions { margin-top: 20px; }
 
     #settingsScreen { padding: 18px 2px 12px; }
     .settings-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -895,9 +896,18 @@
     }
 
     .cell.filled {
-      background: var(--cyan);
+      --placed-colour: var(--cyan);
+      background: var(--placed-colour);
       border-color: transparent;
       box-shadow: inset -4px -4px 0 rgba(16,24,40,.13);
+    }
+
+    .cell.piece-colour-lime { --placed-colour: var(--lime); }
+    .cell.piece-colour-pink { --placed-colour: var(--pink); }
+
+    #gameScreen.powered .cell.filled:not(.bomb):not(.cross) {
+      --placed-colour: var(--cyan);
+      background: var(--cyan);
     }
 
     .cell.bomb {
@@ -996,7 +1006,7 @@
       color: var(--navy);
       background: var(--lime);
       box-shadow: 0 0 9px rgba(216,255,79,.8);
-      font-size: clamp(7px, 2.1vw, 11px);
+      font-size: clamp(8px, 2.3vw, 12px);
       font-weight: 1000;
       letter-spacing: -.04em;
       pointer-events: none;
@@ -1040,7 +1050,7 @@
     }
 
     .cell.clearing::before {
-      background: var(--cyan);
+      background: var(--placed-colour, var(--cyan));
       box-shadow: inset -4px -4px 0 rgba(16,24,40,.13);
       animation: clearPop .26s ease forwards !important;
     }
@@ -1051,7 +1061,7 @@
       animation: crossFireSweep .36s cubic-bezier(.18,.78,.24,1) var(--cross-delay, 0ms) both !important;
     }
 
-    .cell.cross-fire-occupied { --cross-start: var(--cyan); }
+    .cell.cross-fire-occupied { --cross-start: var(--placed-colour, var(--cyan)); }
 
     .cell.cross-fire-occupied::before {
       box-shadow: inset -4px -4px 0 rgba(16,24,40,.13);
@@ -1115,7 +1125,7 @@
     }
 
     @keyframes clearPop {
-      0% { transform: scale(1); background: var(--cyan); filter: brightness(1); }
+      0% { transform: scale(1); background: var(--placed-colour, var(--cyan)); filter: brightness(1); }
       45% { transform: scale(1.15); background: var(--lime); filter: brightness(1.35); }
       100% { transform: scale(.2); opacity: 0; }
     }
@@ -1189,6 +1199,14 @@
         inset -3px -3px 0 rgba(36,18,37,.17),
         inset 0 1px 0 rgba(255,244,223,.35),
         0 0 8px rgba(255,107,158,.22);
+    }
+
+    body[data-theme="sunset"] #gameScreen:not(.powered) .cell.filled.piece-colour-lime:not(.bomb):not(.cross):not(.clearing):not(.cross-fire):not(.exploding):not(.tier3-wave) {
+      background: linear-gradient(145deg, #ffe26b, #ffb454);
+    }
+
+    body[data-theme="sunset"] #gameScreen:not(.powered) .cell.filled.piece-colour-pink:not(.bomb):not(.cross):not(.clearing):not(.cross-fire):not(.exploding):not(.tier3-wave) {
+      background: linear-gradient(145deg, #ff8b88, #ff6b9e);
     }
 
     body[data-theme="sunset"] .primary-btn {
@@ -1435,7 +1453,7 @@
       color: var(--navy);
       background: var(--lime);
       box-shadow: 0 0 4px rgba(216,255,79,.8);
-      font-size: clamp(6px, 1.8vw, 9px);
+      font-size: clamp(7px, 2vw, 10px);
       font-weight: 1000;
     }
     .piece-dot.on.time-dot.ten::after { color: white; background: var(--pink); box-shadow: 0 0 4px rgba(255,92,168,.8); }
@@ -1469,6 +1487,8 @@
 
     .drag-ghost.piece-1 .piece-dot.on { background: var(--lime); }
     .drag-ghost.piece-2 .piece-dot.on { background: var(--pink); }
+    #gameScreen.powered .piece-dot.on:not(.bomb-dot):not(.cross-dot),
+    .drag-ghost.powered .piece-dot.on:not(.bomb-dot):not(.cross-dot) { background: var(--cyan); }
     .drag-ghost.invalid { opacity: .5; filter: grayscale(.25) drop-shadow(0 8px 10px rgba(0,0,0,.3)); }
 
     .overlay {
@@ -1805,7 +1825,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.52 • NAME CHANGE</div>
+      <div class="version">BLOKUMI BUILD v0.58 • EFFECT POLISH</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -1861,7 +1881,7 @@
       <div class="level-road" id="profileLevelRoad"></div>
       <p class="profile-section-title">BOARD & SCORE-CARD THEMES</p>
       <div class="theme-grid" id="profileThemeGrid"></div>
-      <div class="button-stack"><button class="primary-btn" id="profileHomeButton">BACK TO HOME</button></div>
+      <div class="button-stack profile-home-actions"><button class="primary-btn" id="profileHomeButton">BACK TO HOME</button></div>
     </section>
 
     <section class="screen" id="recordsScreen" aria-label="Blokumi leaderboards">
@@ -1994,6 +2014,7 @@
         <button class="secondary-btn" id="devProfileButton">XP RESULT</button>
         <button class="secondary-btn" id="devNeonThemeButton">NEON PREVIEW</button>
         <button class="secondary-btn" id="devSunsetThemeButton">SUNSET PREVIEW</button>
+        <button class="secondary-btn" id="devVoidThemeButton">DEEP VOID PREVIEW</button>
         <button class="secondary-btn" id="devBackgroundButton">BACKGROUND PAUSE</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
@@ -2143,8 +2164,8 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.52";
-    const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
+    const BUILD = "v0.58";
+    const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
     const RUSH_BOARD_BASE_BONUS = 1000;
@@ -3478,13 +3499,23 @@
     async function playTierThreeBoardWave() {
       if (effectiveEffectLevel() === "minimal") return;
       const cells = [...boardEl.children];
+      const wipePromises = [];
       cells.forEach((cell, index) => {
         const row = Math.floor(index / SIZE);
         const col = index % SIZE;
-        cell.style.setProperty("--wave-delay", `${(row + col) * 26}ms`);
+        const waveDelay = (row + col) * 26;
+        cell.style.setProperty("--wave-delay", `${waveDelay}ms`);
         cell.classList.add("tier3-wave");
+        if (state.board[row][col]) {
+          wipePromises.push(delay(waveDelay + 190).then(() => {
+            state.board[row][col] = 0;
+            cell.classList.remove("filled", "bomb", "cross", "piece-colour-lime", "piece-colour-pink", "rush-target", "shard");
+            cell.querySelector(".shard-mark")?.remove();
+            cell.querySelector(".time-mark")?.remove();
+          }));
+        }
       });
-      await delay(760);
+      await Promise.all([delay(760), ...wipePromises]);
     }
 
     function renderAchievements() {
@@ -3786,7 +3817,7 @@
       const candidates = [];
       for (let row = 0; row < SIZE; row += 1) {
         for (let col = 0; col < SIZE; col += 1) {
-          if (state.board[row][col] === 1) candidates.push([row, col]);
+          if (state.board[row][col] && state.board[row][col] !== 2 && state.board[row][col] !== 3) candidates.push([row, col]);
         }
       }
       for (let count = 0; count < amount && candidates.length; count += 1) {
@@ -4096,6 +4127,8 @@
         cell.classList.toggle("filled", Boolean(state.board[row][col]));
         cell.classList.toggle("bomb", state.board[row][col] === 2);
         cell.classList.toggle("cross", state.board[row][col] === 3);
+        cell.classList.toggle("piece-colour-lime", state.board[row][col] === 5);
+        cell.classList.toggle("piece-colour-pink", state.board[row][col] === 6);
         cell.classList.toggle("rush-target", Boolean(state.board[row][col]) && state.rushTargets.has(`${row},${col}`));
         cell.classList.toggle("shard", Boolean(state.board[row][col]) && state.shards.has(`${row},${col}`));
         cell.querySelector(".shard-mark")?.remove();
@@ -4367,7 +4400,8 @@
         return;
       }
 
-      const piece = state.pieces[state.selected];
+      const pieceIndex = state.selected;
+      const piece = state.pieces[pieceIndex];
       if (!isPlacementValid(piece, row, col)) {
         setToast("That block won't fit there.");
         sound("deny");
@@ -4382,7 +4416,7 @@
         const isCross = piece.crossCell && piece.crossCell[0] === offsetRow && piece.crossCell[1] === offsetCol;
         const targetRow = row + offsetRow;
         const targetCol = col + offsetCol;
-        state.board[targetRow][targetCol] = isBomb ? 2 : isCross ? 3 : 1;
+        state.board[targetRow][targetCol] = isBomb ? 2 : isCross ? 3 : 4 + pieceIndex;
         if (piece.shardCell && piece.shardCell[0] === offsetRow && piece.shardCell[1] === offsetCol) {
           state.shards.add(`${targetRow},${targetCol}`);
         }
@@ -5234,7 +5268,7 @@
       $("postRunContinueButton").classList.add("hidden");
       $("standardPostRunContinueButton").classList.add("hidden");
       $("endlessLossActions").hidden = true;
-      if (state.mode === "endless") {
+      if (state.mode === "endless" || state.mode === "rush") {
         $("gameOverTitle").textContent = "What next?";
         $("newBest").hidden = true;
         $("finalScorePanel").hidden = true;
@@ -5552,7 +5586,7 @@
         };
 
         if (type === "blast") {
-          const duration = .34;
+          const duration = .4;
           const frameCount = Math.floor(audioContext.sampleRate * duration);
           const buffer = audioContext.createBuffer(1, frameCount, audioContext.sampleRate);
           const noise = buffer.getChannelData(0);
@@ -5563,16 +5597,24 @@
           const source = audioContext.createBufferSource();
           const filter = audioContext.createBiquadFilter();
           const noiseGain = audioContext.createGain();
+          const crackFilter = audioContext.createBiquadFilter();
+          const crackGain = audioContext.createGain();
           source.buffer = buffer;
           filter.type = "lowpass";
-          filter.frequency.setValueAtTime(1050, now);
-          filter.frequency.exponentialRampToValueAtTime(170, now + duration);
-          noiseGain.gain.setValueAtTime(.052, now);
+          filter.frequency.setValueAtTime(1450, now);
+          filter.frequency.exponentialRampToValueAtTime(145, now + duration);
+          noiseGain.gain.setValueAtTime(.058, now);
           noiseGain.gain.exponentialRampToValueAtTime(.001, now + duration);
+          crackFilter.type = "highpass";
+          crackFilter.frequency.setValueAtTime(900, now);
+          crackGain.gain.setValueAtTime(.028, now);
+          crackGain.gain.exponentialRampToValueAtTime(.001, now + .1);
           source.connect(filter).connect(noiseGain).connect(audioContext.destination);
+          source.connect(crackFilter).connect(crackGain).connect(audioContext.destination);
           source.start(now);
           source.stop(now + duration);
-          playTone(145, 52, .36, "sine", .085);
+          playTone(165, 48, .4, "triangle", .082);
+          playTone(82, 42, .44, "sine", .04, .012);
           return;
         }
 
@@ -5687,6 +5729,7 @@
     $("devProfileButton").addEventListener("click", () => safeAction("Prepare XP result test", prepareDevProfileTest));
     $("devNeonThemeButton").addEventListener("click", () => safeAction("Preview Neon theme", () => previewDevTheme("neon")));
     $("devSunsetThemeButton").addEventListener("click", () => safeAction("Preview Sunset theme", () => previewDevTheme("sunset")));
+    $("devVoidThemeButton").addEventListener("click", () => safeAction("Preview Deep Void theme", () => previewDevTheme("void")));
     $("devBackgroundButton").addEventListener("click", () => safeAction("Prepare background pause test", prepareBackgroundPauseTest));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
