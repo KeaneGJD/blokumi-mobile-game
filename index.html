@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>Blokumi v0.58</title>
+  <title>Blokumi v0.59</title>
   <style>
     :root {
       --ink: #101828;
@@ -1100,21 +1100,33 @@
       animation: bombBurst .42s ease forwards !important;
     }
 
-    .cell.tier3-wave {
+    .cell.tier3-wave { z-index: 7; }
+
+    #gameScreen .cell.tier3-wave::before {
+      content: "";
+      display: block !important;
+      position: absolute;
+      inset: -1px;
+      width: auto;
+      height: auto;
+      z-index: 12;
+      border: 0;
+      border-radius: inherit;
+      pointer-events: none;
       animation: tier3BoardWave .38s cubic-bezier(.2,.8,.2,1) var(--wave-delay, 0ms) both !important;
-      z-index: 7;
     }
 
     @keyframes tier3BoardWave {
-      0% { transform: scale(1); filter: brightness(1); }
+      0% { transform: scale(.92); opacity: 0; background: transparent; filter: brightness(1); }
       48% {
         transform: scale(1.13) rotate(3deg);
+        opacity: 1;
         background: var(--lime);
         border-color: var(--lime);
         box-shadow: 0 0 15px rgba(216,255,79,.72), inset -4px -4px 0 rgba(16,24,40,.13);
         filter: brightness(1.18);
       }
-      100% { transform: scale(.9); filter: brightness(.72); }
+      100% { transform: scale(.72); opacity: 0; background: var(--lime); filter: brightness(.72); }
     }
 
     @keyframes bombBurst {
@@ -1825,7 +1837,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.58 • EFFECT POLISH</div>
+      <div class="version">BLOKUMI BUILD v0.59 • STABLE TIER III BOARD</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2164,7 +2176,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.58";
+    const BUILD = "v0.59";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
