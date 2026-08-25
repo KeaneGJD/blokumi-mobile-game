@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.38</title>
+  <title>DeBlockle v0.44</title>
   <style>
     :root {
       --ink: #101828;
@@ -20,6 +20,8 @@
       --pink: #ff5ca8;
       --orange: #ffad42;
       --red: #ff6470;
+      --rush-a: #9b72ff;
+      --rush-b: #6558e8;
       --bomb-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M38 23 C41 15 47 11 53 14' fill='none' stroke='%23101828' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M34 19 L44 24 L40 31 L31 25 Z' fill='%23101828'/%3E%3Ccircle cx='28' cy='38' r='19' fill='%23101828'/%3E%3Ccircle cx='21' cy='31' r='4' fill='%23fff7e8' opacity='.24'/%3E%3Cpath d='M54 4 L57 9 L63 9 L58 13 L60 19 L54 15 L49 19 L50 13 L45 9 L51 9 Z' fill='%23d8ff4f'/%3E%3C/svg%3E");
       --shadow: 0 16px 42px rgba(0, 0, 0, .28);
       --radius: 22px;
@@ -57,6 +59,8 @@
       --cyan: #36ffe0;
       --pink: #ff4ecb;
       --orange: #ffc857;
+      --rush-a: #b15cff;
+      --rush-b: #3f8cff;
       background: radial-gradient(circle at 12% 4%, rgba(54,255,224,.2), transparent 30%), radial-gradient(circle at 92% 18%, rgba(255,78,203,.15), transparent 28%), linear-gradient(165deg, #08272d 0%, #03151b 65%, #071b22 100%);
     }
 
@@ -73,6 +77,8 @@
       --cyan: #ff8d72;
       --pink: #ff6b9e;
       --orange: #ff9b54;
+      --rush-a: #966eff;
+      --rush-b: #6650c8;
       background: radial-gradient(circle at 12% 4%, rgba(255,155,84,.22), transparent 30%), radial-gradient(circle at 92% 18%, rgba(255,107,158,.18), transparent 28%), linear-gradient(165deg, #40233b 0%, #231426 65%, #30182c 100%);
     }
 
@@ -89,6 +95,8 @@
       --cyan: #61e8ff;
       --pink: #c86bff;
       --orange: #ffae62;
+      --rush-a: #a46bff;
+      --rush-b: #5f55d9;
       background: radial-gradient(circle at 12% 4%, rgba(97,232,255,.16), transparent 30%), radial-gradient(circle at 92% 18%, rgba(200,107,255,.18), transparent 28%), linear-gradient(165deg, #1b1640 0%, #0d0b21 65%, #15102e 100%);
     }
 
@@ -185,63 +193,66 @@
 
     .home-brand {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 13px;
-      margin: 4px 0 14px;
+      gap: 10px;
+      margin: 7px 0 23px;
     }
 
-    .home-brand-copy { min-width: 0; }
+    .home-brand-copy { min-width: 0; text-align: center; }
 
     .hero-mark {
-      flex: 0 0 74px;
-      width: 74px;
-      height: 65px;
+      flex: 0 0 130px;
+      width: 130px;
+      height: 114px;
       margin: 0;
       position: relative;
     }
 
     .hero-block {
       position: absolute;
-      width: 29px;
-      height: 29px;
-      border-radius: 9px;
-      box-shadow: inset -4px -4px 0 rgba(16,24,40,.13), 0 7px 13px rgba(0,0,0,.2);
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+      box-shadow: inset -7px -7px 0 rgba(16,24,40,.13), 0 11px 23px rgba(0,0,0,.21);
     }
 
-    .hero-block.one { background: var(--cyan); left: 5px; top: 2px; transform: rotate(-9deg); }
-    .hero-block.two { background: var(--lime); left: 39px; top: 7px; transform: rotate(8deg); }
-    .hero-block.three { background: var(--pink); left: 25px; top: 35px; transform: rotate(-2deg); }
+    .hero-block.one { background: var(--cyan); left: 9px; top: 4px; transform: rotate(-9deg); }
+    .hero-block.two { background: var(--lime); left: 66px; top: 11px; transform: rotate(8deg); }
+    .hero-block.three { background: var(--pink); left: 43px; top: 60px; transform: rotate(-2deg); }
     .hero-block.three::after {
       content: "";
       position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
       background: var(--navy);
-      right: 4px;
-      top: 4px;
+      right: 8px;
+      top: 8px;
     }
 
     .title {
       margin: 0;
-      text-align: left;
-      font-size: clamp(38px, 10vw, 50px);
+      text-align: center;
+      max-width: 100%;
+      font-size: clamp(62px, 20vw, 88px);
       line-height: .92;
       letter-spacing: -.075em;
       font-weight: 1000;
+      white-space: nowrap;
     }
 
     .title span { color: var(--lime); }
 
     .tagline {
-      text-align: left;
+      text-align: center;
       color: var(--muted);
       font-weight: 650;
-      font-size: 10px;
+      font-size: 11px;
       line-height: 1.35;
       max-width: 245px;
-      margin: 5px 0 0;
+      margin: 6px auto 0;
     }
 
     .home-profile-button {
@@ -270,7 +281,7 @@
     .home-profile-best small { display: block; color: var(--muted); font-size: 7px; font-weight: 950; letter-spacing: .12em; }
     .home-profile-best strong { display: block; margin-top: 2px; color: var(--cyan); font-size: 19px; line-height: 1; letter-spacing: -.03em; }
 
-    .home-section-label { margin: 12px 2px 6px; color: var(--muted); font-size: 8px; font-weight: 1000; letter-spacing: .18em; }
+    .home-section-label { margin: 19px 2px 7px; color: var(--muted); font-size: 8px; font-weight: 1000; letter-spacing: .18em; }
     .home-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .home-endless-button { grid-column: 1 / -1; min-height: 55px; padding: 7px 12px 10px; }
     .home-endless-button strong, .home-endless-button span { display: block; }
@@ -279,7 +290,7 @@
     .home-mode-card { min-width: 0; height: 70px; min-height: 70px; }
     .home-mode-card strong, .home-mode-card > span { display: block; }
     .home-mode-card > strong { font-size: 13px; line-height: 1.12; }
-    .home-utility-grid { display: grid; grid-template-columns: repeat(4, 58px); justify-content: center; gap: 10px; margin-top: 13px; }
+    .home-utility-grid { display: grid; grid-template-columns: repeat(4, 58px); justify-content: center; gap: 10px; margin-top: 32px; }
     .home-utility-button { width: 58px; min-height: 58px; padding: 0; display: grid; place-items: center; border-radius: 17px; }
     .home-utility-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; color: var(--cyan); background: rgba(57,231,208,.1); font-size: 23px; line-height: 1; font-weight: 1000; }
     .home-utility-button:nth-child(2) .home-utility-icon { color: var(--orange); background: rgba(255,173,66,.1); }
@@ -360,7 +371,16 @@
     .daily-button-bottom { margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(16,24,40,.16); }
     .daily-date, .daily-reset { font-size: 7px; font-weight: 1000; letter-spacing: .065em; opacity: .72; white-space: nowrap; }
     .daily-reset b { font: inherit; }
-    .rush-home-button { height: 70px; min-height: 70px; padding: 9px 10px; background: linear-gradient(135deg, rgba(155,114,255,.3), rgba(57,231,208,.22)); border-color: rgba(155,114,255,.48); text-align: center; }
+    .secondary-btn.rush-home-button {
+      height: 70px;
+      min-height: 70px;
+      padding: 9px 10px;
+      color: var(--cream);
+      background: linear-gradient(135deg, var(--rush-a), var(--rush-b));
+      border: 0;
+      box-shadow: inset 0 -6px 0 rgba(16,24,40,.16), 0 12px 24px rgba(101,88,232,.2);
+      text-align: center;
+    }
 
     #recordsScreen { padding: 18px 2px 12px; }
     .records-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -1708,12 +1728,14 @@
       .topbar { min-height: 40px; }
       .icon-btn { width: 40px; height: 40px; }
       #homeScreen { padding-top: 8px; }
-      .home-brand { margin: 1px 0 9px; }
+      .home-brand { gap: 5px; margin: -2px 0 14px; }
+      .hero-mark { transform: scale(.86); margin: -12px 0 -13px; }
+      .title { font-size: clamp(60px, 18.5vw, 76px); }
       .home-profile-button { min-height: 56px; }
-      .home-section-label { margin-top: 9px; }
+      .home-section-label { margin-top: 13px; }
       .home-mode-card, .secondary-btn.daily-button, .rush-home-button { height: 64px; min-height: 64px; }
       .daily-button-bottom { margin-top: 5px; padding-top: 4px; }
-      .home-utility-grid { margin-top: 9px; }
+      .home-utility-grid { margin-top: 22px; }
       .home-utility-button { min-height: 54px; }
       #homeScreen .version { margin-top: 9px; }
       .stats { margin: 4px 0 8px; }
@@ -1773,7 +1795,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.38 • CLEAN DAILY CARD</div>
+      <div class="version">DEBLOCKLE BUILD v0.44 • LARGER HOME CUBES</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
@@ -1984,11 +2006,11 @@
       <h2 id="gameOverTitle">Board blocked!</h2>
       <div class="new-best" id="newBest"></div>
       <div class="final-score" id="finalScorePanel"><span>Final score</span><strong id="finalScore">0</strong></div>
-      <div class="summary-grid">
+      <div class="summary-grid" id="runSummaryPrimary">
         <div class="summary-box"><span>Lines cleared</span><strong id="finalLines">0</strong></div>
         <div class="summary-box"><span>Tiles placed</span><strong id="finalBlocks">0</strong></div>
       </div>
-      <div class="summary-grid detailed">
+      <div class="summary-grid detailed" id="runSummaryDetailed">
         <div class="summary-box"><span id="finalSetsLabel">Sets completed</span><strong id="finalSets">0</strong></div>
         <div class="summary-box"><span>Highest combo</span><strong id="finalCombo">—</strong></div>
         <div class="summary-box"><span>Largest clear</span><strong id="finalLargest">0</strong></div>
@@ -2076,7 +2098,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.38";
+    const BUILD = "v0.44";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -3480,7 +3502,7 @@
       $("gameScreen").classList.toggle("daily-mode", dailyMode);
       $("gameScreen").classList.toggle("campaign-mode", campaignMode);
       $("gameScreen").classList.toggle("rush-mode", rushMode);
-      $("powerPanel").hidden = campaignMode;
+      $("powerPanel").hidden = campaignMode || dailyMode;
       $("rerollButton").hidden = campaignMode;
       if (campaignMode) {
         const level = currentCampaignLevel();
@@ -3615,7 +3637,7 @@
     }
 
     function addEnergy(amount) {
-      if (state.mode === "campaign" || state.powerActive || amount <= 0) return;
+      if (state.mode === "campaign" || state.mode === "daily" || state.powerActive || amount <= 0) return;
       const previousTier = unlockedPowerTier();
       const gainedEnergy = Math.min(30, amount, POWER_MAX - state.energy);
       state.energy = Math.min(POWER_MAX, state.energy + gainedEnergy);
@@ -3681,7 +3703,7 @@
 
     async function activatePowerMode() {
       const tier = unlockedPowerTier();
-      if (!state.running || state.locked || state.powerActive || tier === 0 || state.setPlaced !== 0) return;
+      if (state.mode === "campaign" || state.mode === "daily" || !state.running || state.locked || state.powerActive || tier === 0 || state.setPlaced !== 0) return;
       state.locked = true;
       state.energy = 0;
       state.powerActive = true;
@@ -4762,6 +4784,9 @@
       $("gameOverTitle").textContent = "Share card preview";
       $("newBest").textContent = "DEVELOPER TEST • NOTHING SAVED";
       $("finalScorePanel").hidden = false;
+      $("runSummaryPrimary").hidden = false;
+      $("runSummaryDetailed").hidden = false;
+      $("runStatus").hidden = false;
       $("finalScore").textContent = "12,450";
       $("finalLines").textContent = "24";
       $("finalBlocks").textContent = "186";
@@ -4794,6 +4819,9 @@
       $("gameOverTitle").textContent = "XP result preview";
       $("newBest").textContent = "DEVELOPER TEST • NOTHING SAVED";
       $("finalScorePanel").hidden = false;
+      $("runSummaryPrimary").hidden = false;
+      $("runSummaryDetailed").hidden = false;
+      $("runStatus").hidden = false;
       $("finalScore").textContent = "12,450";
       $("finalLines").textContent = "24";
       $("finalBlocks").textContent = "186";
@@ -4948,11 +4976,8 @@
       const dailyMode = state.mode === "daily";
       const campaignMode = state.mode === "campaign";
       const rushMode = state.mode === "rush";
-      $("modeBanner").hidden = !dailyMode && !campaignMode && !rushMode;
-      if (dailyMode) {
-        $("modeBannerTitle").textContent = `Daily • ${formatDailyDate(state.dailyDate)}`;
-        $("modeBannerStatus").textContent = `${state.dailyPreview ? "Preview" : state.dailyOfficial ? "Official" : "Practice"} • ${DAILY_SHARD_TARGET} Shards`;
-      } else if (campaignMode) {
+      $("modeBanner").hidden = !campaignMode && !rushMode;
+      if (campaignMode) {
         const level = currentCampaignLevel();
         $("modeBannerTitle").textContent = `Campaign • Level ${level.id}`;
         $("modeBannerStatus").textContent = level.chapterName;
@@ -5024,6 +5049,9 @@
       renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
       state.lastShareResult = !isCampaign && !TEST_SAVE_DISABLED ? buildRunShareResult(isNewBest, isNewRushBest) : null;
       $("finalScorePanel").hidden = isDaily || isCampaign;
+      $("runSummaryPrimary").hidden = isDaily;
+      $("runSummaryDetailed").hidden = isDaily;
+      $("runStatus").hidden = isDaily;
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
       $("finalBlocks").textContent = formatScore(state.blocks);
@@ -5039,9 +5067,7 @@
       $("newBest").textContent = isDaily
         ? state.dailyPreview ? "DEVELOPER DAILY PREVIEW" : state.dailyOfficial ? "★ OFFICIAL RESULT SAVED ★" : "PRACTICE RESULT"
         : isCampaign ? `CHAPTER ${currentCampaignLevel().chapter} • LEVEL ${currentCampaignLevel().id}` : isRush ? isNewRushBest ? "★ NEW RUSH RECORD ★" : "DEBLOCKLE RUSH" : isNewBest ? "★ NEW BEST SCORE ★" : "";
-      $("runStatus").textContent = isDaily
-        ? `${state.shardsCollected} / ${DAILY_SHARD_TARGET} Shards • ${Math.min(state.setsCompleted, DAILY_SET_LIMIT)} / ${DAILY_SET_LIMIT} sets • Streak ${displayedDailyStreak()}`
-        : isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : isRush ? `${state.rushBoardsCleared} boards • ${state.lines} lines • Rush best ${formatScore(state.rush.best)}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
+      $("runStatus").textContent = isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : isRush ? `${state.rushBoardsCleared} boards • ${state.lines} lines • Rush best ${formatScore(state.rush.best)}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
       $("dailyResultPanel").hidden = !isDaily;
       $("campaignResultPanel").hidden = !isCampaign && !isRush;
       $("resultSharePanel").hidden = !state.lastShareResult;
