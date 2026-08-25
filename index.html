@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.29.2</title>
+  <title>DeBlockle v0.30</title>
   <style>
     :root {
       --ink: #101828;
@@ -227,7 +227,10 @@
     .record-card span { display: block; color: var(--muted); font-size: 9px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
     .record-card strong { display: block; margin-top: 5px; color: var(--lime); font-size: 28px; letter-spacing: -.04em; }
     .record-card small { display: block; margin-top: 4px; color: var(--cream); font-size: 10px; }
+    .record-share-btn { min-height: 34px; margin-top: 11px; padding: 7px 12px; border-radius: 10px; font-size: 9px; }
+    .record-share-btn:disabled { opacity: .36; cursor: not-allowed; }
     .records-note { color: var(--muted); font-size: 10px; line-height: 1.45; text-align: center; }
+    .records-share-status { min-height: 17px; margin: 4px 0 10px; color: var(--cyan); font-size: 10px; text-align: center; }
 
     #campaignScreen { padding: 18px 2px 12px; }
     .campaign-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -425,23 +428,6 @@
 
     .power-panel.energy-hit { animation: meterReceive .46s cubic-bezier(.2,.8,.2,1); }
     .power-panel.tier-ready { animation: meterTierReady .82s cubic-bezier(.2,.8,.2,1); }
-    .power-panel.reminding::after {
-      content: attr(data-reminder);
-      position: absolute;
-      z-index: 8;
-      right: 8px;
-      top: -9px;
-      padding: 4px 7px;
-      border-radius: 999px;
-      color: var(--navy);
-      background: var(--lime);
-      box-shadow: 0 4px 12px rgba(216,255,79,.24);
-      font-size: 8px;
-      font-weight: 1000;
-      letter-spacing: .08em;
-      animation: meterReminder 1.25s ease both;
-      pointer-events: none;
-    }
     .meter-energy-spark {
       position: fixed;
       z-index: 80;
@@ -471,10 +457,34 @@
     @keyframes meterTierReady {
       35% { transform: scale(1.018); border-color: var(--lime); box-shadow: 0 0 22px rgba(216,255,79,.25); }
     }
-    @keyframes meterReminder {
-      0% { transform: translateY(5px) scale(.9); opacity: 0; }
-      18%, 75% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-3px) scale(.96); opacity: 0; }
+    .power-ready-banner {
+      position: absolute;
+      z-index: 20;
+      left: 50%;
+      top: 50%;
+      width: max-content;
+      max-width: calc(100% - 28px);
+      padding: 12px 18px;
+      border: 1px solid rgba(216,255,79,.75);
+      border-radius: 14px;
+      color: var(--lime);
+      background: rgba(13,21,35,.93);
+      box-shadow: 0 0 24px rgba(216,255,79,.28), 0 8px 22px rgba(0,0,0,.38);
+      text-shadow: 0 0 9px rgba(216,255,79,.48);
+      font-size: clamp(15px, 4.6vw, 21px);
+      font-weight: 1000;
+      letter-spacing: .055em;
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translate(-50%, -38%) scale(.94);
+      pointer-events: none;
+    }
+    .power-ready-banner.show { animation: powerReadyFloat 1.55s ease-out both; }
+    @keyframes powerReadyFloat {
+      0% { transform: translate(-50%, -36%) scale(.94); opacity: 0; }
+      13%, 70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -88%) scale(.98); opacity: 0; }
     }
 
     .meter-copy {
@@ -1020,61 +1030,29 @@
     .reroll-control:disabled { opacity: .38; cursor: not-allowed; }
     .reroll-control.ready { border-color: var(--orange); }
 
-    .lever-machine {
-      width: 40px;
-      height: 50px;
-      position: relative;
-      display: block;
-    }
-
-    .lever-base {
-      position: absolute;
-      left: 3px;
-      right: 3px;
-      bottom: 0;
-      height: 28px;
-      border-radius: 9px;
-      background: var(--orange);
-      box-shadow: inset -5px -5px 0 rgba(16,24,40,.14);
-    }
-
-    .lever-base::after {
-      content: "↻";
-      position: absolute;
-      inset: 0;
+    .randomise-icon {
+      width: 42px;
+      height: 42px;
       display: grid;
       place-items: center;
-      color: var(--navy);
-      font-size: 17px;
-      font-weight: 1000;
-    }
-
-    .lever-arm {
-      position: absolute;
-      width: 6px;
-      height: 29px;
-      left: 28px;
-      top: 0;
-      border-radius: 5px;
-      background: #dce4ef;
-      transform-origin: 50% 88%;
-      transform: rotate(17deg);
-      transition: transform .2s cubic-bezier(.4,0,.2,1);
-    }
-
-    .lever-arm::before {
-      content: "";
-      position: absolute;
-      width: 15px;
-      height: 15px;
+      border: 2px solid rgba(255,173,66,.74);
       border-radius: 50%;
-      left: -4px;
-      top: -5px;
-      background: var(--pink);
-      box-shadow: inset -3px -3px 0 rgba(16,24,40,.16);
+      color: var(--orange);
+      background: rgba(255,173,66,.09);
+      box-shadow: inset 0 0 12px rgba(255,173,66,.08), 0 0 12px rgba(255,173,66,.08);
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 900;
+      transform-origin: 50% 50%;
     }
 
-    .reroll-control.pulling .lever-arm { transform: translateY(17px) rotate(76deg); }
+    .reroll-control.spinning .randomise-icon { animation: randomiserWheelSpin .56s cubic-bezier(.18,.72,.2,1) both; }
+
+    @keyframes randomiserWheelSpin {
+      0% { transform: rotate(0deg) scale(1); }
+      78% { transform: rotate(650deg) scale(1.08); }
+      100% { transform: rotate(720deg) scale(1); }
+    }
 
     .reroll-count {
       font-size: 8px;
@@ -1304,13 +1282,18 @@
     .daily-result-heading { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: var(--orange); font-size: 10px; letter-spacing: .1em; font-weight: 950; }
     .daily-result-heading span:last-child { color: var(--muted); }
     .daily-medal { margin: 10px 0 2px; color: var(--lime); text-align: center; font-size: 24px; font-weight: 1000; letter-spacing: -.03em; }
-    .daily-share-preview { margin: 10px 0 !important; padding: 10px; border-radius: 12px; color: var(--cream) !important; background: rgba(0,0,0,.18); font-size: 11px !important; line-height: 1.4 !important; white-space: pre-line; text-align: center; }
-    .daily-share-btn { min-height: 44px; font-size: 13px; }
     .campaign-result-panel { margin-top: 12px; padding: 13px; border-radius: 17px; text-align: center; background: rgba(155,114,255,.09); border: 1px solid rgba(155,114,255,.24); }
     .campaign-result-panel[hidden] { display: none; }
     .campaign-result-panel strong { display: block; color: var(--lime); font-size: 17px; }
     .campaign-result-panel span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
     .share-status { min-height: 16px; margin: 6px 0 0 !important; color: var(--cyan) !important; font-size: 10px !important; text-align: center; }
+    .result-share-panel { margin-top: 13px; padding: 13px; border: 1px solid rgba(57,231,208,.22); border-radius: 17px; background: rgba(57,231,208,.06); }
+    .result-share-panel[hidden] { display: none; }
+    .result-share-title { display: block; color: var(--cyan); font-size: 10px; font-weight: 1000; letter-spacing: .11em; text-align: center; }
+    .result-share-copy { margin: 4px 0 10px !important; color: var(--muted) !important; font-size: 10px !important; line-height: 1.35 !important; text-align: center; }
+    .result-share-primary { min-height: 44px; font-size: 13px; }
+    .result-share-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .result-share-actions .secondary-btn { min-height: 37px; padding: 8px; font-size: 9px; }
 
     .test-ad-card { text-align: center; }
 
@@ -1469,6 +1452,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+      .power-ready-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
     }
   </style>
 </head>
@@ -1501,18 +1485,19 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.29.2 • METER REMINDERS</div>
+      <div class="version">DEBLOCKLE BUILD v0.30 • SHAREABLE RESULTS</div>
     </section>
 
     <section class="screen" id="recordsScreen" aria-label="DeBlockle leaderboards">
       <h1 class="records-heading">Leaderboards</h1>
-      <p class="records-intro">Your current records. Worldwide rankings will be connected after Rush scoring is balanced.</p>
+      <p class="records-intro">Your records are stored on this device. Share a score card and challenge your friends.</p>
       <div class="records-grid">
-        <div class="record-card"><span>Rush • Best Run</span><strong id="recordRushBest">0</strong><small id="recordRushDetail">0 boards cleared</small></div>
-        <div class="record-card"><span>Endless • Best Run</span><strong id="recordEndlessBest">0</strong><small>Your highest individual Endless score</small></div>
-        <div class="record-card"><span>Endless • Lifetime Score</span><strong id="recordEndlessLifetime">0</strong><small>All genuine Endless runs combined</small></div>
+        <div class="record-card"><span>Rush • Best Run</span><strong id="recordRushBest">0</strong><small id="recordRushDetail">0 boards cleared</small><button class="secondary-btn record-share-btn" id="shareRushRecordButton">SHARE RUSH RECORD</button></div>
+        <div class="record-card"><span>Endless • Best Run</span><strong id="recordEndlessBest">0</strong><small>Your highest individual Endless score</small><button class="secondary-btn record-share-btn" id="shareEndlessRecordButton">SHARE BEST RUN</button></div>
+        <div class="record-card"><span>Endless • Lifetime Score</span><strong id="recordEndlessLifetime">0</strong><small>All genuine Endless runs combined</small><button class="secondary-btn record-share-btn" id="shareLifetimeRecordButton">SHARE LIFETIME SCORE</button></div>
       </div>
-      <p class="records-note">These records are stored on this device in v0.29.</p>
+      <p class="records-note">Sharing opens your phone’s normal share menu. Copy and image-download fallbacks are also available after a run.</p>
+      <p class="records-share-status" id="recordsShareStatus" aria-live="polite"></p>
       <div class="button-stack"><button class="primary-btn" id="recordsHomeButton">BACK TO HOME</button></div>
     </section>
 
@@ -1554,6 +1539,7 @@
       </div>
 
       <div class="board-shell">
+        <div class="power-ready-banner" id="powerReadyBanner" aria-live="polite">POWER TIER 1 READY!</div>
         <div class="board" id="board" role="grid" aria-label="8 by 8 game board"></div>
       </div>
       <div class="toast" id="toast">Press and drag a block onto the board.</div>
@@ -1563,10 +1549,7 @@
         <div class="tray-row">
           <div class="tray" id="tray" aria-label="Available blocks"></div>
           <button class="reroll-control" id="rerollButton" aria-label="Randomise all three blocks">
-            <span class="lever-machine" aria-hidden="true">
-              <span class="lever-base"></span>
-              <span class="lever-arm"></span>
-            </span>
+            <span class="randomise-icon" aria-hidden="true">↻</span>
             <span class="reroll-count" id="rerollCount">2 pulls</span>
           </button>
         </div>
@@ -1584,7 +1567,7 @@
         <li>The highlighted cells show exactly where it will be placed.</li>
         <li>Fill a complete row or column to clear it and score.</li>
         <li>Place all three blocks to receive a fresh set.</li>
-        <li>Before placing from a set, pull the lever to randomise all three blocks. You have two pulls per run.</li>
+        <li>Before placing from a set, tap the circular randomise button to refresh all three blocks. You have two uses per run.</li>
         <li>Orange Blast Blocks detonate when their row or column clears, destroying occupied tiles within two spaces.</li>
         <li>Purple Cross Blocks clear occupied tiles along their opposite axis when their row or column clears.</li>
         <li>Activate the meter at Tier I, or risk holding it for stronger Tier II and Tier III powers.</li>
@@ -1631,6 +1614,7 @@
         <button class="secondary-btn" id="devRushButton">RUSH START</button>
         <button class="secondary-btn" id="devRushClearButton">RUSH CLEAR</button>
         <button class="secondary-btn" id="devMeterButton">METER CUE</button>
+        <button class="secondary-btn" id="devShareButton">SHARE CARD</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
@@ -1668,13 +1652,20 @@
       <div class="daily-result-panel" id="dailyResultPanel" hidden>
         <div class="daily-result-heading"><span id="dailyResultType">OFFICIAL RESULT</span><span id="dailyResultDate">TODAY</span></div>
         <div class="daily-medal" id="dailyMedal">0 / 10 SHARDS</div>
-        <p class="daily-share-preview" id="dailySharePreview"></p>
-        <button class="secondary-btn daily-share-btn" id="shareDailyButton">SHARE RESULT</button>
-        <p class="share-status" id="dailyShareStatus" aria-live="polite"></p>
       </div>
       <div class="campaign-result-panel" id="campaignResultPanel" hidden>
         <strong id="campaignResultTitle">LEVEL COMPLETE</strong>
         <span id="campaignResultCopy">The next puzzle is now unlocked.</span>
+      </div>
+      <div class="result-share-panel" id="resultSharePanel" hidden>
+        <span class="result-share-title">SHARE YOUR RESULT</span>
+        <p class="result-share-copy">Creates a branded score card for social media and messaging apps.</p>
+        <button class="primary-btn result-share-primary" id="shareResultButton">SHARE RESULT</button>
+        <div class="result-share-actions">
+          <button class="secondary-btn" id="copyResultButton">COPY RESULT</button>
+          <button class="secondary-btn" id="saveResultImageButton">SAVE IMAGE</button>
+        </div>
+        <p class="share-status" id="resultShareStatus" aria-live="polite"></p>
       </div>
       <div class="button-stack">
         <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
@@ -1731,7 +1722,8 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.29.2";
+    const BUILD = "v0.30";
+    const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
     const RUSH_BOARD_BASE_BONUS = 1000;
@@ -1908,6 +1900,7 @@
       dailyCompleted: false,
       dailyEndReason: "",
       lastDailyResult: null,
+      lastShareResult: null,
       rushBoardIndex: 0,
       rushBoardOrder: [],
       rushPattern: null,
@@ -1941,8 +1934,7 @@
       rerolls: 2,
       setPlaced: 0,
       energy: 0,
-      powerReminderTier: 0,
-      powerReminderCount: 0,
+      powerCuesShown: [false, false, false, false],
       powerActive: false,
       powerTier: 0,
       powerSetsRemaining: 0,
@@ -2301,7 +2293,6 @@
       setToast(`BOARD ${state.rushBoardsCleared} CLEARED! NEXT PATTERN LOADED.`, true);
       sound("achievement");
       vibrate([25, 20, 40]);
-      remindPowerAtFreshSet();
       return true;
     }
 
@@ -2310,10 +2301,14 @@
       $("recordRushDetail").textContent = `${formatScore(state.rush.bestBoards)} board${state.rush.bestBoards === 1 ? "" : "s"} cleared • ${formatScore(state.rush.bestLines)} lines`;
       $("recordEndlessBest").textContent = formatScore(state.best);
       $("recordEndlessLifetime").textContent = formatScore(state.lifetime.score);
+      $("shareRushRecordButton").disabled = state.rush.best <= 0;
+      $("shareEndlessRecordButton").disabled = state.best <= 0;
+      $("shareLifetimeRecordButton").disabled = state.lifetime.score <= 0;
     }
 
     function openRecords() {
       renderRecords();
+      $("recordsShareStatus").textContent = "";
       showScreen("recordsScreen");
       setGameBackVisible(false);
       sound("select");
@@ -2445,7 +2440,272 @@
       const label = result.official ? "Official" : result.preview ? "Preview" : "Practice";
       const dayNumber = result.date.replaceAll("-", "");
       const shardLine = `${"💎".repeat(Math.min(10, result.shards))}${"▫️".repeat(Math.max(0, DAILY_SHARD_TARGET - result.shards))}`;
-      return `DeBlockle Daily Shard Hunt #${dayNumber}\n${result.templateName}\n${label} • ${result.completed ? "HUNT COMPLETE" : "HUNT ENDED"}\n${result.shards}/${DAILY_SHARD_TARGET} Shards • ${result.sets}/${DAILY_SET_LIMIT} sets\n${shardLine}`;
+      return `DeBlockle Daily Shard Hunt #${dayNumber}\n${result.templateName}\n${label} • ${result.completed ? "HUNT COMPLETE" : "HUNT ENDED"}\n${result.shards}/${DAILY_SHARD_TARGET} Shards • ${result.sets}/${DAILY_SET_LIMIT} sets\n${shardLine}\n${SHARE_URL}`;
+    }
+
+    function buildRunShareResult(isNewBest, isNewRushBest) {
+      if (state.mode === "daily" && state.lastDailyResult) {
+        const result = state.lastDailyResult;
+        return {
+          source: "run",
+          mode: "DAILY SHARD HUNT",
+          accent: "#ffad42",
+          primaryLabel: "SHARDS CLEARED",
+          primaryValue: `${result.shards}/${DAILY_SHARD_TARGET}`,
+          badge: result.completed ? "HUNT COMPLETE" : result.official ? "OFFICIAL RESULT" : "PRACTICE RESULT",
+          stats: [
+            { label: "BOARD", value: result.templateName },
+            { label: "SETS USED", value: `${Math.min(result.sets, DAILY_SET_LIMIT)}/${DAILY_SET_LIMIT}` },
+            { label: "STREAK", value: String(displayedDailyStreak()) }
+          ],
+          text: buildDailyShare(result),
+          fileName: `deblockle-daily-${result.date}.png`
+        };
+      }
+      if (state.mode === "rush") {
+        return {
+          source: "run",
+          mode: "DEBLOCKLE RUSH",
+          accent: "#b89cff",
+          primaryLabel: "FINAL SCORE",
+          primaryValue: formatScore(state.score),
+          badge: isNewRushBest ? "NEW RUSH RECORD" : "60 SECOND SCORE ATTACK",
+          stats: [
+            { label: "BOARDS", value: formatScore(state.rushBoardsCleared) },
+            { label: "LINES", value: formatScore(state.lines) },
+            { label: "BONUS TIME", value: `+${formatScore(state.rushTimeCollected)}s` }
+          ],
+          text: `I scored ${formatScore(state.score)} in DeBlockle Rush!\n${state.rushBoardsCleared} board${state.rushBoardsCleared === 1 ? "" : "s"} cleared • ${state.lines} lines\nCan you beat my score?\n${SHARE_URL}`,
+          fileName: "deblockle-rush-result.png"
+        };
+      }
+      return {
+        source: "run",
+        mode: "ENDLESS DEBLOCKLE",
+        accent: "#d8ff4f",
+        primaryLabel: "FINAL SCORE",
+        primaryValue: formatScore(state.score),
+        badge: isNewBest ? "NEW BEST SCORE" : "ENDLESS RUN",
+        stats: [
+          { label: "LINES", value: formatScore(state.lines) },
+          { label: "TILES", value: formatScore(state.blocks) },
+          { label: "POWER", value: state.highestTierReached ? `TIER ${state.highestTierReached}` : "—" }
+        ],
+        text: `I scored ${formatScore(state.score)} in Endless DeBlockle!\n${state.lines} lines cleared • ${state.blocks} tiles placed\nCan you beat my score?\n${SHARE_URL}`,
+        fileName: "deblockle-endless-result.png"
+      };
+    }
+
+    function buildRecordShareResult(type) {
+      if (type === "rush") return {
+        source: "record",
+        mode: "DEBLOCKLE RUSH",
+        accent: "#b89cff",
+        primaryLabel: "BEST RUN",
+        primaryValue: formatScore(state.rush.best),
+        badge: "PERSONAL RECORD",
+        stats: [
+          { label: "BOARDS", value: formatScore(state.rush.bestBoards) },
+          { label: "LINES", value: formatScore(state.rush.bestLines) },
+          { label: "MODE", value: "60 SEC" }
+        ],
+        text: `My DeBlockle Rush record is ${formatScore(state.rush.best)}!\n${state.rush.bestBoards} board${state.rush.bestBoards === 1 ? "" : "s"} cleared • ${state.rush.bestLines} lines\nCan you beat it?\n${SHARE_URL}`,
+        fileName: "deblockle-rush-record.png"
+      };
+      if (type === "lifetime") return {
+        source: "record",
+        mode: "ENDLESS DEBLOCKLE",
+        accent: "#39e7d0",
+        primaryLabel: "LIFETIME SCORE",
+        primaryValue: formatScore(state.lifetime.score),
+        badge: "ALL ENDLESS RUNS",
+        stats: [
+          { label: "RUNS", value: formatScore(state.lifetime.runs) },
+          { label: "LINES", value: formatScore(state.lifetime.lines) },
+          { label: "BEST RUN", value: formatScore(state.best) }
+        ],
+        text: `My lifetime Endless DeBlockle score is ${formatScore(state.lifetime.score)}!\n${state.lifetime.runs} runs • ${state.lifetime.lines} lines • Best run ${formatScore(state.best)}\n${SHARE_URL}`,
+        fileName: "deblockle-lifetime-record.png"
+      };
+      return {
+        source: "record",
+        mode: "ENDLESS DEBLOCKLE",
+        accent: "#d8ff4f",
+        primaryLabel: "BEST RUN",
+        primaryValue: formatScore(state.best),
+        badge: "PERSONAL RECORD",
+        stats: [
+          { label: "LIFETIME", value: formatScore(state.lifetime.score) },
+          { label: "RUNS", value: formatScore(state.lifetime.runs) },
+          { label: "LINES", value: formatScore(state.lifetime.lines) }
+        ],
+        text: `My best Endless DeBlockle run is ${formatScore(state.best)}!\nLifetime score ${formatScore(state.lifetime.score)} • ${state.lifetime.lines} lines cleared\nCan you beat it?\n${SHARE_URL}`,
+        fileName: "deblockle-endless-record.png"
+      };
+    }
+
+    function roundedCanvasRect(context, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.arcTo(x + width, y, x + width, y + height, r);
+      context.arcTo(x + width, y + height, x, y + height, r);
+      context.arcTo(x, y + height, x, y, r);
+      context.arcTo(x, y, x + width, y, r);
+      context.closePath();
+    }
+
+    function drawFittedCanvasText(context, text, x, y, maxWidth, initialSize, color, weight = 1000) {
+      let size = initialSize;
+      do {
+        context.font = `${weight} ${size}px system-ui, -apple-system, sans-serif`;
+        if (context.measureText(text).width <= maxWidth) break;
+        size -= 3;
+      } while (size > 28);
+      context.fillStyle = color;
+      context.fillText(text, x, y);
+    }
+
+    function createShareCardCanvas(result) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1080;
+      const context = canvas.getContext("2d");
+      const background = context.createLinearGradient(0, 0, 1080, 1080);
+      background.addColorStop(0, "#27344a");
+      background.addColorStop(.52, "#172133");
+      background.addColorStop(1, "#101828");
+      context.fillStyle = background;
+      context.fillRect(0, 0, 1080, 1080);
+
+      context.globalAlpha = .12;
+      for (let row = 0; row < 8; row += 1) {
+        for (let col = 0; col < 8; col += 1) {
+          const active = (row + col * 2) % 5 === 0;
+          context.fillStyle = active ? result.accent : "#ffffff";
+          roundedCanvasRect(context, 695 + col * 44, -35 + row * 44, 34, 34, 7);
+          context.fill();
+        }
+      }
+      context.globalAlpha = 1;
+
+      context.textAlign = "left";
+      context.fillStyle = "#d8ff4f";
+      context.font = "1000 62px system-ui, -apple-system, sans-serif";
+      context.fillText("DEBLOCKLE", 76, 116);
+      context.fillStyle = "#8795aa";
+      context.font = "900 24px system-ui, -apple-system, sans-serif";
+      context.fillText(result.mode, 78, 158);
+
+      roundedCanvasRect(context, 76, 205, 928, 430, 38);
+      context.fillStyle = "rgba(255,255,255,.055)";
+      context.fill();
+      context.strokeStyle = `${result.accent}88`;
+      context.lineWidth = 3;
+      context.stroke();
+
+      context.textAlign = "center";
+      context.fillStyle = result.accent;
+      context.font = "1000 26px system-ui, -apple-system, sans-serif";
+      context.fillText(result.badge, 540, 280);
+      context.fillStyle = "#8795aa";
+      context.font = "900 25px system-ui, -apple-system, sans-serif";
+      context.fillText(result.primaryLabel, 540, 363);
+      drawFittedCanvasText(context, String(result.primaryValue), 540, 505, 790, 128, "#f7f1df");
+
+      const stats = result.stats.slice(0, 3);
+      const gap = 20;
+      const boxWidth = (928 - gap * 2) / 3;
+      stats.forEach((stat, index) => {
+        const x = 76 + index * (boxWidth + gap);
+        roundedCanvasRect(context, x, 675, boxWidth, 174, 26);
+        context.fillStyle = "rgba(255,255,255,.065)";
+        context.fill();
+        context.fillStyle = "#8795aa";
+        context.font = "900 21px system-ui, -apple-system, sans-serif";
+        context.fillText(stat.label, x + boxWidth / 2, 730);
+        drawFittedCanvasText(context, String(stat.value), x + boxWidth / 2, 800, boxWidth - 34, 47, result.accent, 950);
+      });
+
+      context.fillStyle = "#f7f1df";
+      context.font = "900 29px system-ui, -apple-system, sans-serif";
+      context.fillText("CAN YOU BEAT IT?", 540, 930);
+      context.fillStyle = "#8795aa";
+      context.font = "700 22px system-ui, -apple-system, sans-serif";
+      context.fillText("keanegjd.github.io/deblockle-mobile-game", 540, 978);
+      context.fillStyle = result.accent;
+      context.fillRect(76, 1028, 928, 7);
+      return canvas;
+    }
+
+    function shareCardFile(canvas, fileName) {
+      if (typeof File !== "function") return null;
+      const [header, encoded] = canvas.toDataURL("image/png").split(",");
+      const mime = header.match(/data:(.*?);/)?.[1] || "image/png";
+      const binary = atob(encoded);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      return new File([bytes], fileName, { type: mime });
+    }
+
+    async function copyShareText(result, statusId) {
+      let copied = false;
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(result.text);
+          copied = true;
+        } else {
+          const copyArea = document.createElement("textarea");
+          copyArea.value = result.text;
+          copyArea.setAttribute("readonly", "");
+          copyArea.style.position = "fixed";
+          copyArea.style.opacity = "0";
+          document.body.appendChild(copyArea);
+          copyArea.select();
+          copied = Boolean(document.execCommand?.("copy"));
+          copyArea.remove();
+        }
+      } catch (error) { copied = false; }
+      if (statusId) $(statusId).textContent = copied ? "Result copied!" : "Copy unavailable — use Share or Save Image.";
+      return copied;
+    }
+
+    async function shareResultData(result, statusId) {
+      if (!result) return;
+      const status = statusId ? $(statusId) : null;
+      try {
+        const canvas = createShareCardCanvas(result);
+        const file = shareCardFile(canvas, result.fileName);
+        if (navigator.share) {
+          const payload = { title: `${result.mode} • DeBlockle`, text: result.text };
+          if (file && navigator.canShare?.({ files: [file] })) payload.files = [file];
+          if (status) status.textContent = "Opening share menu…";
+          await navigator.share(payload);
+          if (status) status.textContent = payload.files ? "Score card shared!" : "Result shared!";
+          return;
+        }
+        await copyShareText(result, statusId);
+        if (status) status.textContent = "Result copied — share it wherever you like.";
+      } catch (error) {
+        if (error?.name !== "AbortError" && status) status.textContent = "Sharing unavailable — try Copy Result or Save Image.";
+        else if (status) status.textContent = "";
+      }
+    }
+
+    function saveShareImage(result, statusId) {
+      if (!result) return;
+      try {
+        const canvas = createShareCardCanvas(result);
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = result.fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        if (statusId) $(statusId).textContent = "Score card saved!";
+      } catch (error) {
+        if (statusId) $(statusId).textContent = "Image download isn’t supported on this device.";
+      }
     }
 
     function recordOfficialDailyResult(result) {
@@ -2690,8 +2950,8 @@
           : unlockedTier === 2 ? "TIER II READY • HOLD FOR III" : "TIER I READY • HOLD FOR II";
         const canActivate = state.running && !state.locked && state.setPlaced === 0;
         button.textContent = canActivate
-          ? unlockedTier === 3 ? "FULL DEBLOCKLE" : `ACTIVATE TIER ${unlockedTier}`
-          : `TIER ${unlockedTier} READY NEXT SET`;
+          ? `UNLEASH TIER ${unlockedTier}`
+          : `TIER ${unlockedTier} CHARGED • NEXT SET`;
         button.disabled = !canActivate;
         button.classList.toggle("ready", canActivate);
       } else {
@@ -2729,30 +2989,24 @@
     }
 
     function powerTierLabel(tier) {
-      return tier === 3 ? "FULL DEBLOCKLE READY" : `TIER ${tier === 2 ? "II" : "I"} READY`;
+      return tier === 3 ? "FULL DEBLOCKLE READY!" : `POWER TIER ${tier} READY!`;
     }
 
-    function showPowerMeterCue(tier, freshSet = false) {
+    function showPowerMeterCue(tier) {
       const panel = $("powerPanel");
-      if (!panel || panel.hidden || tier <= 0) return;
-      panel.dataset.reminder = powerTierLabel(tier);
-      panel.classList.remove("tier-ready", "reminding");
+      const banner = $("powerReadyBanner");
+      if (!panel || !banner || panel.hidden || tier <= 0 || state.powerCuesShown[tier]) return false;
+      state.powerCuesShown[tier] = true;
+      panel.classList.remove("tier-ready");
       void panel.offsetWidth;
-      panel.classList.add(freshSet ? "reminding" : "tier-ready");
-      window.setTimeout(() => panel.classList.remove("tier-ready", "reminding"), freshSet ? 1350 : 900);
-    }
-
-    function remindPowerAtFreshSet() {
-      const tier = unlockedPowerTier();
-      if (state.mode === "campaign" || state.powerActive || tier <= 0 || state.setPlaced !== 0) return false;
-      if (state.powerReminderTier !== tier) {
-        state.powerReminderTier = tier;
-        state.powerReminderCount = 0;
-      }
-      if (state.powerReminderCount >= 2) return false;
-      state.powerReminderCount += 1;
-      showPowerMeterCue(tier, true);
-      setToast(`${powerTierLabel(tier)} • ACTIVATE BEFORE PLACING`, true);
+      panel.classList.add("tier-ready");
+      window.setTimeout(() => panel.classList.remove("tier-ready"), 900);
+      banner.textContent = powerTierLabel(tier);
+      banner.classList.remove("show");
+      void banner.offsetWidth;
+      banner.classList.add("show");
+      sound("powerCue");
+      window.setTimeout(() => banner.classList.remove("show"), 1650);
       return true;
     }
 
@@ -2765,13 +3019,11 @@
       updatePowerUI();
       if (gainedEnergy > 0) animateEnergyToMeter(gainedEnergy);
       if (newTier > previousTier) {
-        state.powerReminderTier = newTier;
-        state.powerReminderCount = 0;
         const message = newTier === 3 ? "FULL DEBLOCKLE READY!" : `POWER TIER ${newTier} READY!`;
-        showPowerMeterCue(newTier);
-        setToast(state.setPlaced === 0 ? message : `${message} ACTIVATE NEXT SET.`, true);
-        sound("powerReady");
-        vibrate([20, 25, 20, 25, 45]);
+        if (showPowerMeterCue(newTier)) {
+          setToast(state.setPlaced === 0 ? message : `${message} ACTIVATE NEXT SET.`, true);
+          vibrate([20, 25, 20, 25, 45]);
+        }
       }
     }
 
@@ -2830,8 +3082,6 @@
       state.energy = 0;
       state.powerActive = true;
       state.powerTier = tier;
-      state.powerReminderTier = 0;
-      state.powerReminderCount = 0;
       state.powerSetsRemaining = tierSetCount(tier);
       state.highestTierReached = Math.max(state.highestTierReached, tier);
       recordPowerActivation(tier);
@@ -2892,17 +3142,17 @@
       state.rerolls -= 1;
       state.selected = null;
       const button = $("rerollButton");
-      button.classList.add("pulling");
+      button.classList.add("spinning");
       trayEl.classList.add("rerolling");
       updateRerollControl();
       setToast("Randomising your blocks…", true);
       sound("reroll");
       vibrate([18, 25, 18]);
-      await delay(430);
+      await delay(560);
       state.pieces = dealPieceSet(poweredSpecialCount());
       renderTray();
       trayEl.classList.remove("rerolling");
-      button.classList.remove("pulling");
+      button.classList.remove("spinning");
       state.locked = false;
       updateRerollControl();
       setToast(state.rerolls > 0 ? `${state.rerolls} randomiser pull remaining.` : "Randomiser empty for this run.");
@@ -3512,7 +3762,6 @@
         state.setPlaced = 0;
         setToast(deliveryMessage, state.powerActive);
         sound("deal");
-        remindPowerAtFreshSet();
       }
 
       updateBest(false);
@@ -3798,8 +4047,7 @@
       } else if (type === "meter") {
         for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
         state.energy = TIER_1_ENERGY - 5;
-        state.powerReminderTier = 0;
-        state.powerReminderCount = 0;
+        state.powerCuesShown = [false, false, false, false];
         state.selected = 0;
         message = "Meter cue ready: place the Single block in the bottom-right space.";
       } else if (type === "gameover") {
@@ -3886,6 +4134,52 @@
       setToast("RUSH CLEAR: place the Single block in the bottom-right space.", true);
     }
 
+    function prepareDevShareTest() {
+      if (!DEV_MODE) return;
+      closeOverlay("devOverlay");
+      state.running = false;
+      state.mode = "endless";
+      state.lastShareResult = {
+        source: "test",
+        mode: "ENDLESS DEBLOCKLE",
+        accent: "#d8ff4f",
+        primaryLabel: "FINAL SCORE",
+        primaryValue: "12,450",
+        badge: "DEVELOPER PREVIEW",
+        stats: [
+          { label: "LINES", value: "24" },
+          { label: "TILES", value: "186" },
+          { label: "POWER", value: "TIER 2" }
+        ],
+        text: `DeBlockle sharing preview\nScore 12,450 • 24 lines cleared\n${SHARE_URL}`,
+        fileName: "deblockle-share-preview.png"
+      };
+      $("gameOverTitle").textContent = "Share card preview";
+      $("newBest").textContent = "DEVELOPER TEST • NOTHING SAVED";
+      $("finalScorePanel").hidden = false;
+      $("finalScore").textContent = "12,450";
+      $("finalLines").textContent = "24";
+      $("finalBlocks").textContent = "186";
+      $("finalSetsLabel").textContent = "Sets completed";
+      $("finalSets").textContent = "8";
+      $("finalCombo").textContent = "×4";
+      $("finalLargest").textContent = "3";
+      $("finalSpecials").textContent = "2 / 1";
+      $("finalTier").textContent = "Tier 2";
+      $("finalRunTypeLabel").textContent = "Run time";
+      $("finalRunType").textContent = "3:12";
+      $("runStatus").textContent = "Use Share, Copy Result and Save Image to test every fallback.";
+      $("dailyResultPanel").hidden = true;
+      $("campaignResultPanel").hidden = true;
+      $("resultSharePanel").hidden = false;
+      $("resultShareStatus").textContent = "";
+      $("postRunContinueButton").classList.add("hidden");
+      $("postRunChoices").classList.remove("hidden");
+      $("againButton").textContent = "START FRESH RUN";
+      $("homeButton").textContent = "BACK TO HOME";
+      openOverlay("gameOverOverlay");
+    }
+
     function restartCurrentMode() {
       if (state.mode === "daily") startGame("daily", state.dailyDate, state.dailyPreview);
       else if (state.mode === "rush") startGame("rush");
@@ -3924,6 +4218,7 @@
       state.dailyCompleted = false;
       state.dailyEndReason = "";
       state.lastDailyResult = null;
+      state.lastShareResult = null;
       state.rushBoardIndex = 0;
       state.rushBoardOrder = [];
       state.rushPattern = null;
@@ -3957,8 +4252,7 @@
       state.rerolls = mode === "endless" || mode === "rush" ? 2 : 0;
       state.setPlaced = 0;
       state.energy = TEST_MODE && mode !== "campaign" ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
-      state.powerReminderTier = 0;
-      state.powerReminderCount = 0;
+      state.powerCuesShown = [false, false, false, false];
       state.powerActive = false;
       state.powerTier = 0;
       state.powerSetsRemaining = 0;
@@ -4055,6 +4349,7 @@
       }
       updateBest(true);
       recordRunProgress();
+      state.lastShareResult = !isCampaign && !TEST_SAVE_DISABLED ? buildRunShareResult(isNewBest, isNewRushBest) : null;
       $("finalScorePanel").hidden = isDaily || isCampaign;
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
@@ -4076,12 +4371,12 @@
         : isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : isRush ? `${state.rushBoardsCleared} boards • ${state.lines} lines • Rush best ${formatScore(state.rush.best)}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
       $("dailyResultPanel").hidden = !isDaily;
       $("campaignResultPanel").hidden = !isCampaign && !isRush;
+      $("resultSharePanel").hidden = !state.lastShareResult;
+      $("resultShareStatus").textContent = "";
       if (isDaily) {
         $("dailyResultType").textContent = `${state.dailyPreview ? "DEVELOPER PREVIEW" : state.dailyOfficial ? "OFFICIAL RESULT" : "PRACTICE RESULT"} • ${state.dailyTemplate.name}`;
         $("dailyResultDate").textContent = formatDailyDate(state.dailyDate);
         $("dailyMedal").textContent = `${state.shardsCollected} / ${DAILY_SHARD_TARGET} SHARDS${state.dailyCompleted ? " • COMPLETE" : ""}`;
-        $("dailySharePreview").textContent = buildDailyShare(state.lastDailyResult);
-        $("dailyShareStatus").textContent = "";
       }
       if (isCampaign) {
         const lastLevel = state.campaignLevelIndex >= CAMPAIGN_LEVELS.length - 1;
@@ -4197,33 +4492,12 @@
       setGameBackVisible(false);
     }
 
-    async function shareDailyResult() {
-      if (!state.lastDailyResult) return;
-      const text = buildDailyShare(state.lastDailyResult);
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: "DeBlockle Daily", text });
-          $("dailyShareStatus").textContent = "Share sheet opened.";
-          return;
-        }
-        if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(text);
-          $("dailyShareStatus").textContent = "Result copied!";
-          return;
-        }
-        const copyArea = document.createElement("textarea");
-        copyArea.value = text;
-        copyArea.setAttribute("readonly", "");
-        copyArea.style.position = "fixed";
-        copyArea.style.opacity = "0";
-        document.body.appendChild(copyArea);
-        copyArea.select();
-        const copied = document.execCommand?.("copy");
-        copyArea.remove();
-        $("dailyShareStatus").textContent = copied ? "Result copied!" : "Your result is shown above and ready to copy.";
-      } catch (error) {
-        if (error?.name !== "AbortError") $("dailyShareStatus").textContent = "Your result is shown above and ready to copy.";
-      }
+    function shareLastResult() { return shareResultData(state.lastShareResult, "resultShareStatus"); }
+    function copyLastResult() { return copyShareText(state.lastShareResult, "resultShareStatus"); }
+    function saveLastResultImage() { saveShareImage(state.lastShareResult, "resultShareStatus"); }
+    function shareRecord(type) {
+      const result = buildRecordShareResult(type);
+      return shareResultData(result, "recordsShareStatus");
     }
 
     function toggleSound() {
@@ -4242,21 +4516,79 @@
       if (!state.sound) return;
       try {
         audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioContext.currentTime;
+        const playTone = (frequency, endFrequency, duration, wave = "sine", volume = .055, delaySeconds = 0) => {
+          const startAt = now + delaySeconds;
+          const oscillator = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          oscillator.type = wave;
+          oscillator.frequency.setValueAtTime(frequency, startAt);
+          if (endFrequency && endFrequency !== frequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
+          gain.gain.setValueAtTime(volume, startAt);
+          gain.gain.exponentialRampToValueAtTime(.001, startAt + duration);
+          oscillator.connect(gain).connect(audioContext.destination);
+          oscillator.start(startAt);
+          oscillator.stop(startAt + duration);
+        };
+
+        if (type === "blast") {
+          const duration = .34;
+          const frameCount = Math.floor(audioContext.sampleRate * duration);
+          const buffer = audioContext.createBuffer(1, frameCount, audioContext.sampleRate);
+          const noise = buffer.getChannelData(0);
+          for (let index = 0; index < frameCount; index += 1) {
+            const decay = Math.pow(1 - (index / frameCount), 2.5);
+            noise[index] = (Math.random() * 2 - 1) * decay;
+          }
+          const source = audioContext.createBufferSource();
+          const filter = audioContext.createBiquadFilter();
+          const noiseGain = audioContext.createGain();
+          source.buffer = buffer;
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(1050, now);
+          filter.frequency.exponentialRampToValueAtTime(170, now + duration);
+          noiseGain.gain.setValueAtTime(.052, now);
+          noiseGain.gain.exponentialRampToValueAtTime(.001, now + duration);
+          source.connect(filter).connect(noiseGain).connect(audioContext.destination);
+          source.start(now);
+          source.stop(now + duration);
+          playTone(145, 52, .36, "sine", .085);
+          return;
+        }
+
+        if (type === "cross") {
+          playTone(520, 1120, .26, "triangle", .052);
+          playTone(880, 1540, .29, "sine", .03, .035);
+          playTone(1320, 980, .12, "triangle", .025, .17);
+          return;
+        }
+
+        if (type === "reroll") {
+          const tickTimes = [0, .032, .067, .105, .148, .196, .251, .313, .384, .465];
+          tickTimes.forEach((tickAt, index) => {
+            const pitch = 820 - (index * 25);
+            playTone(pitch, pitch * .82, .032, "triangle", .027, tickAt);
+          });
+          playTone(690, 1060, .11, "sine", .042, .515);
+          return;
+        }
+
         const oscillator = audioContext.createOscillator();
         const gain = audioContext.createGain();
         const tones = {
-          select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07], reroll: [710, .16],
-          clear: [620, .12], bigClear: [820, .18], blast: [105, .28], cross: [940, .2], powerReady: [760, .2], powerOn: [1040, .34], powerOff: [360, .18], achievement: [1180, .22], continue: [680, .24], start: [520, .12], gameOver: [125, .22]
+          select: [480, .035], deny: [145, .08], place: [255, .045], deal: [390, .07],
+          clear: [620, .12], bigClear: [820, .18], powerReady: [760, .2], powerCue: [560, .34], powerOn: [1040, .34], powerOff: [360, .18], achievement: [1180, .22], continue: [680, .24], start: [520, .12], gameOver: [125, .22]
         };
         const [frequency, duration] = tones[type] || tones.select;
-        oscillator.type = type === "gameOver" || type === "deny" ? "sawtooth" : "sine";
-        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-        if (type === "clear" || type === "bigClear") oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.45, audioContext.currentTime + duration);
-        gain.gain.setValueAtTime(.055, audioContext.currentTime);
-        gain.gain.exponentialRampToValueAtTime(.001, audioContext.currentTime + duration);
+        oscillator.type = type === "gameOver" || type === "deny" ? "sawtooth" : type === "powerCue" ? "triangle" : "sine";
+        oscillator.frequency.setValueAtTime(frequency, now);
+        if (type === "powerCue") oscillator.frequency.exponentialRampToValueAtTime(1320, now + duration);
+        else if (type === "clear" || type === "bigClear") oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.45, now + duration);
+        gain.gain.setValueAtTime(.055, now);
+        gain.gain.exponentialRampToValueAtTime(.001, now + duration);
         oscillator.connect(gain).connect(audioContext.destination);
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + duration);
+        oscillator.start(now);
+        oscillator.stop(now + duration);
       } catch (error) { console.warn("Audio unavailable", error); }
     }
 
@@ -4268,6 +4600,9 @@
     $("rushButton").addEventListener("click", () => safeAction("Start Rush", () => startGame("rush")));
     $("leaderboardsButton").addEventListener("click", () => safeAction("Open leaderboards", openRecords));
     $("recordsHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
+    $("shareRushRecordButton").addEventListener("click", () => safeAction("Share Rush record", () => shareRecord("rush")));
+    $("shareEndlessRecordButton").addEventListener("click", () => safeAction("Share Endless record", () => shareRecord("endless")));
+    $("shareLifetimeRecordButton").addEventListener("click", () => safeAction("Share lifetime score", () => shareRecord("lifetime")));
     $("againButton").addEventListener("click", () => safeAction("Restart game", restartCurrentMode));
     $("homeButton").addEventListener("click", () => safeAction("Return after run", returnAfterRun));
     $("backButton").addEventListener("click", () => safeAction("Pause game", openPauseMenu));
@@ -4284,7 +4619,9 @@
     $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("closeInterstitialButton").addEventListener("click", () => safeAction("Close test interstitial", () => closeInterstitial(true)));
     $("adUnavailableButton").addEventListener("click", () => safeAction("Simulate unavailable ad", () => closeInterstitial(false)));
-    $("shareDailyButton").addEventListener("click", () => safeAction("Share daily result", shareDailyResult));
+    $("shareResultButton").addEventListener("click", () => safeAction("Share result", shareLastResult));
+    $("copyResultButton").addEventListener("click", () => safeAction("Copy result", copyLastResult));
+    $("saveResultImageButton").addEventListener("click", () => safeAction("Save result image", saveLastResultImage));
     $("devMenuButton").addEventListener("click", () => openOverlay("devOverlay"));
     $("closeDevButton").addEventListener("click", () => closeOverlay("devOverlay"));
     $("devNormalButton").addEventListener("click", () => safeAction("Prepare normal clear test", () => prepareDevScenario("normal")));
@@ -4302,6 +4639,7 @@
     $("devRushButton").addEventListener("click", () => safeAction("Start Rush test", () => prepareRushTest(false)));
     $("devRushClearButton").addEventListener("click", () => safeAction("Prepare Rush clear test", () => prepareRushTest(true)));
     $("devMeterButton").addEventListener("click", () => safeAction("Prepare meter cue test", () => prepareDevScenario("meter")));
+    $("devShareButton").addEventListener("click", () => safeAction("Prepare share card test", prepareDevShareTest));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
