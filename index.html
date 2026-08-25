@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.44</title>
+  <title>DeBlockle v0.45</title>
   <style>
     :root {
       --ink: #101828;
@@ -1795,7 +1795,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.44 • LARGER HOME CUBES</div>
+      <div class="version">DEBLOCKLE BUILD v0.45 • RELEASE CANDIDATE</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
@@ -1936,12 +1936,12 @@
         <li>Before placing from a set, tap the circular randomise button to refresh all three blocks. You have two uses per run.</li>
         <li>Orange Blast Blocks detonate when their row or column clears, destroying occupied tiles within two spaces.</li>
         <li>Purple Cross Blocks clear occupied tiles along their opposite axis when their row or column clears.</li>
-        <li>Activate the meter at Tier I, or risk holding it for stronger Tier II and Tier III powers.</li>
+        <li>In Endless and Rush, activate the meter at Tier I or hold it for stronger Tier II and Tier III powers.</li>
         <li>The run ends when none of your remaining blocks fit.</li>
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
       <p>Block deliveries become more challenging as your run progresses, with larger shapes joining the pool later.</p>
-      <p>Daily Shard Hunt is objective-only: clear 10 glowing Shards from the pre-built board and supplied blocks before 12 sets run out. There is no score in this mode.</p>
+      <p>Daily Shard Hunt is objective-only: clear 10 glowing Shards from the pre-built board and supplied blocks before 12 sets run out. Daily has no score, randomiser or Power Meter.</p>
       <p>DeBlockle Rush begins with 60 seconds and a pre-built board. Clear the full board to load another pattern. Marked tiles award +5 or +10 seconds when removed.</p>
       <p>Endless scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
@@ -2098,7 +2098,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.44";
+    const BUILD = "v0.45";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2124,6 +2124,7 @@
     const SPECIAL_TUTORIAL_KEY = "deblockle_v013_special_tutorials";
     const DAILY_DATA_KEY = "deblockle_v022_daily";
     const CAMPAIGN_DATA_KEY = "deblockle_v028_campaign";
+    const CAMPAIGN_ENABLED = false;
     const RUSH_DATA_KEY = "deblockle_v029_rush";
     const PROFILE_KEY = "deblockle_v031_profile";
     const SETTINGS_KEY = "deblockle_v034_settings";
@@ -2940,13 +2941,16 @@
     function currentCampaignLevel() { return CAMPAIGN_LEVELS[state.campaignLevelIndex] || CAMPAIGN_LEVELS[0]; }
 
     function campaignLevelUnlocked(index) {
+      if (!CAMPAIGN_ENABLED) return false;
       if (index === 0 || DEV_MODE) return true;
       return state.campaign.completed.includes(CAMPAIGN_LEVELS[index - 1].id);
     }
 
     function renderCampaign() {
+      if (!CAMPAIGN_ENABLED) return;
       if (!Array.isArray(state.campaign.completed)) state.campaign.completed = [];
-      const host = $("campaignLevels");
+      const host = document.getElementById("campaignLevels");
+      if (!host) return;
       host.innerHTML = "";
       [...new Set(CAMPAIGN_LEVELS.map((level) => level.chapter))].forEach((chapter) => {
         const levels = CAMPAIGN_LEVELS.filter((level) => level.chapter === chapter);
@@ -2976,6 +2980,10 @@
     }
 
     function openCampaign() {
+      if (!CAMPAIGN_ENABLED) {
+        goHome();
+        return;
+      }
       state.running = false;
       state.locked = false;
       closeOverlay("gameOverOverlay");
@@ -3143,11 +3151,11 @@
         primaryValue: formatScore(state.lifetime.score),
         badge: "ALL ENDLESS RUNS",
         stats: [
-          { label: "RUNS", value: formatScore(state.lifetime.runs) },
-          { label: "LINES", value: formatScore(state.lifetime.lines) },
-          { label: "BEST RUN", value: formatScore(state.best) }
+          { label: "BEST RUN", value: formatScore(state.best) },
+          { label: "MODE", value: "ENDLESS" },
+          { label: "SAVED", value: "ON DEVICE" }
         ],
-        text: `My lifetime Endless DeBlockle score is ${formatScore(state.lifetime.score)}!\n${state.lifetime.runs} runs • ${state.lifetime.lines} lines • Best run ${formatScore(state.best)}\n${SHARE_URL}`,
+        text: `My lifetime Endless DeBlockle score is ${formatScore(state.lifetime.score)}!\nBest run ${formatScore(state.best)} • Saved on this device\n${SHARE_URL}`,
         fileName: "deblockle-lifetime-record.png"
       };
       return {
@@ -3159,10 +3167,10 @@
         badge: "PERSONAL RECORD",
         stats: [
           { label: "LIFETIME", value: formatScore(state.lifetime.score) },
-          { label: "RUNS", value: formatScore(state.lifetime.runs) },
-          { label: "LINES", value: formatScore(state.lifetime.lines) }
+          { label: "MODE", value: "ENDLESS" },
+          { label: "SAVED", value: "ON DEVICE" }
         ],
-        text: `My best Endless DeBlockle run is ${formatScore(state.best)}!\nLifetime score ${formatScore(state.lifetime.score)} • ${state.lifetime.lines} lines cleared\nCan you beat it?\n${SHARE_URL}`,
+        text: `My best Endless DeBlockle run is ${formatScore(state.best)}!\nLifetime score ${formatScore(state.lifetime.score)} • Saved on this device\nCan you beat it?\n${SHARE_URL}`,
         fileName: "deblockle-endless-record.png"
       };
     }
@@ -3471,7 +3479,7 @@
         state.lifetime.runs += 1;
         state.recorded.run = true;
       }
-      state.lifetime.score += Math.max(0, state.score - state.recorded.score);
+      if (state.mode === "endless") state.lifetime.score += Math.max(0, state.score - state.recorded.score);
       state.lifetime.lines += Math.max(0, state.lines - state.recorded.lines);
       state.lifetime.tiles += Math.max(0, state.blocks - state.recorded.tiles);
       state.lifetime.bombs += Math.max(0, state.bombsDetonated - state.recorded.bombs);
@@ -4885,11 +4893,19 @@
     }
 
     function startCampaignLevel(index) {
+      if (!CAMPAIGN_ENABLED) {
+        goHome();
+        return;
+      }
       if (!campaignLevelUnlocked(index)) return;
       startGame("campaign", "", false, index);
     }
 
     function startGame(mode = "endless", dailyDate = "", dailyPreview = false, campaignLevelIndex = 0) {
+      if (mode === "campaign" && !CAMPAIGN_ENABLED) {
+        goHome();
+        return;
+      }
       stopRushTimer();
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
