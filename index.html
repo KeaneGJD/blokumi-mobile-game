@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.26</title>
+  <title>DeBlockle v0.28</title>
   <style>
     :root {
       --ink: #101828;
@@ -217,6 +217,33 @@
     .daily-button-row strong { font-size: 16px; letter-spacing: .035em; }
     .daily-button-row span { font-size: 9px; font-weight: 950; letter-spacing: .08em; opacity: .72; }
     .daily-button-status { display: block; margin-top: 2px; font-size: 9px; font-weight: 900; letter-spacing: .07em; opacity: .76; }
+    .campaign-home-button { background: linear-gradient(135deg, rgba(155,114,255,.28), rgba(57,231,208,.2)); border-color: rgba(155,114,255,.42); }
+
+    #campaignScreen { padding: 18px 2px 12px; }
+    .campaign-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
+    .campaign-intro { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .campaign-chapter { margin-top: 16px; }
+    .campaign-chapter-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .campaign-chapter-head strong { color: var(--orange); font-size: 12px; letter-spacing: .09em; }
+    .campaign-chapter-head span { color: var(--muted); font-size: 9px; font-weight: 850; }
+    .campaign-level-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .campaign-level {
+      min-height: 91px;
+      padding: 9px 7px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 15px;
+      color: var(--cream);
+      background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.045));
+      text-align: left;
+      cursor: pointer;
+    }
+    .campaign-level:not(:disabled):active { transform: scale(.97); }
+    .campaign-level.complete { border-color: rgba(216,255,79,.38); background: rgba(216,255,79,.08); }
+    .campaign-level:disabled { opacity: .38; cursor: not-allowed; }
+    .campaign-level small { display: block; color: var(--muted); font-size: 8px; font-weight: 900; letter-spacing: .09em; }
+    .campaign-level strong { display: block; margin-top: 5px; font-size: 11px; line-height: 1.15; }
+    .campaign-level span { display: block; margin-top: 7px; color: var(--lime); font-size: 8px; font-weight: 950; }
+    .campaign-screen-actions { margin: 0 0 4px; }
 
     .primary-btn, .secondary-btn {
       width: 100%;
@@ -301,6 +328,23 @@
     .daily-rule-copy strong { display: block; overflow: hidden; color: var(--orange); font-size: 10px; letter-spacing: .08em; white-space: nowrap; text-overflow: ellipsis; }
     .daily-rule-copy span { display: block; margin-top: 1px; color: var(--muted); font-size: 8px; line-height: 1.15; }
     .daily-rule-sets { color: var(--cream); font-size: 8px; font-weight: 950; letter-spacing: .05em; white-space: nowrap; }
+    .campaign-rule-panel {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      margin: 2px 0 7px;
+      padding: 7px 9px;
+      border: 1px solid rgba(155,114,255,.32);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(155,114,255,.13), rgba(57,231,208,.07));
+    }
+    .campaign-rule-panel[hidden], .power-panel[hidden], .reroll-control[hidden] { display: none; }
+    #gameScreen.campaign-mode .tray-row { grid-template-columns: 1fr; }
+    .campaign-level-badge { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: var(--navy); background: #9b72ff; font-size: 11px; font-weight: 1000; }
+    .campaign-rule-copy strong { display: block; color: #b89cff; font-size: 10px; letter-spacing: .07em; }
+    .campaign-rule-copy span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .campaign-rule-progress { color: var(--cream); font-size: 10px; font-weight: 1000; white-space: nowrap; }
 
     .stats {
       display: grid;
@@ -1134,6 +1178,10 @@
     .daily-medal { margin: 10px 0 2px; color: var(--lime); text-align: center; font-size: 24px; font-weight: 1000; letter-spacing: -.03em; }
     .daily-share-preview { margin: 10px 0 !important; padding: 10px; border-radius: 12px; color: var(--cream) !important; background: rgba(0,0,0,.18); font-size: 11px !important; line-height: 1.4 !important; white-space: pre-line; text-align: center; }
     .daily-share-btn { min-height: 44px; font-size: 13px; }
+    .campaign-result-panel { margin-top: 12px; padding: 13px; border-radius: 17px; text-align: center; background: rgba(155,114,255,.09); border: 1px solid rgba(155,114,255,.24); }
+    .campaign-result-panel[hidden] { display: none; }
+    .campaign-result-panel strong { display: block; color: var(--lime); font-size: 17px; }
+    .campaign-result-panel span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
     .share-status { min-height: 16px; margin: 6px 0 0 !important; color: var(--cyan) !important; font-size: 10px !important; text-align: center; }
 
     .test-ad-card { text-align: center; }
@@ -1320,10 +1368,18 @@
       </div>
       <div class="button-stack">
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
+        <button class="secondary-btn campaign-home-button" id="campaignButton">PUZZLE CAMPAIGN</button>
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.26 • COMPACT DAILY HOME</div>
+      <div class="version">DEBLOCKLE BUILD v0.28 • EXPANDED CAMPAIGN</div>
+    </section>
+
+    <section class="screen" id="campaignScreen" aria-label="DeBlockle Puzzle Campaign">
+      <h1 class="campaign-heading">Puzzle Campaign</h1>
+      <p class="campaign-intro">Solve 25 fixed puzzles across four mechanic-focused chapters.</p>
+      <div class="campaign-screen-actions"><button class="secondary-btn" id="campaignHomeButton">BACK TO HOME</button></div>
+      <div id="campaignLevels"></div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1335,6 +1391,11 @@
           <span id="dailyRuleDescription">Clear the marked gems</span>
         </div>
         <span class="daily-rule-sets" id="dailyRemainingText">12 SETS LEFT</span>
+      </div>
+      <div class="campaign-rule-panel" id="campaignRulePanel" hidden>
+        <span class="campaign-level-badge" id="campaignLevelBadge">1-1</span>
+        <div class="campaign-rule-copy"><strong id="campaignRuleTitle">ONE GAP</strong><span id="campaignRuleDescription">Clear one line</span></div>
+        <span class="campaign-rule-progress" id="campaignRuleProgress">0 / 1</span>
       </div>
       <div class="stats">
         <div class="stat"><span class="stat-label" id="bestLabel">Best</span><strong class="stat-value" id="bestValue">0</strong></div>
@@ -1394,6 +1455,7 @@
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
       <p>Block deliveries become more challenging as your run progresses, with larger shapes joining the pool later.</p>
       <p>Daily Shard Hunt is objective-only: clear 10 glowing Shards from the pre-built board and supplied blocks before 12 sets run out. There is no score in this mode.</p>
+      <p>Puzzle Campaign uses fixed boards and fixed blocks. Complete the displayed objective to unlock the next level; points and randomisers are disabled.</p>
       <p>Endless scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
     </div>
@@ -1469,6 +1531,10 @@
         <button class="secondary-btn daily-share-btn" id="shareDailyButton">SHARE RESULT</button>
         <p class="share-status" id="dailyShareStatus" aria-live="polite"></p>
       </div>
+      <div class="campaign-result-panel" id="campaignResultPanel" hidden>
+        <strong id="campaignResultTitle">LEVEL COMPLETE</strong>
+        <span id="campaignResultCopy">The next puzzle is now unlocked.</span>
+      </div>
       <div class="button-stack">
         <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
         <div class="post-run-choices hidden" id="postRunChoices">
@@ -1524,7 +1590,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.26";
+    const BUILD = "v0.28";
     const SIZE = 8;
     const DAILY_SET_LIMIT = 12;
     const DAILY_SHARD_TARGET = 10;
@@ -1546,6 +1612,7 @@
     const LIFETIME_STATS_KEY = "deblockle_v010_lifetime_stats";
     const SPECIAL_TUTORIAL_KEY = "deblockle_v013_special_tutorials";
     const DAILY_DATA_KEY = "deblockle_v022_daily";
+    const CAMPAIGN_DATA_KEY = "deblockle_v028_campaign";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
@@ -1562,6 +1629,40 @@
       { id: "fortress", name: "SHARD FORTRESS", cells: [[2,2],[2,3],[2,4],[2,5],[3,2],[3,5],[4,1],[4,2],[4,5],[4,6],[5,1],[5,3],[5,4],[5,6],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] },
       { id: "spiral", name: "OPEN SPIRAL", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,6],[3,2],[3,3],[3,4],[3,5],[3,6],[4,2],[5,2],[5,5],[5,6],[6,2],[6,3],[6,4],[6,5]] },
       { id: "hourglass", name: "HOURGLASS", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,2],[2,5],[3,3],[3,4],[4,3],[4,4],[5,2],[5,5],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] }
+    ];
+
+    const campaignRowExcept = (row, missing = []) => Array.from({ length: SIZE }, (_, col) => [row, col]).filter(([, col]) => !missing.includes(col));
+    const campaignColExcept = (col, missing = []) => Array.from({ length: SIZE }, (_, row) => [row, col]).filter(([row]) => !missing.includes(row));
+
+    const CAMPAIGN_LEVELS = [
+      { id: "1-1", chapter: 1, chapterName: "FOUNDATIONS", name: "SHORT SUPPLY", description: "Clear two rows with the short lines", objective: { type: "lines", target: 2 }, normal: [...campaignRowExcept(7,[6,7]), ...campaignRowExcept(5,[5,6,7])], sets: [["Double H","Triple H","Single"]] },
+      { id: "1-2", chapter: 1, chapterName: "FOUNDATIONS", name: "VERTICAL THINKING", description: "Clear two columns", objective: { type: "lines", target: 2 }, normal: [...campaignColExcept(7,[6,7]), ...campaignColExcept(5,[5,6,7])], sets: [["Double V","Triple V","Single"]] },
+      { id: "1-3", chapter: 1, chapterName: "FOUNDATIONS", name: "SQUARE ORDER", description: "Clear three lines in the correct order", objective: { type: "lines", target: 3 }, normal: [...campaignColExcept(6,[6,7]), ...campaignColExcept(7,[6,7]), ...campaignRowExcept(5,[5])], sets: [["Square 2","Triple H","Single"]] },
+      { id: "1-4", chapter: 1, chapterName: "FOUNDATIONS", name: "CORNER FIRST", description: "Use the corner before the straight line", objective: { type: "lines", target: 3 }, normal: [...campaignRowExcept(7,[6,7]), ...campaignColExcept(6,[6,7]), ...campaignRowExcept(4,[5,7])], sets: [["L Small A","Triple H","L Small D"]] },
+      { id: "1-5", chapter: 1, chapterName: "FOUNDATIONS", name: "LONG REACH", description: "Clear both rows with long lines", objective: { type: "lines", target: 2 }, normal: [...campaignRowExcept(7,[4,5,6,7]), ...campaignRowExcept(5,[3,4,5,6,7])], sets: [["Line 4 H","Line 5 H","L Small B"]] },
+      { id: "1-6", chapter: 1, chapterName: "FOUNDATIONS", name: "TALL ORDER", description: "Clear both columns with long lines", objective: { type: "lines", target: 2 }, normal: [...campaignColExcept(7,[4,5,6,7]), ...campaignColExcept(5,[3,4,5,6,7])], sets: [["Line 4 V","Line 5 V","L Small C"]] },
+      { id: "1-7", chapter: 1, chapterName: "FOUNDATIONS", name: "BIG CORNERS", description: "Fit both large corner blocks", objective: { type: "lines", target: 2 }, normal: [...campaignRowExcept(7,[5,6,7]), ...campaignRowExcept(0,[0,1,2])], sets: [["L Large A","L Large D","L Large B"]] },
+      { id: "1-8", chapter: 1, chapterName: "FOUNDATIONS", name: "BENDS AND ZIGS", description: "Clear two rows with unusual shapes", objective: { type: "lines", target: 2 }, normal: [...campaignRowExcept(6,[5,6,7]), ...campaignRowExcept(4,[0,1])], sets: [["T Down","Z Block","S Block"]] },
+      { id: "1-9", chapter: 1, chapterName: "FOUNDATIONS", name: "SHAPE WORKSHOP", description: "Combine a rectangle and a Plus", objective: { type: "lines", target: 3 }, normal: [...campaignRowExcept(6,[5,6,7]), ...campaignRowExcept(7,[5,6,7]), ...campaignRowExcept(3,[5,6,7])], sets: [["Rectangle 2×3","Plus","U Block"]] },
+      { id: "1-10", chapter: 1, chapterName: "FOUNDATIONS", name: "BIG FINISH", description: "Clear four rows with the largest shapes", objective: { type: "lines", target: 4 }, normal: [...campaignRowExcept(5,[5,6,7]), ...campaignRowExcept(6,[5,6,7]), ...campaignRowExcept(7,[5,6,7]), ...campaignRowExcept(3,[3,4,5,6,7])], sets: [["Square 3","Line 5 H","U Block"]] },
+
+      { id: "2-1", chapter: 2, chapterName: "BLAST BLOCKS", name: "TWO FUSES", description: "Detonate both Blast Blocks", objective: { type: "bombs", target: 2 }, normal: [...campaignRowExcept(7,[7]), ...campaignRowExcept(4,[7])], bombs: [[7,2],[4,5]], sets: [["Single","Single","Double H"]] },
+      { id: "2-2", chapter: 2, chapterName: "BLAST BLOCKS", name: "LONG FUSES", description: "Complete both Blast rows", objective: { type: "bombs", target: 2 }, normal: [...campaignRowExcept(7,[5,6,7]), ...campaignRowExcept(4,[4,5,6,7])], bombs: [[7,2],[4,1]], sets: [["Triple H","Line 4 H","Single"]] },
+      { id: "2-3", chapter: 2, chapterName: "BLAST BLOCKS", name: "LIVE DELIVERY", description: "Place and detonate a supplied Blast", objective: { type: "bombs", target: 2 }, normal: [...campaignRowExcept(7,[5,6,7]), ...campaignRowExcept(4,[7])], bombs: [[4,3]], sets: [[{ name: "Triple H", bombCell: [0,1] },"Single","Double V"]] },
+      { id: "2-4", chapter: 2, chapterName: "BLAST BLOCKS", name: "CHAIN PAIR", description: "Trigger a chain and a separate Blast", objective: { type: "bombs", target: 3 }, normal: [...campaignRowExcept(7,[7]), ...campaignRowExcept(4,[7])], bombs: [[7,2],[7,4],[4,1]], sets: [["Single","Single","L Small A"]] },
+      { id: "2-5", chapter: 2, chapterName: "BLAST BLOCKS", name: "DEMOLITION", description: "Detonate all four Blast Blocks", objective: { type: "bombs", target: 4 }, normal: [...campaignRowExcept(7,[6,7]), ...campaignRowExcept(4,[5,6,7]), ...campaignRowExcept(1,[4,5,6,7])], bombs: [[7,2],[4,1],[4,3],[1,0]], sets: [["Double H","Triple H","Line 4 H"]] },
+
+      { id: "3-1", chapter: 3, chapterName: "CROSS BLOCKS", name: "CROSS DELIVERY", description: "Build and activate a Cross row", objective: { type: "crosses", target: 1 }, normal: [[7,0],[7,1],[7,2],[7,3]], sets: [[{ name: "Double H", crossCell: [0,0] },"Double H","Single"]] },
+      { id: "3-2", chapter: 3, chapterName: "CROSS BLOCKS", name: "VERTICAL CROSS", description: "Build and activate a Cross column", objective: { type: "crosses", target: 1 }, normal: [[0,7],[1,7],[2,7],[3,7]], sets: [[{ name: "Double V", crossCell: [0,0] },"Double V","Single"]] },
+      { id: "3-3", chapter: 3, chapterName: "CROSS BLOCKS", name: "WIDE CROSS", description: "Finish the Cross row with two shapes", objective: { type: "crosses", target: 1 }, normal: [[5,0],[5,1],[5,2]], sets: [[{ name: "Triple H", crossCell: [0,1] },"Double H","Double V"]] },
+      { id: "3-4", chapter: 3, chapterName: "CROSS BLOCKS", name: "T JUNCTION", description: "Use the T block to carry a Cross", objective: { type: "crosses", target: 1 }, normal: [[6,0],[6,1],[6,2]], sets: [[{ name: "T Down", crossCell: [0,1] },"Double H","L Small B"]] },
+      { id: "3-5", chapter: 3, chapterName: "CROSS BLOCKS", name: "DOUBLE CROSS", description: "Activate two Cross Blocks together", objective: { type: "crosses", target: 2 }, normal: [[7,0],[7,1]], sets: [[{ name: "Double H", crossCell: [0,0] },{ name: "Double H", crossCell: [0,1] },"Double H"]] },
+
+      { id: "4-1", chapter: 4, chapterName: "SHARD HUNT", name: "SHARD ROWS", description: "Collect four Shards from two rows", objective: { type: "shards", target: 4 }, normal: [...campaignRowExcept(7,[7]), ...campaignRowExcept(5,[7])], shards: [[7,2],[7,5],[5,1],[5,4]], sets: [["Single","Single","Double H"]] },
+      { id: "4-2", chapter: 4, chapterName: "SHARD HUNT", name: "SHAPED SHARDS", description: "Collect six Shards with two shapes", objective: { type: "shards", target: 6 }, normal: [...campaignRowExcept(7,[5,6,7]), ...campaignRowExcept(4,[6,7])], shards: [[7,0],[7,2],[7,4],[4,1],[4,3],[4,5]], sets: [["Triple H","Double H","Single"]] },
+      { id: "4-3", chapter: 4, chapterName: "SHARD HUNT", name: "SHARD DELIVERY", description: "Place a supplied Shard, then clear it", objective: { type: "shards", target: 3 }, normal: [[7,0],[7,1],[7,2],[7,3]], shards: [[7,1],[7,3]], sets: [[{ name: "Double H", shardCell: [0,1] },"Double H","Single"]] },
+      { id: "4-4", chapter: 4, chapterName: "SHARD HUNT", name: "BLAST HARVEST", description: "Use two Blasts to collect eight Shards", objective: { type: "shards", target: 8 }, normal: [...campaignRowExcept(7,[6,7]), ...campaignRowExcept(3,[6,7]), [5,2],[5,3],[1,2],[1,3]], bombs: [[7,3],[3,3]], shards: [[7,1],[7,4],[5,2],[5,3],[3,1],[3,4],[1,2],[1,3]], sets: [["Double H","Double H","Single"]] },
+      { id: "4-5", chapter: 4, chapterName: "SHARD HUNT", name: "CROSS HARVEST", description: "Use two Crosses to collect eight Shards", objective: { type: "shards", target: 8 }, normal: [[7,0],[7,1],[1,2],[3,2],[5,2],[6,2],[0,5],[2,5],[4,5],[6,5]], shards: [[1,2],[3,2],[5,2],[6,2],[0,5],[2,5],[4,5],[6,5]], sets: [[{ name: "Double H", crossCell: [0,0] },{ name: "Double H", crossCell: [0,1] },"Double H"]] }
     ];
 
     const SHAPES = [
@@ -1624,6 +1725,8 @@
       longestStreak: 0
     };
 
+    const DEFAULT_CAMPAIGN_DATA = { completed: [] };
+
     function readJSON(key, fallback) {
       try {
         const value = JSON.parse(localStorage.getItem(key));
@@ -1649,6 +1752,10 @@
       dailyCompleted: false,
       dailyEndReason: "",
       lastDailyResult: null,
+      campaignLevelIndex: 0,
+      campaignSetIndex: 0,
+      campaignPlacements: 0,
+      campaignCompleted: false,
       selected: null,
       score: 0,
       best: Number(localStorage.getItem(BEST_KEY) || 0),
@@ -1679,6 +1786,7 @@
       achievements: readJSON(ACHIEVEMENTS_KEY, {}),
       lifetime: { ...DEFAULT_LIFETIME, ...readJSON(LIFETIME_STATS_KEY, {}) },
       daily: { ...DEFAULT_DAILY_DATA, ...readJSON(DAILY_DATA_KEY, {}) },
+      campaign: { ...DEFAULT_CAMPAIGN_DATA, ...readJSON(CAMPAIGN_DATA_KEY, {}) },
       specialTutorials: { bomb: false, cross: false, ...readJSON(SPECIAL_TUTORIAL_KEY, {}) },
       recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -1835,8 +1943,8 @@
       return DAILY_BOARD_TEMPLATES[hashSeed(`deblockle-shard-layout:${dateKey}`) % DAILY_BOARD_TEMPLATES.length];
     }
 
-    function dailyBaseScoreMultiplier() { return state.mode === "daily" ? 0 : 1; }
-    function dailyClearScoreMultiplier() { return state.mode === "daily" ? 0 : 1; }
+    function dailyBaseScoreMultiplier() { return state.mode === "endless" ? 1 : 0; }
+    function dailyClearScoreMultiplier() { return state.mode === "endless" ? 1 : 0; }
 
     function updateDailyGauntletUI() {
       const dailyMode = state.mode === "daily";
@@ -1906,6 +2014,123 @@
         ? `${officialResult.shards}/${DAILY_SHARD_TARGET} SHARDS • PRACTICE AVAILABLE`
         : `${DAILY_SHARD_TARGET} SHARDS • OFFICIAL READY`;
       $("dailyButton").setAttribute("aria-label", officialResult ? "Practice today's Daily Shard Hunt" : "Play today's official Daily Shard Hunt");
+    }
+
+    function currentCampaignLevel() { return CAMPAIGN_LEVELS[state.campaignLevelIndex] || CAMPAIGN_LEVELS[0]; }
+
+    function campaignLevelUnlocked(index) {
+      if (index === 0 || DEV_MODE) return true;
+      return state.campaign.completed.includes(CAMPAIGN_LEVELS[index - 1].id);
+    }
+
+    function renderCampaign() {
+      if (!Array.isArray(state.campaign.completed)) state.campaign.completed = [];
+      const host = $("campaignLevels");
+      host.innerHTML = "";
+      [...new Set(CAMPAIGN_LEVELS.map((level) => level.chapter))].forEach((chapter) => {
+        const levels = CAMPAIGN_LEVELS.filter((level) => level.chapter === chapter);
+        const section = document.createElement("section");
+        section.className = "campaign-chapter";
+        const completedCount = levels.filter((level) => state.campaign.completed.includes(level.id)).length;
+        section.innerHTML = `<div class="campaign-chapter-head"><strong>CHAPTER ${chapter} • ${levels[0].chapterName}</strong><span>${completedCount} / ${levels.length}</span></div>`;
+        const grid = document.createElement("div");
+        grid.className = "campaign-level-grid";
+        levels.forEach((level) => {
+          const index = CAMPAIGN_LEVELS.indexOf(level);
+          const completed = state.campaign.completed.includes(level.id);
+          const unlocked = campaignLevelUnlocked(index);
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "campaign-level";
+          button.classList.toggle("complete", completed);
+          button.disabled = !unlocked;
+          button.innerHTML = `<small>${unlocked ? `LEVEL ${level.id}` : "LOCKED"}</small><strong>${level.name}</strong><span>${completed ? "✓ COMPLETE" : unlocked ? "PLAY" : "🔒"}</span>`;
+          button.setAttribute("aria-label", unlocked ? `Play level ${level.id}, ${level.name}${completed ? ", completed" : ""}` : `Level ${level.id} locked`);
+          if (unlocked) button.addEventListener("click", () => safeAction("Start campaign level", () => startCampaignLevel(index)));
+          grid.appendChild(button);
+        });
+        section.appendChild(grid);
+        host.appendChild(section);
+      });
+    }
+
+    function openCampaign() {
+      state.running = false;
+      state.locked = false;
+      closeOverlay("gameOverOverlay");
+      closeOverlay("pauseOverlay");
+      state.mode = "campaign";
+      renderCampaign();
+      showScreen("campaignScreen");
+      setGameBackVisible(false);
+    }
+
+    function campaignPieceSet(setIndex = state.campaignSetIndex) {
+      const level = currentCampaignLevel();
+      const descriptors = level.sets[setIndex] || [];
+      return descriptors.map((descriptor) => {
+        const options = typeof descriptor === "string" ? { name: descriptor } : descriptor;
+        const shape = SHAPES.find((item) => item.name === options.name);
+        if (!shape) throw new Error(`Campaign shape not found: ${options.name}`);
+        return {
+          ...shape,
+          cells: shape.cells.map((cell) => [...cell]),
+          used: false,
+          bombCell: options.bombCell ? [...options.bombCell] : null,
+          crossCell: options.crossCell ? [...options.crossCell] : null,
+          shardCell: options.shardCell ? [...options.shardCell] : null
+        };
+      });
+    }
+
+    function setupCampaignBoard() {
+      if (state.mode !== "campaign") return;
+      const level = currentCampaignLevel();
+      state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+      (level.normal || []).forEach(([row, col]) => { state.board[row][col] = 1; });
+      (level.bombs || []).forEach(([row, col]) => { state.board[row][col] = 2; });
+      (level.crosses || []).forEach(([row, col]) => { state.board[row][col] = 3; });
+      state.shards = new Set((level.shards || []).map(([row, col]) => `${row},${col}`));
+      state.shardsCollected = 0;
+    }
+
+    function campaignObjectiveProgress() {
+      const objective = currentCampaignLevel().objective;
+      if (objective.type === "lines") return Math.min(objective.target, state.lines);
+      if (objective.type === "bombs") return Math.min(objective.target, state.bombsDetonated);
+      if (objective.type === "crosses") return Math.min(objective.target, state.crossesActivated);
+      if (objective.type === "shards") return Math.min(objective.target, state.shardsCollected);
+      if (objective.type === "clearAll") return state.board.every((row) => row.every((cell) => cell === 0)) ? 1 : 0;
+      return 0;
+    }
+
+    function campaignObjectiveComplete() {
+      const objective = currentCampaignLevel().objective;
+      return campaignObjectiveProgress() >= objective.target;
+    }
+
+    function campaignProgressText() {
+      const level = currentCampaignLevel();
+      if (level.objective.type === "clearAll") return campaignObjectiveComplete() ? "CLEAR" : `${state.board.flat().filter(Boolean).length} LEFT`;
+      return `${campaignObjectiveProgress()} / ${level.objective.target}`;
+    }
+
+    function updateCampaignUI() {
+      const campaignMode = state.mode === "campaign";
+      $("campaignRulePanel").hidden = !campaignMode;
+      if (!campaignMode) return;
+      const level = currentCampaignLevel();
+      $("campaignLevelBadge").textContent = level.id;
+      $("campaignRuleTitle").textContent = level.name;
+      $("campaignRuleDescription").textContent = level.description;
+      $("campaignRuleProgress").textContent = campaignProgressText();
+    }
+
+    function saveCampaignCompletion() {
+      const level = currentCampaignLevel();
+      if (!state.campaign.completed.includes(level.id)) state.campaign.completed.push(level.id);
+      if (!TEST_SAVE_DISABLED) localStorage.setItem(CAMPAIGN_DATA_KEY, JSON.stringify(state.campaign));
+      renderCampaign();
     }
 
     function dailyEmojiLine(value, step) {
@@ -2019,7 +2244,7 @@
     }
 
     function unlockAchievement(id) {
-      if (TEST_SAVE_DISABLED || state.achievements[id]) return;
+      if (TEST_SAVE_DISABLED || state.mode === "campaign" || state.achievements[id]) return;
       const achievement = ACHIEVEMENTS.find((item) => item.id === id);
       if (!achievement) return;
       state.achievements[id] = Date.now();
@@ -2053,7 +2278,7 @@
     }
 
     function recordRunProgress() {
-      if (TEST_SAVE_DISABLED) return;
+      if (TEST_SAVE_DISABLED || state.mode === "campaign") return;
       if (!state.recorded.run) {
         state.lifetime.runs += 1;
         state.recorded.run = true;
@@ -2076,20 +2301,39 @@
 
     function updateStats() {
       const dailyMode = state.mode === "daily";
+      const campaignMode = state.mode === "campaign";
       const shardsLeft = Math.max(0, DAILY_SHARD_TARGET - state.shardsCollected);
       $("gameScreen").classList.toggle("daily-mode", dailyMode);
-      $("bestLabel").textContent = dailyMode ? "Sets left" : "Best";
-      $("bestValue").textContent = dailyMode ? Math.max(0, DAILY_SET_LIMIT - state.setsCompleted) : formatScore(state.best);
-      $("scoreLabel").textContent = dailyMode ? "Shards left" : "Score";
-      $("scoreValue").textContent = dailyMode ? shardsLeft : formatScore(state.score);
-      $("dailyObjectiveGem").hidden = !dailyMode;
-      $("comboLabel").textContent = dailyMode ? "Collected" : "Combo";
+      $("gameScreen").classList.toggle("campaign-mode", campaignMode);
+      $("powerPanel").hidden = campaignMode;
+      $("rerollButton").hidden = campaignMode;
+      if (campaignMode) {
+        const level = currentCampaignLevel();
+        const shardObjective = level.objective.type === "shards";
+        $("bestLabel").textContent = "Sets left";
+        $("bestValue").textContent = Math.max(0, level.sets.length - state.campaignSetIndex);
+        $("scoreLabel").textContent = shardObjective ? "Shards left" : level.objective.type === "clearAll" ? "Blocks left" : "Progress";
+        $("scoreValue").textContent = shardObjective
+          ? Math.max(0, level.objective.target - state.shardsCollected)
+          : level.objective.type === "clearAll" ? state.board.flat().filter(Boolean).length : campaignProgressText();
+        $("dailyObjectiveGem").hidden = !shardObjective;
+        $("comboLabel").textContent = "Placed";
+        $("comboValue").textContent = state.campaignPlacements;
+      } else {
+        $("bestLabel").textContent = dailyMode ? "Sets left" : "Best";
+        $("bestValue").textContent = dailyMode ? Math.max(0, DAILY_SET_LIMIT - state.setsCompleted) : formatScore(state.best);
+        $("scoreLabel").textContent = dailyMode ? "Shards left" : "Score";
+        $("scoreValue").textContent = dailyMode ? shardsLeft : formatScore(state.score);
+        $("dailyObjectiveGem").hidden = !dailyMode;
+        $("comboLabel").textContent = dailyMode ? "Collected" : "Combo";
+        $("comboValue").textContent = dailyMode ? state.shardsCollected : state.combo > 1 ? `×${state.combo}` : "—";
+      }
       $("homeBest").textContent = formatScore(state.best);
-      $("comboValue").textContent = dailyMode ? state.shardsCollected : state.combo > 1 ? `×${state.combo}` : "—";
-      $("comboValue").classList.toggle("hot", !dailyMode && state.combo > 1);
+      $("comboValue").classList.toggle("hot", !dailyMode && !campaignMode && state.combo > 1);
       updateRerollControl();
       updatePowerUI();
       updateDailyGauntletUI();
+      updateCampaignUI();
       renderDailyHome();
     }
 
@@ -2145,7 +2389,7 @@
     }
 
     function addEnergy(amount) {
-      if (state.powerActive || amount <= 0) return;
+      if (state.mode === "campaign" || state.powerActive || amount <= 0) return;
       const previousTier = unlockedPowerTier();
       state.energy = Math.min(POWER_MAX, state.energy + Math.min(30, amount));
       const newTier = unlockedPowerTier();
@@ -2252,7 +2496,8 @@
       const available = state.running && !state.locked && !setLocked && state.rerolls > 0;
       button.disabled = !available;
       button.classList.toggle("ready", available);
-      if (state.rerolls <= 0) label.textContent = "empty";
+      if (state.mode === "campaign") label.textContent = "fixed";
+      else if (state.rerolls <= 0) label.textContent = "empty";
       else if (setLocked) label.textContent = `${state.rerolls} saved`;
       else label.textContent = `${state.rerolls} pull${state.rerolls === 1 ? "" : "s"}`;
       button.setAttribute("aria-label", available
@@ -2434,6 +2679,7 @@
     }
 
     function dealPieceSet(specialCount = 0) {
+      if (state.mode === "campaign") return campaignPieceSet();
       if (state.mode !== "daily") return generatePieceSet(specialCount);
       const previousRandom = activeDealRandom;
       activeDealRandom = seededRandom(`deblockle-daily:${state.dailyDate}:delivery:${state.dailyDealIndex}`);
@@ -2758,10 +3004,11 @@
       });
       piece.used = true;
       state.setPlaced += 1;
+      if (state.mode === "campaign") state.campaignPlacements += 1;
       state.blocks += piece.cells.length;
       const placementScore = Math.round(piece.cells.length * 5 * powerMultiplier() * dailyBaseScoreMultiplier());
       state.score += placementScore;
-      if (state.mode !== "daily") showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
+      if (state.mode === "endless") showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
       checkScoreAchievement();
       state.selected = null;
       renderBoard();
@@ -2778,12 +3025,41 @@
         endGame("shardComplete");
         return;
       }
+      if (state.mode === "campaign" && campaignObjectiveComplete()) {
+        state.campaignCompleted = true;
+        saveCampaignCompletion();
+        state.locked = false;
+        updateStats();
+        setToast("PUZZLE COMPLETE!", true);
+        sound("achievement");
+        vibrate([30, 25, 45, 25, 75]);
+        endGame("campaignComplete");
+        return;
+      }
       if (cleared === 0) {
         state.combo = 0;
         setToast("Keep building your next clear.");
       }
 
-      if (state.pieces.every((item) => item.used)) {
+      if (state.pieces.every((item) => item.used) && state.mode === "campaign") {
+        state.setsCompleted += 1;
+        state.campaignSetIndex += 1;
+        if (state.campaignSetIndex >= currentCampaignLevel().sets.length) {
+          state.pieces = [];
+          state.selected = null;
+          state.setPlaced = 0;
+          renderTray();
+          updateStats();
+          state.locked = false;
+          endGame("campaignOutOfPieces");
+          return;
+        }
+        state.pieces = dealPieceSet();
+        state.setPlaced = 0;
+        state.selected = null;
+        setToast("Next puzzle set delivered.");
+        sound("deal");
+      } else if (state.pieces.every((item) => item.used)) {
         state.setsCompleted += 1;
         let deliveryMessage = "Fresh blocks delivered!";
         if (state.powerActive) {
@@ -2823,7 +3099,7 @@
       updatePowerUI();
 
       const remaining = state.pieces.filter((item) => !item.used);
-      if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame("blocked");
+      if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame(state.mode === "campaign" ? "campaignBlocked" : "blocked");
     }
 
     async function clearCompletedLines() {
@@ -2923,12 +3199,14 @@
       }
 
       const removedCells = new Set([...lineCells, ...crossCells, ...blastCells]);
-      const collectedShardKeys = state.mode === "daily"
+      const collectedShardKeys = state.mode === "daily" || state.mode === "campaign"
         ? [...removedCells].filter((key) => state.shards.has(key))
         : [];
       if (collectedShardKeys.length) {
-        state.shardsCollected = Math.min(DAILY_SHARD_TARGET, state.shardsCollected + collectedShardKeys.length);
+        const shardTarget = state.mode === "campaign" ? currentCampaignLevel().objective.target : DAILY_SHARD_TARGET;
+        state.shardsCollected = Math.min(shardTarget, state.shardsCollected + collectedShardKeys.length);
         updateDailyGauntletUI();
+        updateCampaignUI();
       }
       state.largestClear = Math.max(state.largestClear, removedCells.size);
       state.bombsDetonated += triggeredBombs.size;
@@ -2945,7 +3223,7 @@
       const clearScore = Math.round((lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus)
         * multiplier * powerMultiplier() * dailyClearScoreMultiplier(lineCount, triggeredBombs.size, triggeredCrosses.size));
       state.score += clearScore;
-      if (state.mode !== "daily") showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
+      if (state.mode === "endless") showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
       checkScoreAchievement();
 
       crossPathDelays.forEach((delayMs, key) => {
@@ -2985,7 +3263,8 @@
               ? `DOUBLE CLEAR! ×${multiplier}`
               : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
       const shardPhrase = collectedShardKeys.length ? ` • ${collectedShardKeys.length} SHARD${collectedShardKeys.length === 1 ? "" : "S"}` : "";
-      setToast(`${phrase}${shardPhrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}  +${formatScore(clearScore)}`, true);
+      const scorePhrase = state.mode === "endless" ? `  +${formatScore(clearScore)}` : "";
+      setToast(`${phrase}${shardPhrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}${scorePhrase}`, true);
       sound(triggeredBombs.size ? "blast" : triggeredCrosses.size ? "cross" : lineCount >= 2 ? "bigClear" : "clear");
       vibrate(triggeredBombs.size ? [45, 30, 65] : triggeredCrosses.size ? [22, 24, 22, 24, 40] : lineCount >= 2 ? [25, 35, 45] : 30);
       const maxCrossDelay = crossPathDelays.size ? Math.max(...crossPathDelays.values()) : 0;
@@ -3016,7 +3295,7 @@
     }
 
     function updateBest(forceSave) {
-      if (TEST_SAVE_DISABLED || state.mode === "daily") return;
+      if (TEST_SAVE_DISABLED || state.mode !== "endless") return;
       if (state.score > state.best) {
         state.best = state.score;
         localStorage.setItem(BEST_KEY, String(state.best));
@@ -3026,7 +3305,7 @@
     }
 
     function updateCleanBest() {
-      if (TEST_SAVE_DISABLED || state.mode === "daily") return;
+      if (TEST_SAVE_DISABLED || state.mode !== "endless") return;
       if (state.score <= state.cleanBest) return;
       state.cleanBest = state.score;
       localStorage.setItem(CLEAN_BEST_KEY, String(state.cleanBest));
@@ -3146,10 +3425,20 @@
 
     function restartCurrentMode() {
       if (state.mode === "daily") startGame("daily", state.dailyDate, state.dailyPreview);
+      else if (state.mode === "campaign") {
+        const nextIndex = state.campaignCompleted ? state.campaignLevelIndex + 1 : state.campaignLevelIndex;
+        if (nextIndex < CAMPAIGN_LEVELS.length) startCampaignLevel(nextIndex);
+        else openCampaign();
+      }
       else startGame();
     }
 
-    function startGame(mode = "endless", dailyDate = "", dailyPreview = false) {
+    function startCampaignLevel(index) {
+      if (!campaignLevelUnlocked(index)) return;
+      startGame("campaign", "", false, index);
+    }
+
+    function startGame(mode = "endless", dailyDate = "", dailyPreview = false, campaignLevelIndex = 0) {
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
@@ -3170,6 +3459,10 @@
       state.dailyCompleted = false;
       state.dailyEndReason = "";
       state.lastDailyResult = null;
+      state.campaignLevelIndex = mode === "campaign" ? campaignLevelIndex : state.campaignLevelIndex;
+      state.campaignSetIndex = 0;
+      state.campaignPlacements = 0;
+      state.campaignCompleted = false;
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       state.pieces = [];
       state.selected = null;
@@ -3185,9 +3478,9 @@
       state.bombsDetonated = 0;
       state.crossesActivated = 0;
       state.highestTierReached = 0;
-      state.rerolls = mode === "daily" ? 0 : 2;
+      state.rerolls = mode === "endless" ? 2 : 0;
       state.setPlaced = 0;
-      state.energy = TEST_MODE ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
+      state.energy = TEST_MODE && mode !== "campaign" ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
       state.powerActive = false;
       state.powerTier = 0;
       state.powerSetsRemaining = 0;
@@ -3198,7 +3491,8 @@
       state.running = true;
       state.pieces = dealPieceSet();
       setupDailyShardBoard();
-      if (TEST_TUTORIAL) {
+      setupCampaignBoard();
+      if (TEST_TUTORIAL && mode !== "campaign") {
         addSpecialType(state.pieces, "bomb");
         addSpecialType(state.pieces, "cross");
       }
@@ -3210,18 +3504,23 @@
       showScreen("gameScreen");
       setGameBackVisible(true);
       const dailyMode = state.mode === "daily";
-      $("modeBanner").hidden = !dailyMode;
+      const campaignMode = state.mode === "campaign";
+      $("modeBanner").hidden = !dailyMode && !campaignMode;
       if (dailyMode) {
         $("modeBannerTitle").textContent = `Daily • ${formatDailyDate(state.dailyDate)}`;
         $("modeBannerStatus").textContent = `${state.dailyPreview ? "Preview" : state.dailyOfficial ? "Official" : "Practice"} • ${DAILY_SHARD_TARGET} Shards`;
+      } else if (campaignMode) {
+        const level = currentCampaignLevel();
+        $("modeBannerTitle").textContent = `Campaign • Level ${level.id}`;
+        $("modeBannerStatus").textContent = level.chapterName;
       }
-      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily DeBlockle game" : "Endless DeBlockle game");
+      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily DeBlockle game" : campaignMode ? `Campaign level ${currentCampaignLevel().id}` : "Endless DeBlockle game");
       renderBoard();
       renderTray();
       updateStats();
       setToast(dailyMode
         ? `${state.dailyTemplate.name}: clear ${DAILY_SHARD_TARGET} Shards before ${DAILY_SET_LIMIT} sets run out.`
-        : "Press and drag a block onto the board.");
+        : campaignMode ? `${currentCampaignLevel().name}: ${currentCampaignLevel().description}.` : "Press and drag a block onto the board.");
       sound("start");
       if (TEST_GAME_OVER) window.setTimeout(endGame, 250);
     }
@@ -3234,10 +3533,11 @@
       state.dailyCompleted = state.mode === "daily" && reason === "shardComplete";
       setGameBackVisible(false);
       state.runDurationMs = Date.now() - state.runStartedAt;
-      state.sessionCompletedRuns += 1;
+      const isCampaign = state.mode === "campaign";
+      if (!isCampaign) state.sessionCompletedRuns += 1;
       const isDaily = state.mode === "daily";
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
-      const isNewBest = !isDaily && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
+      const isNewBest = !isDaily && !isCampaign && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
       if (isDaily) {
         state.lastDailyResult = {
           date: state.dailyDate,
@@ -3257,7 +3557,7 @@
       }
       updateBest(true);
       recordRunProgress();
-      $("finalScorePanel").hidden = isDaily;
+      $("finalScorePanel").hidden = isDaily || isCampaign;
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
       $("finalBlocks").textContent = formatScore(state.blocks);
@@ -3267,14 +3567,15 @@
       $("finalSpecials").textContent = `${formatScore(state.bombsDetonated)} / ${formatScore(state.crossesActivated)}`;
       $("finalTier").textContent = state.highestTierReached ? `Tier ${state.highestTierReached}` : "—";
       $("finalRunType").textContent = formatDuration(state.runDurationMs);
-      $("gameOverTitle").textContent = isDaily ? state.dailyCompleted ? "Shard Hunt complete!" : "Shard Hunt ended" : "Board blocked!";
+      $("gameOverTitle").textContent = isDaily ? state.dailyCompleted ? "Shard Hunt complete!" : "Shard Hunt ended" : isCampaign ? state.campaignCompleted ? "Puzzle complete!" : "Puzzle not solved" : "Board blocked!";
       $("newBest").textContent = isDaily
         ? state.dailyPreview ? "DEVELOPER DAILY PREVIEW" : state.dailyOfficial ? "★ OFFICIAL RESULT SAVED ★" : "PRACTICE RESULT"
-        : isNewBest ? "★ NEW BEST SCORE ★" : "";
+        : isCampaign ? `CHAPTER ${currentCampaignLevel().chapter} • LEVEL ${currentCampaignLevel().id}` : isNewBest ? "★ NEW BEST SCORE ★" : "";
       $("runStatus").textContent = isDaily
         ? `${state.shardsCollected} / ${DAILY_SHARD_TARGET} Shards • ${Math.min(state.setsCompleted, DAILY_SET_LIMIT)} / ${DAILY_SET_LIMIT} sets • Streak ${displayedDailyStreak()}`
-        : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
+        : isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
       $("dailyResultPanel").hidden = !isDaily;
+      $("campaignResultPanel").hidden = !isCampaign;
       if (isDaily) {
         $("dailyResultType").textContent = `${state.dailyPreview ? "DEVELOPER PREVIEW" : state.dailyOfficial ? "OFFICIAL RESULT" : "PRACTICE RESULT"} • ${state.dailyTemplate.name}`;
         $("dailyResultDate").textContent = formatDailyDate(state.dailyDate);
@@ -3282,16 +3583,28 @@
         $("dailySharePreview").textContent = buildDailyShare(state.lastDailyResult);
         $("dailyShareStatus").textContent = "";
       }
-      $("againButton").textContent = isDaily ? state.dailyPreview ? "REPLAY PREVIEW" : "PRACTICE TODAY'S SHARD HUNT" : "PLAY AGAIN";
+      if (isCampaign) {
+        const lastLevel = state.campaignLevelIndex >= CAMPAIGN_LEVELS.length - 1;
+        $("campaignResultTitle").textContent = state.campaignCompleted ? "LEVEL COMPLETE" : "TRY A DIFFERENT MOVE";
+        $("campaignResultCopy").textContent = state.campaignCompleted
+          ? lastLevel ? "All 25 campaign puzzles are complete." : `Level ${CAMPAIGN_LEVELS[state.campaignLevelIndex + 1].id} is now unlocked.`
+          : "The supplied blocks have a fixed solution. Restart and try again.";
+        $("againButton").textContent = state.campaignCompleted ? lastLevel ? "CAMPAIGN COMPLETE" : "NEXT LEVEL" : "TRY AGAIN";
+        $("homeButton").textContent = "LEVEL SELECT";
+      } else {
+        $("againButton").textContent = isDaily ? state.dailyPreview ? "REPLAY PREVIEW" : "PRACTICE TODAY'S SHARD HUNT" : "PLAY AGAIN";
+        $("homeButton").textContent = "BACK TO HOME";
+      }
       $("postRunContinueButton").classList.remove("hidden");
       $("postRunChoices").classList.add("hidden");
       updateStats();
-      sound(isDaily && state.dailyCompleted ? "achievement" : "gameOver");
-      vibrate(isDaily && state.dailyCompleted ? [30, 25, 45, 25, 75] : [45, 70, 45]);
+      sound((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? "achievement" : "gameOver");
+      vibrate((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? [30, 25, 45, 25, 75] : [45, 70, 45]);
       window.setTimeout(() => openOverlay("gameOverOverlay"), 180);
     }
 
     function shouldShowInterstitial() {
+      if (state.mode === "campaign") return false;
       if (TEST_INTERSTITIAL) return true;
       if (TEST_SAVE_DISABLED) return false;
       const enoughRuns = state.sessionCompletedRuns > 1;
@@ -3335,6 +3648,11 @@
       setGameBackVisible(false);
     }
 
+    function returnAfterRun() {
+      if (state.mode === "campaign") openCampaign();
+      else goHome();
+    }
+
     function openPauseMenu() {
       if (!state.running || state.locked) return;
       cleanUpDrag();
@@ -3349,11 +3667,16 @@
 
     function quitRunToMenu() {
       if (!state.running) return;
+      const campaignMode = state.mode === "campaign";
       cleanUpDrag();
       state.running = false;
       state.locked = false;
       recordRunProgress();
       closeOverlay("pauseOverlay");
+      if (campaignMode) {
+        openCampaign();
+        return;
+      }
       state.mode = "endless";
       state.dailyDate = "";
       $("modeBanner").hidden = true;
@@ -3430,8 +3753,10 @@
 
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
     $("dailyButton").addEventListener("click", () => safeAction("Start daily challenge", () => startDailyGame()));
+    $("campaignButton").addEventListener("click", () => safeAction("Open campaign", openCampaign));
+    $("campaignHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("againButton").addEventListener("click", () => safeAction("Restart game", restartCurrentMode));
-    $("homeButton").addEventListener("click", () => safeAction("Return home", goHome));
+    $("homeButton").addEventListener("click", () => safeAction("Return after run", returnAfterRun));
     $("backButton").addEventListener("click", () => safeAction("Pause game", openPauseMenu));
     $("resumeButton").addEventListener("click", () => safeAction("Resume game", resumeGame));
     $("quitRunButton").addEventListener("click", () => safeAction("Quit run", quitRunToMenu));
