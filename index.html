@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.32</title>
+  <title>DeBlockle v0.33</title>
   <style>
     :root {
       --ink: #101828;
@@ -1688,7 +1688,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.32 • ENHANCED THEMES</div>
+      <div class="version">DEBLOCKLE BUILD v0.33 • BACKGROUND PAUSE</div>
     </section>
 
     <section class="screen" id="profileScreen" aria-label="Local player profile">
@@ -1812,7 +1812,7 @@
   <div class="overlay" id="pauseOverlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
     <div class="modal">
       <h2 id="pauseTitle">Game paused</h2>
-      <p>Your current run is still here. Resume playing, or quit and return to the main menu.</p>
+      <p id="pauseCopy">Your current run is still here. Resume playing, or quit and return to the main menu.</p>
       <div class="button-stack">
         <button class="primary-btn" id="resumeButton">RESUME GAME</button>
         <button class="secondary-btn" id="quitRunButton">QUIT TO MENU</button>
@@ -1845,6 +1845,7 @@
         <button class="secondary-btn" id="devProfileButton">XP RESULT</button>
         <button class="secondary-btn" id="devNeonThemeButton">NEON PREVIEW</button>
         <button class="secondary-btn" id="devSunsetThemeButton">SUNSET PREVIEW</button>
+        <button class="secondary-btn" id="devBackgroundButton">BACKGROUND PAUSE</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
@@ -1958,7 +1959,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.32";
+    const BUILD = "v0.33";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2206,6 +2207,8 @@
       runDurationMs: 0,
       sessionCompletedRuns: 0,
       lastInterstitialAt: 0,
+      appBackgrounded: false,
+      pausedByBackground: false,
       locked: false,
       running: false,
       achievements: readJSON(ACHIEVEMENTS_KEY, {}),
@@ -4716,6 +4719,14 @@
       sound("select");
     }
 
+    function prepareBackgroundPauseTest() {
+      if (!DEV_MODE) return;
+      startGame("rush");
+      state.rushRemainingMs = 30000;
+      updateRushUI();
+      pauseForBackground();
+    }
+
     function restartCurrentMode() {
       if (state.mode === "daily") startGame("daily", state.dailyDate, state.dailyPreview);
       else if (state.mode === "rush") startGame("rush");
@@ -4756,6 +4767,8 @@
       state.lastDailyResult = null;
       state.lastShareResult = null;
       state.lastXpResult = null;
+      state.appBackgrounded = false;
+      state.pausedByBackground = false;
       state.rushBoardIndex = 0;
       state.rushBoardOrder = [];
       state.rushPattern = null;
@@ -4846,6 +4859,9 @@
       stopRushTimer();
       state.running = false;
       state.locked = true;
+      state.appBackgrounded = false;
+      state.pausedByBackground = false;
+      closeOverlay("pauseOverlay");
       state.dailyEndReason = state.mode === "daily" ? reason : "";
       state.dailyCompleted = state.mode === "daily" && reason === "shardComplete";
       setGameBackVisible(false);
@@ -4976,6 +4992,8 @@
     function goHome() {
       stopRushTimer();
       state.running = false;
+      state.appBackgrounded = false;
+      state.pausedByBackground = false;
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
@@ -4993,16 +5011,56 @@
       else goHome();
     }
 
+    function setPausePresentation(backgroundPause = false) {
+      $("pauseTitle").textContent = backgroundPause ? "Paused while you were away" : "Game paused";
+      $("pauseCopy").textContent = backgroundPause
+        ? "Your run stayed open while DeBlockle was in the background. Resume from exactly where you left it, or quit to the main menu."
+        : "Your current run is still here. Resume playing, or quit and return to the main menu.";
+    }
+
+    function pauseForBackground() {
+      if (!state.running || state.appBackgrounded) return;
+      state.appBackgrounded = true;
+      cleanUpDrag();
+      if (state.mode === "rush") state.rushPaused = true;
+      const anotherPauseIsVisible = $("pauseOverlay").classList.contains("open") || $("specialTutorialOverlay").classList.contains("open");
+      if (anotherPauseIsVisible) return;
+      state.pausedByBackground = true;
+      setPausePresentation(true);
+      openOverlay("pauseOverlay");
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        pauseForBackground();
+        return;
+      }
+      if (!state.appBackgrounded) return;
+      if (state.running && state.pausedByBackground) {
+        setPausePresentation(true);
+        openOverlay("pauseOverlay");
+      } else {
+        state.appBackgrounded = false;
+      }
+    }
+
     function openPauseMenu() {
       if (!state.running || state.locked) return;
       cleanUpDrag();
       if (state.mode === "rush") state.rushPaused = true;
+      state.appBackgrounded = false;
+      state.pausedByBackground = false;
+      setPausePresentation(false);
       openOverlay("pauseOverlay");
       sound("select");
     }
 
     function resumeGame() {
+      if (document.hidden) return;
       closeOverlay("pauseOverlay");
+      state.appBackgrounded = false;
+      state.pausedByBackground = false;
+      setPausePresentation(false);
       if (state.mode === "rush") {
         state.rushPaused = false;
         state.rushLastTickAt = Date.now();
@@ -5017,6 +5075,9 @@
       stopRushTimer();
       state.running = false;
       state.locked = false;
+      state.appBackgrounded = false;
+      state.pausedByBackground = false;
+      setPausePresentation(false);
       recordRunProgress();
       closeOverlay("pauseOverlay");
       if (campaignMode) {
@@ -5184,10 +5245,14 @@
     $("devProfileButton").addEventListener("click", () => safeAction("Prepare XP result test", prepareDevProfileTest));
     $("devNeonThemeButton").addEventListener("click", () => safeAction("Preview Neon theme", () => previewDevTheme("neon")));
     $("devSunsetThemeButton").addEventListener("click", () => safeAction("Preview Sunset theme", () => previewDevTheme("sunset")));
+    $("devBackgroundButton").addEventListener("click", () => safeAction("Prepare background pause test", prepareBackgroundPauseTest));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
     $("devOverlay").addEventListener("click", (event) => { if (event.target === $("devOverlay")) closeOverlay("devOverlay"); });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", pauseForBackground);
+    window.addEventListener("pageshow", () => { if (!document.hidden) handleVisibilityChange(); });
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
