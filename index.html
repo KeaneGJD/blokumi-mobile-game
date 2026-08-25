@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.47</title>
+  <title>DeBlockle v0.48</title>
   <style>
     :root {
       --ink: #101828;
@@ -1805,7 +1805,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.47 • HOMEPAGE SPACING</div>
+      <div class="version">DEBLOCKLE BUILD v0.48 • AD FREQUENCY</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
@@ -2144,7 +2144,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.47";
+    const BUILD = "v0.48";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2161,8 +2161,7 @@
     const OPENING_SPECIAL_FREE_SETS = 1;
     const CROSS_FIRE_STEP_MS = 38;
     const CROSS_FIRE_DURATION_MS = 380;
-    const MIN_INTERSTITIAL_RUN_MS = 5 * 60 * 1000;
-    const MIN_INTERSTITIAL_GAP_MS = 5 * 60 * 1000;
+    const ENDLESS_RUNS_PER_INTERSTITIAL = 3;
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
     const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
@@ -2307,7 +2306,8 @@
 
     const DEFAULT_LIFETIME = {
       runs: 0, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0,
-      continues: 0, interstitials: 0, highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
+      continues: 0, interstitials: 0, endlessRunsSinceAd: 0,
+      highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
     };
 
     const DEFAULT_DAILY_DATA = {
@@ -5159,6 +5159,10 @@
       }
       updateBest(true);
       recordRunProgress();
+      if (state.mode === "endless" && !wasFinalized && !TEST_SAVE_DISABLED) {
+        state.lifetime.endlessRunsSinceAd = Math.max(0, Number(state.lifetime.endlessRunsSinceAd) || 0) + 1;
+        localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
+      }
       if (!wasFinalized) renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
       state.runFinalized = true;
       state.lastShareResult = !isCampaign && !TEST_SAVE_DISABLED ? buildRunShareResult(isNewBest, isNewRushBest) : null;
@@ -5222,13 +5226,9 @@
     }
 
     function shouldShowInterstitial() {
-      if (state.mode === "campaign") return false;
       if (TEST_INTERSTITIAL) return true;
-      if (TEST_SAVE_DISABLED) return false;
-      const enoughRuns = state.sessionCompletedRuns > 1;
-      const longEnough = state.runDurationMs >= MIN_INTERSTITIAL_RUN_MS;
-      const gapPassed = !state.lastInterstitialAt || (Date.now() - state.lastInterstitialAt) >= MIN_INTERSTITIAL_GAP_MS;
-      return enoughRuns && longEnough && gapPassed;
+      if (state.mode !== "endless" || TEST_SAVE_DISABLED || state.endlessRescueUsed) return false;
+      return (Number(state.lifetime.endlessRunsSinceAd) || 0) >= ENDLESS_RUNS_PER_INTERSTITIAL;
     }
 
     function revealPostRunChoices() {
@@ -5251,7 +5251,7 @@
     }
 
     function continueAfterRun() {
-      if (state.mode === "endless" || shouldShowInterstitial()) openOverlay("interstitialOverlay");
+      if (shouldShowInterstitial()) openOverlay("interstitialOverlay");
       else revealPostRunChoices();
     }
 
@@ -5281,6 +5281,7 @@
       if (!TEST_SAVE_DISABLED) {
         state.lifetime.continues += 1;
         state.lifetime.interstitials += 1;
+        state.lifetime.endlessRunsSinceAd = 0;
         localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
         renderAchievements();
       }
@@ -5308,6 +5309,7 @@
       if (wasShown && !TEST_SAVE_DISABLED) {
         state.lastInterstitialAt = Date.now();
         state.lifetime.interstitials += 1;
+        if (state.mode === "endless") state.lifetime.endlessRunsSinceAd = 0;
         localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
         renderAchievements();
       }
