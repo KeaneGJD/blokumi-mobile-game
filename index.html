@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.21</title>
+  <title>DeBlockle v0.26</title>
   <style>
     :root {
       --ink: #101828;
@@ -199,6 +199,25 @@
 
     .home-best strong { color: var(--cyan); font-size: 26px; letter-spacing: -.03em; }
 
+    .daily-card {
+      margin: 0 0 14px;
+      padding: 0;
+    }
+
+    .secondary-btn.daily-button {
+      min-height: 62px;
+      padding: 9px 15px 10px;
+      color: var(--ink);
+      background: linear-gradient(135deg, var(--orange), var(--pink));
+      border: 0;
+      box-shadow: inset 0 -6px 0 rgba(16,24,40,.13), 0 12px 24px rgba(255,92,168,.1);
+      text-align: left;
+    }
+    .daily-button-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .daily-button-row strong { font-size: 16px; letter-spacing: .035em; }
+    .daily-button-row span { font-size: 9px; font-weight: 950; letter-spacing: .08em; opacity: .72; }
+    .daily-button-status { display: block; margin-top: 2px; font-size: 9px; font-weight: 900; letter-spacing: .07em; opacity: .76; }
+
     .primary-btn, .secondary-btn {
       width: 100%;
       min-height: 58px;
@@ -237,6 +256,52 @@
 
     #gameScreen { padding-top: 14px; }
 
+    .mode-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 3px 0 5px;
+      padding: 7px 10px;
+      border-radius: 12px;
+      color: var(--orange);
+      background: rgba(255,173,66,.09);
+      border: 1px solid rgba(255,173,66,.22);
+      font-size: 9px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .mode-banner[hidden] { display: none; }
+    .mode-banner span:last-child { color: var(--muted); letter-spacing: .06em; }
+
+    .daily-rule-panel {
+      display: grid;
+      grid-template-columns: 25px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      margin: 2px 0 7px;
+      padding: 6px 9px;
+      border-radius: 12px;
+      color: var(--cream);
+      background: linear-gradient(135deg, rgba(255,173,66,.12), rgba(255,92,168,.08));
+      border: 1px solid rgba(255,173,66,.25);
+    }
+    .daily-rule-panel[hidden] { display: none; }
+    .daily-rule-icon {
+      display: block;
+      width: 19px;
+      height: 23px;
+      margin: auto;
+      clip-path: polygon(50% 0, 94% 34%, 72% 100%, 28% 100%, 6% 34%);
+      background: linear-gradient(135deg, #fff 0 14%, #ffe56a 16% 48%, #ffad42 50% 78%, #ff5c75 80%);
+      filter: drop-shadow(0 0 4px rgba(255,173,66,.75));
+    }
+    .daily-rule-copy { min-width: 0; }
+    .daily-rule-copy strong { display: block; overflow: hidden; color: var(--orange); font-size: 10px; letter-spacing: .08em; white-space: nowrap; text-overflow: ellipsis; }
+    .daily-rule-copy span { display: block; margin-top: 1px; color: var(--muted); font-size: 8px; line-height: 1.15; }
+    .daily-rule-sets { color: var(--cream); font-size: 8px; font-weight: 950; letter-spacing: .05em; white-space: nowrap; }
+
     .stats {
       display: grid;
       grid-template-columns: 1fr 1.35fr 1fr;
@@ -260,6 +325,18 @@
     .stat-label { color: var(--muted); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; font-weight: 900; }
     .stat-value { font-size: 20px; font-weight: 1000; letter-spacing: -.04em; margin-top: 2px; }
     .stat.main .stat-value { color: var(--lime); font-size: 25px; }
+    .stat-value-row { display: flex; align-items: center; justify-content: center; gap: 7px; }
+    .daily-objective-gem {
+      display: block;
+      width: 16px;
+      height: 20px;
+      clip-path: polygon(50% 0, 94% 34%, 72% 100%, 28% 100%, 6% 34%);
+      background: linear-gradient(135deg, #fff 0 14%, #ffe56a 16% 48%, #ffad42 50% 78%, #ff5c75 80%);
+      filter: drop-shadow(0 0 5px rgba(255,173,66,.72));
+    }
+    .daily-objective-gem[hidden] { display: none; }
+    #gameScreen.daily-mode .stat.main { background: rgba(255,173,66,.1); border-color: rgba(255,173,66,.28); }
+    #gameScreen.daily-mode .stat.main .stat-value { color: var(--orange); }
     #comboValue.hot { color: var(--pink); }
 
     .power-panel {
@@ -573,6 +650,34 @@
     @keyframes crossPulse {
       0%, 100% { filter: brightness(1); }
       50% { filter: brightness(1.2) drop-shadow(0 0 5px rgba(155,114,255,.48)); }
+    }
+
+    .shard-mark {
+      position: absolute;
+      z-index: 9;
+      left: 50%;
+      top: 50%;
+      width: 43%;
+      height: 55%;
+      transform: translate(-50%, -50%);
+      clip-path: polygon(50% 0, 94% 34%, 72% 100%, 28% 100%, 6% 34%);
+      background: linear-gradient(135deg, #fff 0 14%, #ffe56a 16% 48%, #ffad42 50% 78%, #ff5c75 80%);
+      box-shadow: 0 0 10px rgba(255,173,66,.9);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.35));
+      pointer-events: none;
+      animation: shardPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes shardPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(.92); filter: drop-shadow(0 0 3px rgba(255,173,66,.68)); }
+      50% { transform: translate(-50%, -54%) scale(1.08); filter: drop-shadow(0 0 7px rgba(255,92,117,.95)); }
+    }
+
+    .cell.shard-collected .shard-mark { animation: shardCollect .48s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes shardCollect {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      45% { transform: translate(-50%, -85%) scale(1.45) rotate(12deg); opacity: 1; }
+      100% { transform: translate(-50%, -210%) scale(.35) rotate(35deg); opacity: 0; }
     }
 
     .cell.preview-valid { background: rgba(216,255,79,.7); border-color: var(--lime); }
@@ -922,6 +1027,20 @@
 
     .piece-dot.on.cross-dot::after { transform: rotate(90deg); }
 
+    .piece-dot.on.shard-dot::after {
+      content: "";
+      position: absolute;
+      z-index: 7;
+      left: 50%;
+      top: 50%;
+      width: 48%;
+      height: 62%;
+      transform: translate(-50%, -50%);
+      clip-path: polygon(50% 0, 94% 34%, 72% 100%, 28% 100%, 6% 34%);
+      background: linear-gradient(135deg, #fff 0 14%, #ffe56a 16% 48%, #ffad42 50% 78%, #ff5c75 80%);
+      filter: drop-shadow(0 0 3px rgba(255,173,66,.9));
+    }
+
     .piece-card:nth-child(2) .piece-dot.on { background: var(--lime); }
     .piece-card:nth-child(3) .piece-dot.on { background: var(--pink); }
 
@@ -1007,6 +1126,15 @@
     .continue-btn.hidden { display: none; }
     .post-run-choices { display: grid; gap: 12px; }
     .post-run-choices.hidden { display: none; }
+
+    .daily-result-panel { margin-top: 12px; padding: 13px; border-radius: 17px; background: rgba(255,173,66,.08); border: 1px solid rgba(255,173,66,.2); }
+    .daily-result-panel[hidden] { display: none; }
+    .daily-result-heading { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: var(--orange); font-size: 10px; letter-spacing: .1em; font-weight: 950; }
+    .daily-result-heading span:last-child { color: var(--muted); }
+    .daily-medal { margin: 10px 0 2px; color: var(--lime); text-align: center; font-size: 24px; font-weight: 1000; letter-spacing: -.03em; }
+    .daily-share-preview { margin: 10px 0 !important; padding: 10px; border-radius: 12px; color: var(--cream) !important; background: rgba(0,0,0,.18); font-size: 11px !important; line-height: 1.4 !important; white-space: pre-line; text-align: center; }
+    .daily-share-btn { min-height: 44px; font-size: 13px; }
+    .share-status { min-height: 16px; margin: 6px 0 0 !important; color: var(--cyan) !important; font-size: 10px !important; text-align: center; }
 
     .test-ad-card { text-align: center; }
 
@@ -1183,19 +1311,35 @@
       <h1 class="title">De<span>Block</span>le</h1>
       <p class="tagline">Fit the pieces. Clear the lines.<br>Keep the board alive.</p>
       <div class="home-best"><span>Best score</span><strong id="homeBest">0</strong></div>
+      <div class="daily-card">
+        <button class="secondary-btn daily-button" id="dailyButton">
+          <span class="daily-button-row"><strong>☀ DAILY DEBLOCKLE</strong><span id="dailyDateLabel">TODAY</span></span>
+          <span class="daily-button-status" id="dailyStatus">10 SHARDS • OFFICIAL READY</span>
+        </button>
+        <span id="dailyRuleHome" hidden></span><span id="dailyStreak" hidden></span><span id="dailyCountdown" hidden></span>
+      </div>
       <div class="button-stack">
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.21 • SMART BLOCK GENERATOR</div>
+      <div class="version">DEBLOCKLE BUILD v0.26 • COMPACT DAILY HOME</div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
+      <div class="mode-banner" id="modeBanner" hidden><span id="modeBannerTitle">Daily DeBlockle</span><span id="modeBannerStatus">Official attempt</span></div>
+      <div class="daily-rule-panel" id="dailyRulePanel" hidden>
+        <span class="daily-rule-icon" id="dailyRuleIcon" aria-hidden="true"></span>
+        <div class="daily-rule-copy">
+          <strong id="dailyRuleTitle">TODAY'S BOARD</strong>
+          <span id="dailyRuleDescription">Clear the marked gems</span>
+        </div>
+        <span class="daily-rule-sets" id="dailyRemainingText">12 SETS LEFT</span>
+      </div>
       <div class="stats">
-        <div class="stat"><span class="stat-label">Best</span><strong class="stat-value" id="bestValue">0</strong></div>
-        <div class="stat main"><span class="stat-label">Score</span><strong class="stat-value" id="scoreValue">0</strong><div class="score-burst" id="scoreBurst" aria-live="polite"></div></div>
-        <div class="stat"><span class="stat-label">Combo</span><strong class="stat-value" id="comboValue">—</strong></div>
+        <div class="stat"><span class="stat-label" id="bestLabel">Best</span><strong class="stat-value" id="bestValue">0</strong></div>
+        <div class="stat main"><span class="stat-label" id="scoreLabel">Score</span><div class="stat-value-row"><span class="daily-objective-gem" id="dailyObjectiveGem" hidden aria-hidden="true"></span><strong class="stat-value" id="scoreValue">0</strong></div><div class="score-burst" id="scoreBurst" aria-live="polite"></div></div>
+        <div class="stat"><span class="stat-label" id="comboLabel">Combo</span><strong class="stat-value" id="comboValue">—</strong></div>
       </div>
 
       <div class="power-panel" id="powerPanel">
@@ -1249,7 +1393,8 @@
       </ol>
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
       <p>Block deliveries become more challenging as your run progresses, with larger shapes joining the pool later.</p>
-      <p>Scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
+      <p>Daily Shard Hunt is objective-only: clear 10 glowing Shards from the pre-built board and supplied blocks before 12 sets run out. There is no score in this mode.</p>
+      <p>Endless scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
     </div>
   </div>
@@ -1280,8 +1425,11 @@
         <button class="secondary-btn" id="devEarlyButton">EARLY BLOCKS</button>
         <button class="secondary-btn" id="devMidButton">MID BLOCKS</button>
         <button class="secondary-btn" id="devLateButton">LATE BLOCKS</button>
+        <button class="secondary-btn" id="devDailyTodayButton">DAILY TODAY</button>
+        <button class="secondary-btn" id="devDailyNextButton">DAILY +1 DAY</button>
+        <button class="secondary-btn" id="devDailyFinishButton">SHARD FINISH</button>
       </div>
-      <p class="dev-note">Developer runs never update saved scores, achievements, lifetime stats or advert timing.</p>
+      <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
     </div>
   </div>
@@ -1300,7 +1448,7 @@
     <div class="modal">
       <h2 id="gameOverTitle">Board blocked!</h2>
       <div class="new-best" id="newBest"></div>
-      <div class="final-score"><span>Final score</span><strong id="finalScore">0</strong></div>
+      <div class="final-score" id="finalScorePanel"><span>Final score</span><strong id="finalScore">0</strong></div>
       <div class="summary-grid">
         <div class="summary-box"><span>Lines cleared</span><strong id="finalLines">0</strong></div>
         <div class="summary-box"><span>Tiles placed</span><strong id="finalBlocks">0</strong></div>
@@ -1314,6 +1462,13 @@
         <div class="summary-box"><span>Run time</span><strong id="finalRunType">0:00</strong></div>
       </div>
       <p class="run-status" id="runStatus">Best score: 0</p>
+      <div class="daily-result-panel" id="dailyResultPanel" hidden>
+        <div class="daily-result-heading"><span id="dailyResultType">OFFICIAL RESULT</span><span id="dailyResultDate">TODAY</span></div>
+        <div class="daily-medal" id="dailyMedal">0 / 10 SHARDS</div>
+        <p class="daily-share-preview" id="dailySharePreview"></p>
+        <button class="secondary-btn daily-share-btn" id="shareDailyButton">SHARE RESULT</button>
+        <p class="share-status" id="dailyShareStatus" aria-live="polite"></p>
+      </div>
       <div class="button-stack">
         <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
         <div class="post-run-choices hidden" id="postRunChoices">
@@ -1369,8 +1524,13 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.21";
+    const BUILD = "v0.26";
     const SIZE = 8;
+    const DAILY_SET_LIMIT = 12;
+    const DAILY_SHARD_TARGET = 10;
+    const DAILY_STARTING_SHARDS = 5;
+    const DAILY_SHARD_DELIVERIES = [1, 2, 4, 5, 7, 8, 10, 11];
+    const DAILY_SHARD_VERSION = 2;
     const TIER_1_ENERGY = 100;
     const TIER_2_ENERGY = 220;
     const TIER_3_ENERGY = 360;
@@ -1385,6 +1545,7 @@
     const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
     const LIFETIME_STATS_KEY = "deblockle_v010_lifetime_stats";
     const SPECIAL_TUTORIAL_KEY = "deblockle_v013_special_tutorials";
+    const DAILY_DATA_KEY = "deblockle_v022_daily";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
@@ -1393,6 +1554,15 @@
     const TEST_TUTORIAL = new URLSearchParams(window.location.search).get("tutorial") === "1";
     const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "1";
     const TEST_SAVE_DISABLED = TEST_MODE || TEST_GAME_OVER || TEST_TUTORIAL || DEV_MODE;
+
+    const DAILY_BOARD_TEMPLATES = [
+      { id: "diamond", name: "BROKEN DIAMOND", cells: [[0,3],[0,4],[1,2],[1,5],[2,1],[2,6],[3,0],[3,7],[4,0],[4,7],[5,1],[5,6],[6,2],[6,5],[7,3],[7,4]] },
+      { id: "ring", name: "FRACTURED RING", cells: [[1,2],[1,3],[1,4],[1,5],[2,1],[2,6],[3,1],[3,3],[3,6],[4,1],[4,4],[4,6],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]] },
+      { id: "arrows", name: "TWIN ARROWS", cells: [[1,1],[1,6],[2,2],[2,5],[3,3],[3,4],[4,2],[4,5],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]] },
+      { id: "fortress", name: "SHARD FORTRESS", cells: [[2,2],[2,3],[2,4],[2,5],[3,2],[3,5],[4,1],[4,2],[4,5],[4,6],[5,1],[5,3],[5,4],[5,6],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] },
+      { id: "spiral", name: "OPEN SPIRAL", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,6],[3,2],[3,3],[3,4],[3,5],[3,6],[4,2],[5,2],[5,5],[5,6],[6,2],[6,3],[6,4],[6,5]] },
+      { id: "hourglass", name: "HOURGLASS", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,2],[2,5],[3,3],[3,4],[4,3],[4,4],[5,2],[5,5],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] }
+    ];
 
     const SHAPES = [
       { name: "Single", cells: [[0,0]], weight: 4, tier: 1, family: "dot" },
@@ -1447,6 +1617,13 @@
       continues: 0, interstitials: 0, highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
     };
 
+    const DEFAULT_DAILY_DATA = {
+      results: {},
+      lastOfficialDate: "",
+      currentStreak: 0,
+      longestStreak: 0
+    };
+
     function readJSON(key, fallback) {
       try {
         const value = JSON.parse(localStorage.getItem(key));
@@ -1460,6 +1637,18 @@
     const state = {
       board: [],
       pieces: [],
+      mode: "endless",
+      dailyDate: "",
+      dailyOfficial: false,
+      dailyPreview: false,
+      dailyDealIndex: 0,
+      dailyActionRandom: null,
+      dailyTemplate: null,
+      shards: new Set(),
+      shardsCollected: 0,
+      dailyCompleted: false,
+      dailyEndReason: "",
+      lastDailyResult: null,
       selected: null,
       score: 0,
       best: Number(localStorage.getItem(BEST_KEY) || 0),
@@ -1489,6 +1678,7 @@
       running: false,
       achievements: readJSON(ACHIEVEMENTS_KEY, {}),
       lifetime: { ...DEFAULT_LIFETIME, ...readJSON(LIFETIME_STATS_KEY, {}) },
+      daily: { ...DEFAULT_DAILY_DATA, ...readJSON(DAILY_DATA_KEY, {}) },
       specialTutorials: { bomb: false, cross: false, ...readJSON(SPECIAL_TUTORIAL_KEY, {}) },
       recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -1505,6 +1695,7 @@
     let specialTutorialQueue = [];
     let activeSpecialTutorial = null;
     let tutorialSessionSeen = new Set();
+    let activeDealRandom = null;
 
     function safeAction(name, action) {
       try { return action(); }
@@ -1586,6 +1777,172 @@
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
       return `${minutes}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function localDateKey(offsetDays = 0) {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offsetDays);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function dateFromKey(key) {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function formatDailyDate(key) {
+      return dateFromKey(key).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
+    }
+
+    function dayDifference(laterKey, earlierKey) {
+      if (!laterKey || !earlierKey) return Infinity;
+      return Math.round((Date.UTC(...laterKey.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value))
+        - Date.UTC(...earlierKey.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value))) / 86400000);
+    }
+
+    function displayedDailyStreak(todayKey = localDateKey()) {
+      if (!state.daily.lastOfficialDate) return 0;
+      return dayDifference(todayKey, state.daily.lastOfficialDate) <= 1 ? state.daily.currentStreak : 0;
+    }
+
+    function hashSeed(text) {
+      let hash = 2166136261;
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function seededRandom(seedText) {
+      let value = hashSeed(seedText);
+      return () => {
+        value += 0x6D2B79F5;
+        let result = value;
+        result = Math.imul(result ^ (result >>> 15), result | 1);
+        result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
+        return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function gameRandom() {
+      if (activeDealRandom) return activeDealRandom();
+      if (state.mode === "daily" && state.dailyActionRandom) return state.dailyActionRandom();
+      return Math.random();
+    }
+
+    function dailyTemplateForDate(dateKey) {
+      return DAILY_BOARD_TEMPLATES[hashSeed(`deblockle-shard-layout:${dateKey}`) % DAILY_BOARD_TEMPLATES.length];
+    }
+
+    function dailyBaseScoreMultiplier() { return state.mode === "daily" ? 0 : 1; }
+    function dailyClearScoreMultiplier() { return state.mode === "daily" ? 0 : 1; }
+
+    function updateDailyGauntletUI() {
+      const dailyMode = state.mode === "daily";
+      $("dailyRulePanel").hidden = !dailyMode;
+      if (!dailyMode || !state.dailyTemplate) return;
+      const setsLeft = Math.max(0, DAILY_SET_LIMIT - state.setsCompleted);
+      $("dailyRuleTitle").textContent = state.dailyTemplate.name;
+      $("dailyRuleDescription").textContent = "Clear the marked gems";
+      $("dailyRemainingText").textContent = state.shardsCollected >= DAILY_SHARD_TARGET ? "TARGET CLEARED" : `${setsLeft} SET${setsLeft === 1 ? "" : "S"} LEFT`;
+    }
+
+    function setupDailyShardBoard() {
+      if (state.mode !== "daily") return;
+      state.dailyTemplate = dailyTemplateForDate(state.dailyDate);
+      state.shards = new Set();
+      state.shardsCollected = 0;
+      state.dailyTemplate.cells.forEach(([row, col]) => { state.board[row][col] = 1; });
+      const candidates = state.dailyTemplate.cells.map((cell) => [...cell]);
+      const random = seededRandom(`deblockle-starting-shards:${state.dailyDate}`);
+      for (let index = candidates.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [candidates[index], candidates[swapIndex]] = [candidates[swapIndex], candidates[index]];
+      }
+      candidates.slice(0, DAILY_STARTING_SHARDS).forEach(([row, col]) => state.shards.add(`${row},${col}`));
+    }
+
+    function addShardToPieces(pieces) {
+      if (pieces.some((piece) => piece.shardCell)) return pieces;
+      const targets = specialTargets(pieces);
+      if (!targets.length) return pieces;
+      const target = targets[Math.floor(gameRandom() * targets.length)];
+      target.piece.shardCell = [...target.cell];
+      return pieces;
+    }
+
+    function applyDailyShardDelivery(pieces) {
+      if (state.mode !== "daily") return pieces;
+      const deliveryNumber = state.setsCompleted + 1;
+      if (DAILY_SHARD_DELIVERIES.includes(deliveryNumber)) addShardToPieces(pieces);
+      return pieces;
+    }
+
+    function secondsUntilTomorrow() {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      return Math.max(0, Math.floor((tomorrow - now) / 1000));
+    }
+
+    function formatCountdown(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function renderDailyHome() {
+      const today = localDateKey();
+      const result = state.daily.results?.[today];
+      const officialResult = result?.shardVersion === DAILY_SHARD_VERSION ? result : null;
+      const template = dailyTemplateForDate(today);
+      const streak = displayedDailyStreak(today);
+      $("dailyDateLabel").textContent = formatDailyDate(today);
+      $("dailyRuleHome").innerHTML = `<strong>Shard Hunt:</strong> Clear ${DAILY_SHARD_TARGET} Shards from today's ${template.name} board before ${DAILY_SET_LIMIT} sets run out.`;
+      $("dailyCountdown").textContent = formatCountdown(secondsUntilTomorrow());
+      $("dailyStreak").textContent = `${streak} / ${state.daily.longestStreak} day${state.daily.longestStreak === 1 ? "" : "s"}`;
+      $("dailyStatus").textContent = officialResult
+        ? `${officialResult.shards}/${DAILY_SHARD_TARGET} SHARDS • PRACTICE AVAILABLE`
+        : `${DAILY_SHARD_TARGET} SHARDS • OFFICIAL READY`;
+      $("dailyButton").setAttribute("aria-label", officialResult ? "Practice today's Daily Shard Hunt" : "Play today's official Daily Shard Hunt");
+    }
+
+    function dailyEmojiLine(value, step) {
+      const filled = Math.max(0, Math.min(5, Math.ceil(value / step)));
+      return `${"🟩".repeat(filled)}${"⬜".repeat(5 - filled)}`;
+    }
+
+    function buildDailyShare(result) {
+      const label = result.official ? "Official" : result.preview ? "Preview" : "Practice";
+      const dayNumber = result.date.replaceAll("-", "");
+      const shardLine = `${"💎".repeat(Math.min(10, result.shards))}${"▫️".repeat(Math.max(0, DAILY_SHARD_TARGET - result.shards))}`;
+      return `DeBlockle Daily Shard Hunt #${dayNumber}\n${result.templateName}\n${label} • ${result.completed ? "HUNT COMPLETE" : "HUNT ENDED"}\n${result.shards}/${DAILY_SHARD_TARGET} Shards • ${result.sets}/${DAILY_SET_LIMIT} sets\n${shardLine}`;
+    }
+
+    function recordOfficialDailyResult(result) {
+      if (TEST_SAVE_DISABLED || !result.official || state.daily.results?.[result.date]?.shardVersion === DAILY_SHARD_VERSION) return;
+      if (!state.daily.results || typeof state.daily.results !== "object") state.daily.results = {};
+      const gap = dayDifference(result.date, state.daily.lastOfficialDate);
+      state.daily.currentStreak = gap === 0 ? Math.max(1, state.daily.currentStreak) : gap === 1 ? state.daily.currentStreak + 1 : 1;
+      state.daily.longestStreak = Math.max(state.daily.longestStreak, state.daily.currentStreak);
+      state.daily.lastOfficialDate = result.date;
+      state.daily.results[result.date] = {
+        score: result.score,
+        lines: result.lines,
+        sets: result.sets,
+        combo: result.combo,
+        tier: result.tier,
+        completed: result.completed,
+        shards: result.shards,
+        templateId: result.templateId,
+        shardVersion: DAILY_SHARD_VERSION,
+        completedAt: Date.now()
+      };
+      const retainedDates = Object.keys(state.daily.results).sort().slice(-35);
+      state.daily.results = Object.fromEntries(retainedDates.map((date) => [date, state.daily.results[date]]));
+      localStorage.setItem(DAILY_DATA_KEY, JSON.stringify(state.daily));
+      renderDailyHome();
     }
 
     function showScoreBurst(text, special = false) {
@@ -1718,13 +2075,22 @@
     }
 
     function updateStats() {
-      $("scoreValue").textContent = formatScore(state.score);
-      $("bestValue").textContent = formatScore(state.best);
+      const dailyMode = state.mode === "daily";
+      const shardsLeft = Math.max(0, DAILY_SHARD_TARGET - state.shardsCollected);
+      $("gameScreen").classList.toggle("daily-mode", dailyMode);
+      $("bestLabel").textContent = dailyMode ? "Sets left" : "Best";
+      $("bestValue").textContent = dailyMode ? Math.max(0, DAILY_SET_LIMIT - state.setsCompleted) : formatScore(state.best);
+      $("scoreLabel").textContent = dailyMode ? "Shards left" : "Score";
+      $("scoreValue").textContent = dailyMode ? shardsLeft : formatScore(state.score);
+      $("dailyObjectiveGem").hidden = !dailyMode;
+      $("comboLabel").textContent = dailyMode ? "Collected" : "Combo";
       $("homeBest").textContent = formatScore(state.best);
-      $("comboValue").textContent = state.combo > 1 ? `×${state.combo}` : "—";
-      $("comboValue").classList.toggle("hot", state.combo > 1);
+      $("comboValue").textContent = dailyMode ? state.shardsCollected : state.combo > 1 ? `×${state.combo}` : "—";
+      $("comboValue").classList.toggle("hot", !dailyMode && state.combo > 1);
       updateRerollControl();
       updatePowerUI();
+      updateDailyGauntletUI();
+      renderDailyHome();
     }
 
     function unlockedPowerTier(energy = state.energy) {
@@ -1797,7 +2163,8 @@
       pieces.forEach((piece, pieceIndex) => {
         piece.cells.forEach((cell) => {
           const occupiedBySpecial = (piece.bombCell && piece.bombCell[0] === cell[0] && piece.bombCell[1] === cell[1])
-            || (piece.crossCell && piece.crossCell[0] === cell[0] && piece.crossCell[1] === cell[1]);
+            || (piece.crossCell && piece.crossCell[0] === cell[0] && piece.crossCell[1] === cell[1])
+            || (piece.shardCell && piece.shardCell[0] === cell[0] && piece.shardCell[1] === cell[1]);
           if (!occupiedBySpecial) targets.push({ piece, pieceIndex, cell });
         });
       });
@@ -1809,7 +2176,7 @@
       if (alreadyPresent) return;
       const targets = specialTargets(pieces);
       if (!targets.length) return;
-      const target = targets[Math.floor(Math.random() * targets.length)];
+      const target = targets[Math.floor(gameRandom() * targets.length)];
       if (type === "bomb") target.piece.bombCell = [...target.cell];
       else target.piece.crossCell = [...target.cell];
     }
@@ -1819,7 +2186,7 @@
         addSpecialType(pieces, "bomb");
         addSpecialType(pieces, "cross");
       } else if (count === 1 && !pieces.some((piece) => piece.bombCell || piece.crossCell)) {
-        addSpecialType(pieces, Math.random() < .55 ? "bomb" : "cross");
+        addSpecialType(pieces, gameRandom() < .55 ? "bomb" : "cross");
       }
       return pieces;
     }
@@ -1832,7 +2199,7 @@
         }
       }
       for (let count = 0; count < amount && candidates.length; count += 1) {
-        const index = Math.floor(Math.random() * candidates.length);
+        const index = Math.floor(gameRandom() * candidates.length);
         const [row, col] = candidates.splice(index, 1)[0];
         state.board[row][col] = 2;
       }
@@ -1947,7 +2314,7 @@
       const recentNames = new Set(state.recentShapeNames);
       let pool = SHAPES.filter((shape) => shape.tier <= maximumTier && !excludedNames.includes(shape.name));
       if (!pool.length) pool = SHAPES.filter((shape) => shape.tier <= maximumTier);
-      const occupancy = occupiedRatio();
+      const occupancy = state.mode === "daily" ? .35 : occupiedRatio();
       const weighted = pool.map((shape) => {
         let weight = shape.weight;
         if (recentNames.has(shape.name)) weight *= .28;
@@ -1957,7 +2324,7 @@
         return { shape, weight };
       });
       const total = weighted.reduce((sum, item) => sum + item.weight, 0);
-      let roll = Math.random() * total;
+      let roll = gameRandom() * total;
       for (const item of weighted) {
         roll -= item.weight;
         if (roll <= 0) return makePiece(item.shape);
@@ -1985,6 +2352,9 @@
     }
 
     function reinforcePlayableSet(pieces, stage) {
+      // Daily deliveries must stay identical for every player, so board-dependent
+      // rescue replacements are reserved for Endless Mode.
+      if (state.mode === "daily") return pieces;
       const required = minimumPlayablePieces(stage);
       let playableCount = pieces.filter(canShapeFitAnywhere).length;
       if (playableCount >= required) return pieces;
@@ -2025,7 +2395,7 @@
       return state.setsCompleted >= 20 ? .15 : .12;
     }
 
-    function dealPieceSet(specialCount = 0) {
+    function generatePieceSet(specialCount = 0) {
       const stage = generatorStage();
       let bestPieces = null;
       let bestScore = -Infinity;
@@ -2033,11 +2403,11 @@
       for (let attempt = 0; attempt < 18; attempt += 1) {
         const pieces = reinforcePlayableSet(buildCandidateSet(stage), stage);
         const signature = dealSignature(pieces);
-        const playable = pieces.filter(canShapeFitAnywhere).length;
+        const playable = state.mode === "daily" ? 3 : pieces.filter(canShapeFitAnywhere).length;
         const uniqueNames = new Set(pieces.map((piece) => piece.name)).size;
         const uniqueFamilies = new Set(pieces.map((piece) => piece.family)).size;
         const repeatedSet = state.recentDealSignatures.includes(signature);
-        const score = (playable * 50) + (uniqueNames * 9) + (uniqueFamilies * 5) - (repeatedSet ? 80 : 0) + Math.random();
+        const score = (playable * 50) + (uniqueNames * 9) + (uniqueFamilies * 5) - (repeatedSet ? 80 : 0) + gameRandom();
         if (score > bestScore) {
           bestScore = score;
           bestPieces = pieces;
@@ -2050,23 +2420,35 @@
 
       if (specialCount > 0) {
         ensurePoweredSpecials(pieces, specialCount);
-        return pieces;
+        return applyDailyShardDelivery(pieces);
       }
 
       const specialChance = state.setsCompleted < OPENING_SPECIAL_FREE_SETS ? 0 : specialChanceForStage(stage);
-      if (Math.random() < specialChance) {
-        const piece = pieces[Math.floor(Math.random() * pieces.length)];
-        const specialCell = piece.cells[Math.floor(Math.random() * piece.cells.length)];
-        if (Math.random() < .68) piece.bombCell = [...specialCell];
+      if (gameRandom() < specialChance) {
+        const piece = pieces[Math.floor(gameRandom() * pieces.length)];
+        const specialCell = piece.cells[Math.floor(gameRandom() * piece.cells.length)];
+        if (gameRandom() < .68) piece.bombCell = [...specialCell];
         else piece.crossCell = [...specialCell];
       }
-      return pieces;
+      return applyDailyShardDelivery(pieces);
+    }
+
+    function dealPieceSet(specialCount = 0) {
+      if (state.mode !== "daily") return generatePieceSet(specialCount);
+      const previousRandom = activeDealRandom;
+      activeDealRandom = seededRandom(`deblockle-daily:${state.dailyDate}:delivery:${state.dailyDealIndex}`);
+      state.dailyDealIndex += 1;
+      try {
+        return generatePieceSet(specialCount);
+      } finally {
+        activeDealRandom = previousRandom;
+      }
     }
 
     function shuffled(items) {
       const copy = [...items];
       for (let index = copy.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
+        const swapIndex = Math.floor(gameRandom() * (index + 1));
         [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
       }
       return copy;
@@ -2097,12 +2479,21 @@
         const col = index % SIZE;
         // Clearing is a temporary animation state. Removing it here restores
         // the cleared board spaces so they can immediately accept new blocks.
-        cell.classList.remove("clearing", "exploding", "cross-clearing", "cross-triggering", "cross-fire", "cross-fire-occupied", "cross-fire-origin", "tier3-wave");
+        cell.classList.remove("clearing", "exploding", "cross-clearing", "cross-triggering", "cross-fire", "cross-fire-occupied", "cross-fire-origin", "tier3-wave", "shard-collected");
         cell.style.removeProperty("--cross-delay");
         cell.style.removeProperty("--wave-delay");
         cell.classList.toggle("filled", Boolean(state.board[row][col]));
         cell.classList.toggle("bomb", state.board[row][col] === 2);
         cell.classList.toggle("cross", state.board[row][col] === 3);
+        cell.classList.toggle("shard", Boolean(state.board[row][col]) && state.shards.has(`${row},${col}`));
+        cell.querySelector(".shard-mark")?.remove();
+        if (state.board[row][col] && state.shards.has(`${row},${col}`)) {
+          const shard = document.createElement("span");
+          shard.className = "shard-mark";
+          shard.setAttribute("aria-hidden", "true");
+          cell.appendChild(shard);
+        }
+        cell.setAttribute("aria-label", `Row ${row + 1}, column ${col + 1}${state.shards.has(`${row},${col}`) ? ", contains a Shard" : ""}`);
       });
       checkSpecialTutorials();
     }
@@ -2123,7 +2514,7 @@
         card.classList.toggle("selected", state.selected === index && !piece.used);
         card.classList.toggle("used", piece.used);
         card.classList.toggle("cannot-fit", !piece.used && !canShapeFitAnywhere(piece));
-        card.setAttribute("aria-label", piece.used ? `${piece.name}, placed` : `Choose ${piece.name}`);
+        card.setAttribute("aria-label", piece.used ? `${piece.name}, placed` : `Choose ${piece.name}${piece.shardCell ? ", containing a Shard" : ""}`);
         card.addEventListener("pointerdown", (event) => safeAction("Begin drag", () => beginDrag(index, event)));
         card.addEventListener("keydown", (event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -2143,6 +2534,7 @@
             if (piece.cells.some(([r, c]) => r === row && c === col)) dot.classList.add("on");
             if (piece.bombCell && piece.bombCell[0] === row && piece.bombCell[1] === col) dot.classList.add("bomb-dot");
             if (piece.crossCell && piece.crossCell[0] === row && piece.crossCell[1] === col) dot.classList.add("cross-dot");
+            if (piece.shardCell && piece.shardCell[0] === row && piece.shardCell[1] === col) dot.classList.add("shard-dot");
             grid.appendChild(dot);
           }
         }
@@ -2172,6 +2564,7 @@
           if (piece.cells.some(([r, c]) => r === row && c === col)) dot.classList.add("on");
           if (piece.bombCell && piece.bombCell[0] === row && piece.bombCell[1] === col) dot.classList.add("bomb-dot");
           if (piece.crossCell && piece.crossCell[0] === row && piece.crossCell[1] === col) dot.classList.add("cross-dot");
+          if (piece.shardCell && piece.shardCell[0] === row && piece.shardCell[1] === col) dot.classList.add("shard-dot");
           grid.appendChild(dot);
         }
       }
@@ -2356,14 +2749,19 @@
       piece.cells.forEach(([offsetRow, offsetCol]) => {
         const isBomb = piece.bombCell && piece.bombCell[0] === offsetRow && piece.bombCell[1] === offsetCol;
         const isCross = piece.crossCell && piece.crossCell[0] === offsetRow && piece.crossCell[1] === offsetCol;
-        state.board[row + offsetRow][col + offsetCol] = isBomb ? 2 : isCross ? 3 : 1;
+        const targetRow = row + offsetRow;
+        const targetCol = col + offsetCol;
+        state.board[targetRow][targetCol] = isBomb ? 2 : isCross ? 3 : 1;
+        if (piece.shardCell && piece.shardCell[0] === offsetRow && piece.shardCell[1] === offsetCol) {
+          state.shards.add(`${targetRow},${targetCol}`);
+        }
       });
       piece.used = true;
       state.setPlaced += 1;
       state.blocks += piece.cells.length;
-      const placementScore = piece.cells.length * 5 * powerMultiplier();
+      const placementScore = Math.round(piece.cells.length * 5 * powerMultiplier() * dailyBaseScoreMultiplier());
       state.score += placementScore;
-      showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
+      if (state.mode !== "daily") showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
       checkScoreAchievement();
       state.selected = null;
       renderBoard();
@@ -2371,6 +2769,15 @@
       sound("place");
 
       const cleared = await clearCompletedLines();
+      if (state.mode === "daily" && state.shardsCollected >= DAILY_SHARD_TARGET) {
+        state.locked = false;
+        updateStats();
+        setToast("SHARD HUNT COMPLETE!", true);
+        sound("achievement");
+        vibrate([30, 25, 45, 25, 75]);
+        endGame("shardComplete");
+        return;
+      }
       if (cleared === 0) {
         state.combo = 0;
         setToast("Keep building your next clear.");
@@ -2391,6 +2798,17 @@
             deliveryMessage = `POWER ACTIVE: ${state.powerSetsRemaining} SET${state.powerSetsRemaining === 1 ? "" : "S"} LEFT!`;
           }
         }
+        if (state.mode === "daily" && state.setsCompleted >= DAILY_SET_LIMIT) {
+          state.pieces = [];
+          state.selected = null;
+          state.setPlaced = 0;
+          setToast("DELIVERIES USED — SHARD HUNT ENDED.", true);
+          updateStats();
+          renderTray();
+          state.locked = false;
+          endGame("setLimit");
+          return;
+        }
         state.pieces = dealPieceSet(poweredSpecialCount());
         state.setPlaced = 0;
         setToast(deliveryMessage, state.powerActive);
@@ -2405,7 +2823,7 @@
       updatePowerUI();
 
       const remaining = state.pieces.filter((item) => !item.used);
-      if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame();
+      if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame("blocked");
     }
 
     async function clearCompletedLines() {
@@ -2505,6 +2923,13 @@
       }
 
       const removedCells = new Set([...lineCells, ...crossCells, ...blastCells]);
+      const collectedShardKeys = state.mode === "daily"
+        ? [...removedCells].filter((key) => state.shards.has(key))
+        : [];
+      if (collectedShardKeys.length) {
+        state.shardsCollected = Math.min(DAILY_SHARD_TARGET, state.shardsCollected + collectedShardKeys.length);
+        updateDailyGauntletUI();
+      }
       state.largestClear = Math.max(state.largestClear, removedCells.size);
       state.bombsDetonated += triggeredBombs.size;
       state.crossesActivated += triggeredCrosses.size;
@@ -2517,9 +2942,10 @@
       const chainBonus = Math.max(0, triggeredBombs.size - 1) * 100;
       const crossBonus = triggeredCrosses.size * 100;
       const multiplier = Math.max(1, state.combo);
-      const clearScore = (lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus) * multiplier * powerMultiplier();
+      const clearScore = Math.round((lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus)
+        * multiplier * powerMultiplier() * dailyClearScoreMultiplier(lineCount, triggeredBombs.size, triggeredCrosses.size));
       state.score += clearScore;
-      showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
+      if (state.mode !== "daily") showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
       checkScoreAchievement();
 
       crossPathDelays.forEach((delayMs, key) => {
@@ -2535,6 +2961,7 @@
       removedCells.forEach((key) => {
         const [row, col] = key.split(",").map(Number);
         const cell = boardEl.children[(row * SIZE) + col];
+        if (collectedShardKeys.includes(key)) cell.classList.add("shard-collected");
         if (triggeredBombs.has(key)) cell.classList.add("exploding");
         else if (crossPathDelays.has(key)) return;
         else if (blastCells.has(key)) cell.classList.add("exploding");
@@ -2557,7 +2984,8 @@
             : lineCount === 2
               ? `DOUBLE CLEAR! ×${multiplier}`
               : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
-      setToast(`${phrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}  +${formatScore(clearScore)}`, true);
+      const shardPhrase = collectedShardKeys.length ? ` • ${collectedShardKeys.length} SHARD${collectedShardKeys.length === 1 ? "" : "S"}` : "";
+      setToast(`${phrase}${shardPhrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}  +${formatScore(clearScore)}`, true);
       sound(triggeredBombs.size ? "blast" : triggeredCrosses.size ? "cross" : lineCount >= 2 ? "bigClear" : "clear");
       vibrate(triggeredBombs.size ? [45, 30, 65] : triggeredCrosses.size ? [22, 24, 22, 24, 40] : lineCount >= 2 ? [25, 35, 45] : 30);
       const maxCrossDelay = crossPathDelays.size ? Math.max(...crossPathDelays.values()) : 0;
@@ -2570,6 +2998,7 @@
       removedCells.forEach((key) => {
         const [row, col] = key.split(",").map(Number);
         state.board[row][col] = 0;
+        state.shards.delete(key);
       });
       renderBoard();
       if (occupiedBeforeClear >= 32 && state.board.every((row) => row.every((cell) => cell === 0))) unlockAchievement("clean_slate");
@@ -2587,7 +3016,7 @@
     }
 
     function updateBest(forceSave) {
-      if (TEST_SAVE_DISABLED) return;
+      if (TEST_SAVE_DISABLED || state.mode === "daily") return;
       if (state.score > state.best) {
         state.best = state.score;
         localStorage.setItem(BEST_KEY, String(state.best));
@@ -2597,7 +3026,7 @@
     }
 
     function updateCleanBest() {
-      if (TEST_SAVE_DISABLED) return;
+      if (TEST_SAVE_DISABLED || state.mode === "daily") return;
       if (state.score <= state.cleanBest) return;
       state.cleanBest = state.score;
       localStorage.setItem(CLEAN_BEST_KEY, String(state.cleanBest));
@@ -2693,7 +3122,34 @@
       if (type === "gameover") window.setTimeout(endGame, 180);
     }
 
-    function startGame() {
+    function startDailyGame(offsetDays = 0, preview = false) {
+      startGame("daily", localDateKey(offsetDays), preview);
+    }
+
+    function prepareDailyFinishTest() {
+      if (!DEV_MODE) return;
+      startDailyGame(0, true);
+      state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+      state.pieces = makeDevPieces();
+      for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+      state.shards = new Set([`${SIZE - 1},3`]);
+      state.shardsCollected = DAILY_SHARD_TARGET - 1;
+      state.setsCompleted = 5;
+      state.setPlaced = 0;
+      state.selected = 0;
+      state.locked = false;
+      renderBoard();
+      renderTray();
+      updateStats();
+      setToast("FINAL SHARD: place the Single block in the bottom-right space.", true);
+    }
+
+    function restartCurrentMode() {
+      if (state.mode === "daily") startGame("daily", state.dailyDate, state.dailyPreview);
+      else startGame();
+    }
+
+    function startGame(mode = "endless", dailyDate = "", dailyPreview = false) {
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
@@ -2702,6 +3158,18 @@
       specialTutorialQueue = [];
       activeSpecialTutorial = null;
       if (TEST_TUTORIAL) tutorialSessionSeen.clear();
+      state.mode = mode;
+      state.dailyDate = mode === "daily" ? (dailyDate || localDateKey()) : "";
+      state.dailyPreview = mode === "daily" && dailyPreview;
+      state.dailyOfficial = mode === "daily" && !dailyPreview && state.daily.results?.[state.dailyDate]?.shardVersion !== DAILY_SHARD_VERSION;
+      state.dailyDealIndex = 0;
+      state.dailyActionRandom = mode === "daily" ? seededRandom(`deblockle-daily:${state.dailyDate}:actions`) : null;
+      state.dailyTemplate = null;
+      state.shards = new Set();
+      state.shardsCollected = 0;
+      state.dailyCompleted = false;
+      state.dailyEndReason = "";
+      state.lastDailyResult = null;
       state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       state.pieces = [];
       state.selected = null;
@@ -2717,7 +3185,7 @@
       state.bombsDetonated = 0;
       state.crossesActivated = 0;
       state.highestTierReached = 0;
-      state.rerolls = 2;
+      state.rerolls = mode === "daily" ? 0 : 2;
       state.setPlaced = 0;
       state.energy = TEST_MODE ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
       state.powerActive = false;
@@ -2729,6 +3197,7 @@
       state.locked = false;
       state.running = true;
       state.pieces = dealPieceSet();
+      setupDailyShardBoard();
       if (TEST_TUTORIAL) {
         addSpecialType(state.pieces, "bomb");
         addSpecialType(state.pieces, "cross");
@@ -2740,25 +3209,55 @@
       }
       showScreen("gameScreen");
       setGameBackVisible(true);
+      const dailyMode = state.mode === "daily";
+      $("modeBanner").hidden = !dailyMode;
+      if (dailyMode) {
+        $("modeBannerTitle").textContent = `Daily • ${formatDailyDate(state.dailyDate)}`;
+        $("modeBannerStatus").textContent = `${state.dailyPreview ? "Preview" : state.dailyOfficial ? "Official" : "Practice"} • ${DAILY_SHARD_TARGET} Shards`;
+      }
+      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily DeBlockle game" : "Endless DeBlockle game");
       renderBoard();
       renderTray();
       updateStats();
-      setToast("Press and drag a block onto the board.");
+      setToast(dailyMode
+        ? `${state.dailyTemplate.name}: clear ${DAILY_SHARD_TARGET} Shards before ${DAILY_SET_LIMIT} sets run out.`
+        : "Press and drag a block onto the board.");
       sound("start");
       if (TEST_GAME_OVER) window.setTimeout(endGame, 250);
     }
 
-    function endGame() {
+    function endGame(reason = "blocked") {
       if (!state.running) return;
       state.running = false;
       state.locked = true;
+      state.dailyEndReason = state.mode === "daily" ? reason : "";
+      state.dailyCompleted = state.mode === "daily" && reason === "shardComplete";
       setGameBackVisible(false);
       state.runDurationMs = Date.now() - state.runStartedAt;
       state.sessionCompletedRuns += 1;
+      const isDaily = state.mode === "daily";
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
-      const isNewBest = !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
+      const isNewBest = !isDaily && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
+      if (isDaily) {
+        state.lastDailyResult = {
+          date: state.dailyDate,
+          official: state.dailyOfficial,
+          preview: state.dailyPreview,
+          score: state.score,
+          lines: state.lines,
+          sets: state.setsCompleted,
+          combo: state.highestCombo,
+          tier: state.highestTierReached,
+          completed: state.dailyCompleted,
+          shards: state.shardsCollected,
+          templateId: state.dailyTemplate?.id || "",
+          templateName: state.dailyTemplate?.name || "Shard Hunt"
+        };
+        recordOfficialDailyResult(state.lastDailyResult);
+      }
       updateBest(true);
       recordRunProgress();
+      $("finalScorePanel").hidden = isDaily;
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
       $("finalBlocks").textContent = formatScore(state.blocks);
@@ -2768,13 +3267,27 @@
       $("finalSpecials").textContent = `${formatScore(state.bombsDetonated)} / ${formatScore(state.crossesActivated)}`;
       $("finalTier").textContent = state.highestTierReached ? `Tier ${state.highestTierReached}` : "—";
       $("finalRunType").textContent = formatDuration(state.runDurationMs);
-      $("newBest").textContent = isNewBest ? "★ NEW BEST SCORE ★" : "";
-      $("runStatus").textContent = `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
+      $("gameOverTitle").textContent = isDaily ? state.dailyCompleted ? "Shard Hunt complete!" : "Shard Hunt ended" : "Board blocked!";
+      $("newBest").textContent = isDaily
+        ? state.dailyPreview ? "DEVELOPER DAILY PREVIEW" : state.dailyOfficial ? "★ OFFICIAL RESULT SAVED ★" : "PRACTICE RESULT"
+        : isNewBest ? "★ NEW BEST SCORE ★" : "";
+      $("runStatus").textContent = isDaily
+        ? `${state.shardsCollected} / ${DAILY_SHARD_TARGET} Shards • ${Math.min(state.setsCompleted, DAILY_SET_LIMIT)} / ${DAILY_SET_LIMIT} sets • Streak ${displayedDailyStreak()}`
+        : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
+      $("dailyResultPanel").hidden = !isDaily;
+      if (isDaily) {
+        $("dailyResultType").textContent = `${state.dailyPreview ? "DEVELOPER PREVIEW" : state.dailyOfficial ? "OFFICIAL RESULT" : "PRACTICE RESULT"} • ${state.dailyTemplate.name}`;
+        $("dailyResultDate").textContent = formatDailyDate(state.dailyDate);
+        $("dailyMedal").textContent = `${state.shardsCollected} / ${DAILY_SHARD_TARGET} SHARDS${state.dailyCompleted ? " • COMPLETE" : ""}`;
+        $("dailySharePreview").textContent = buildDailyShare(state.lastDailyResult);
+        $("dailyShareStatus").textContent = "";
+      }
+      $("againButton").textContent = isDaily ? state.dailyPreview ? "REPLAY PREVIEW" : "PRACTICE TODAY'S SHARD HUNT" : "PLAY AGAIN";
       $("postRunContinueButton").classList.remove("hidden");
       $("postRunChoices").classList.add("hidden");
       updateStats();
-      sound("gameOver");
-      vibrate([45, 70, 45]);
+      sound(isDaily && state.dailyCompleted ? "achievement" : "gameOver");
+      vibrate(isDaily && state.dailyCompleted ? [30, 25, 45, 25, 75] : [45, 70, 45]);
       window.setTimeout(() => openOverlay("gameOverOverlay"), 180);
     }
 
@@ -2814,6 +3327,9 @@
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
       closeOverlay("devOverlay");
+      state.mode = "endless";
+      state.dailyDate = "";
+      $("modeBanner").hidden = true;
       updateStats();
       showScreen("homeScreen");
       setGameBackVisible(false);
@@ -2838,9 +3354,41 @@
       state.locked = false;
       recordRunProgress();
       closeOverlay("pauseOverlay");
+      state.mode = "endless";
+      state.dailyDate = "";
+      $("modeBanner").hidden = true;
       updateStats();
       showScreen("homeScreen");
       setGameBackVisible(false);
+    }
+
+    async function shareDailyResult() {
+      if (!state.lastDailyResult) return;
+      const text = buildDailyShare(state.lastDailyResult);
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: "DeBlockle Daily", text });
+          $("dailyShareStatus").textContent = "Share sheet opened.";
+          return;
+        }
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          $("dailyShareStatus").textContent = "Result copied!";
+          return;
+        }
+        const copyArea = document.createElement("textarea");
+        copyArea.value = text;
+        copyArea.setAttribute("readonly", "");
+        copyArea.style.position = "fixed";
+        copyArea.style.opacity = "0";
+        document.body.appendChild(copyArea);
+        copyArea.select();
+        const copied = document.execCommand?.("copy");
+        copyArea.remove();
+        $("dailyShareStatus").textContent = copied ? "Result copied!" : "Your result is shown above and ready to copy.";
+      } catch (error) {
+        if (error?.name !== "AbortError") $("dailyShareStatus").textContent = "Your result is shown above and ready to copy.";
+      }
     }
 
     function toggleSound() {
@@ -2881,7 +3429,8 @@
     function delay(ms) { return new Promise((resolve) => window.setTimeout(resolve, ms)); }
 
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
-    $("againButton").addEventListener("click", () => safeAction("Restart game", startGame));
+    $("dailyButton").addEventListener("click", () => safeAction("Start daily challenge", () => startDailyGame()));
+    $("againButton").addEventListener("click", () => safeAction("Restart game", restartCurrentMode));
     $("homeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("backButton").addEventListener("click", () => safeAction("Pause game", openPauseMenu));
     $("resumeButton").addEventListener("click", () => safeAction("Resume game", resumeGame));
@@ -2897,6 +3446,7 @@
     $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("closeInterstitialButton").addEventListener("click", () => safeAction("Close test interstitial", () => closeInterstitial(true)));
     $("adUnavailableButton").addEventListener("click", () => safeAction("Simulate unavailable ad", () => closeInterstitial(false)));
+    $("shareDailyButton").addEventListener("click", () => safeAction("Share daily result", shareDailyResult));
     $("devMenuButton").addEventListener("click", () => openOverlay("devOverlay"));
     $("closeDevButton").addEventListener("click", () => closeOverlay("devOverlay"));
     $("devNormalButton").addEventListener("click", () => safeAction("Prepare normal clear test", () => prepareDevScenario("normal")));
@@ -2908,6 +3458,9 @@
     $("devEarlyButton").addEventListener("click", () => safeAction("Prepare early block test", () => prepareDevScenario("earlyBlocks")));
     $("devMidButton").addEventListener("click", () => safeAction("Prepare mid block test", () => prepareDevScenario("midBlocks")));
     $("devLateButton").addEventListener("click", () => safeAction("Prepare late block test", () => prepareDevScenario("lateBlocks")));
+    $("devDailyTodayButton").addEventListener("click", () => safeAction("Preview today's daily", () => startDailyGame(0, true)));
+    $("devDailyNextButton").addEventListener("click", () => safeAction("Preview tomorrow's daily", () => startDailyGame(1, true)));
+    $("devDailyFinishButton").addEventListener("click", () => safeAction("Prepare daily finish test", prepareDailyFinishTest));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
@@ -2929,6 +3482,8 @@
     updateStats();
     renderAchievements();
     updateSoundButton();
+    renderDailyHome();
+    window.setInterval(renderDailyHome, 1000);
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
     if (TEST_TUTORIAL) document.querySelector(".version").textContent += " • TUTORIAL TEST";
