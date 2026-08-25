@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.29.1</title>
+  <title>DeBlockle v0.29.2</title>
   <style>
     :root {
       --ink: #101828;
@@ -420,6 +420,61 @@
       border-radius: 16px;
       background: rgba(57,231,208,.055);
       transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+      position: relative;
+    }
+
+    .power-panel.energy-hit { animation: meterReceive .46s cubic-bezier(.2,.8,.2,1); }
+    .power-panel.tier-ready { animation: meterTierReady .82s cubic-bezier(.2,.8,.2,1); }
+    .power-panel.reminding::after {
+      content: attr(data-reminder);
+      position: absolute;
+      z-index: 8;
+      right: 8px;
+      top: -9px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      color: var(--navy);
+      background: var(--lime);
+      box-shadow: 0 4px 12px rgba(216,255,79,.24);
+      font-size: 8px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      animation: meterReminder 1.25s ease both;
+      pointer-events: none;
+    }
+    .meter-energy-spark {
+      position: fixed;
+      z-index: 80;
+      left: var(--spark-left);
+      top: var(--spark-top);
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      color: var(--navy);
+      background: var(--cyan);
+      box-shadow: 0 0 14px rgba(57,231,208,.8);
+      font-size: 8px;
+      font-weight: 1000;
+      pointer-events: none;
+      animation: meterSpark .52s cubic-bezier(.35,.1,.25,1) forwards;
+    }
+    @keyframes meterSpark {
+      0% { transform: translate(-50%, -50%) scale(.7); opacity: 0; }
+      18% { opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--spark-x)), calc(-50% + var(--spark-y))) scale(.35); opacity: 0; }
+    }
+    @keyframes meterReceive {
+      45% { border-color: rgba(57,231,208,.75); background: rgba(57,231,208,.14); box-shadow: 0 0 17px rgba(57,231,208,.18); }
+    }
+    @keyframes meterTierReady {
+      35% { transform: scale(1.018); border-color: var(--lime); box-shadow: 0 0 22px rgba(216,255,79,.25); }
+    }
+    @keyframes meterReminder {
+      0% { transform: translateY(5px) scale(.9); opacity: 0; }
+      18%, 75% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-3px) scale(.96); opacity: 0; }
     }
 
     .meter-copy {
@@ -1446,7 +1501,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.29.1 • LEADERBOARD FIX</div>
+      <div class="version">DEBLOCKLE BUILD v0.29.2 • METER REMINDERS</div>
     </section>
 
     <section class="screen" id="recordsScreen" aria-label="DeBlockle leaderboards">
@@ -1575,6 +1630,7 @@
         <button class="secondary-btn" id="devDailyFinishButton">SHARD FINISH</button>
         <button class="secondary-btn" id="devRushButton">RUSH START</button>
         <button class="secondary-btn" id="devRushClearButton">RUSH CLEAR</button>
+        <button class="secondary-btn" id="devMeterButton">METER CUE</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
@@ -1675,7 +1731,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.29.1";
+    const BUILD = "v0.29.2";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
     const RUSH_BOARD_BASE_BONUS = 1000;
@@ -1885,6 +1941,8 @@
       rerolls: 2,
       setPlaced: 0,
       energy: 0,
+      powerReminderTier: 0,
+      powerReminderCount: 0,
       powerActive: false,
       powerTier: 0,
       powerSetsRemaining: 0,
@@ -2243,6 +2301,7 @@
       setToast(`BOARD ${state.rushBoardsCleared} CLEARED! NEXT PATTERN LOADED.`, true);
       sound("achievement");
       vibrate([25, 20, 40]);
+      remindPowerAtFreshSet();
       return true;
     }
 
@@ -2626,30 +2685,90 @@
         button.disabled = true;
         button.classList.remove("ready");
       } else if (unlockedTier > 0) {
-        const nextTarget = unlockedTier === 1 ? TIER_2_ENERGY : TIER_3_ENERGY;
-        status.textContent = unlockedTier === 3 ? "FULL DEBLOCKLE" : `TIER ${unlockedTier} • ${state.energy}/${nextTarget}`;
+        status.textContent = unlockedTier === 3
+          ? "FULL DEBLOCKLE READY"
+          : unlockedTier === 2 ? "TIER II READY • HOLD FOR III" : "TIER I READY • HOLD FOR II";
         const canActivate = state.running && !state.locked && state.setPlaced === 0;
         button.textContent = canActivate
           ? unlockedTier === 3 ? "FULL DEBLOCKLE" : `ACTIVATE TIER ${unlockedTier}`
-          : `TIER ${unlockedTier} NEXT SET`;
+          : `TIER ${unlockedTier} READY NEXT SET`;
         button.disabled = !canActivate;
         button.classList.toggle("ready", canActivate);
       } else {
         status.textContent = `${state.energy} / ${TIER_1_ENERGY}`;
-        button.textContent = "BUILD POWER";
+        button.textContent = `${Math.round((state.energy / TIER_1_ENERGY) * 100)}% CHARGED`;
         button.disabled = true;
         button.classList.remove("ready");
       }
     }
 
+    function animateEnergyToMeter(amount) {
+      const panel = $("powerPanel");
+      if (!panel || panel.hidden) return;
+      panel.classList.remove("energy-hit");
+      void panel.offsetWidth;
+      panel.classList.add("energy-hit");
+      window.setTimeout(() => panel.classList.remove("energy-hit"), 520);
+      if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+      const boardRect = boardEl.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      if (!boardRect.width || !panelRect.width) return;
+      const startX = boardRect.left + (boardRect.width * .5);
+      const startY = boardRect.top + Math.min(42, boardRect.height * .18);
+      const targetX = panelRect.left + (panelRect.width * .5);
+      const targetY = panelRect.top + (panelRect.height * .5);
+      const spark = document.createElement("span");
+      spark.className = "meter-energy-spark";
+      spark.textContent = `+${Math.min(30, Math.max(1, amount))}`;
+      spark.style.setProperty("--spark-left", `${startX}px`);
+      spark.style.setProperty("--spark-top", `${startY}px`);
+      spark.style.setProperty("--spark-x", `${targetX - startX}px`);
+      spark.style.setProperty("--spark-y", `${targetY - startY}px`);
+      document.body.appendChild(spark);
+      window.setTimeout(() => spark.remove(), 650);
+    }
+
+    function powerTierLabel(tier) {
+      return tier === 3 ? "FULL DEBLOCKLE READY" : `TIER ${tier === 2 ? "II" : "I"} READY`;
+    }
+
+    function showPowerMeterCue(tier, freshSet = false) {
+      const panel = $("powerPanel");
+      if (!panel || panel.hidden || tier <= 0) return;
+      panel.dataset.reminder = powerTierLabel(tier);
+      panel.classList.remove("tier-ready", "reminding");
+      void panel.offsetWidth;
+      panel.classList.add(freshSet ? "reminding" : "tier-ready");
+      window.setTimeout(() => panel.classList.remove("tier-ready", "reminding"), freshSet ? 1350 : 900);
+    }
+
+    function remindPowerAtFreshSet() {
+      const tier = unlockedPowerTier();
+      if (state.mode === "campaign" || state.powerActive || tier <= 0 || state.setPlaced !== 0) return false;
+      if (state.powerReminderTier !== tier) {
+        state.powerReminderTier = tier;
+        state.powerReminderCount = 0;
+      }
+      if (state.powerReminderCount >= 2) return false;
+      state.powerReminderCount += 1;
+      showPowerMeterCue(tier, true);
+      setToast(`${powerTierLabel(tier)} • ACTIVATE BEFORE PLACING`, true);
+      return true;
+    }
+
     function addEnergy(amount) {
       if (state.mode === "campaign" || state.powerActive || amount <= 0) return;
       const previousTier = unlockedPowerTier();
-      state.energy = Math.min(POWER_MAX, state.energy + Math.min(30, amount));
+      const gainedEnergy = Math.min(30, amount, POWER_MAX - state.energy);
+      state.energy = Math.min(POWER_MAX, state.energy + gainedEnergy);
       const newTier = unlockedPowerTier();
       updatePowerUI();
+      if (gainedEnergy > 0) animateEnergyToMeter(gainedEnergy);
       if (newTier > previousTier) {
+        state.powerReminderTier = newTier;
+        state.powerReminderCount = 0;
         const message = newTier === 3 ? "FULL DEBLOCKLE READY!" : `POWER TIER ${newTier} READY!`;
+        showPowerMeterCue(newTier);
         setToast(state.setPlaced === 0 ? message : `${message} ACTIVATE NEXT SET.`, true);
         sound("powerReady");
         vibrate([20, 25, 20, 25, 45]);
@@ -2711,6 +2830,8 @@
       state.energy = 0;
       state.powerActive = true;
       state.powerTier = tier;
+      state.powerReminderTier = 0;
+      state.powerReminderCount = 0;
       state.powerSetsRemaining = tierSetCount(tier);
       state.highestTierReached = Math.max(state.highestTierReached, tier);
       recordPowerActivation(tier);
@@ -3391,6 +3512,7 @@
         state.setPlaced = 0;
         setToast(deliveryMessage, state.powerActive);
         sound("deal");
+        remindPowerAtFreshSet();
       }
 
       updateBest(false);
@@ -3673,6 +3795,13 @@
         state.energy = TIER_3_ENERGY;
         state.selected = null;
         message = "Tier III ready: press FULL DEBLOCKLE above the board.";
+      } else if (type === "meter") {
+        for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+        state.energy = TIER_1_ENERGY - 5;
+        state.powerReminderTier = 0;
+        state.powerReminderCount = 0;
+        state.selected = 0;
+        message = "Meter cue ready: place the Single block in the bottom-right space.";
       } else if (type === "gameover") {
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
         state.score = 1250;
@@ -3828,6 +3957,8 @@
       state.rerolls = mode === "endless" || mode === "rush" ? 2 : 0;
       state.setPlaced = 0;
       state.energy = TEST_MODE && mode !== "campaign" ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
+      state.powerReminderTier = 0;
+      state.powerReminderCount = 0;
       state.powerActive = false;
       state.powerTier = 0;
       state.powerSetsRemaining = 0;
@@ -4170,6 +4301,7 @@
     $("devDailyFinishButton").addEventListener("click", () => safeAction("Prepare daily finish test", prepareDailyFinishTest));
     $("devRushButton").addEventListener("click", () => safeAction("Start Rush test", () => prepareRushTest(false)));
     $("devRushClearButton").addEventListener("click", () => safeAction("Prepare Rush clear test", () => prepareRushTest(true)));
+    $("devMeterButton").addEventListener("click", () => safeAction("Prepare meter cue test", () => prepareDevScenario("meter")));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
