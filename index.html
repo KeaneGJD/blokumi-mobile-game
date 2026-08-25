@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.34</title>
+  <title>DeBlockle v0.38</title>
   <style>
     :root {
       --ink: #101828;
@@ -26,6 +26,7 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
 
     html, body { min-height: 100%; }
 
@@ -180,41 +181,52 @@
     .screen { display: none; flex: 1; }
     .screen.active { display: flex; flex-direction: column; }
 
-    #homeScreen { justify-content: center; padding: 34px 6px 12px; }
+    #homeScreen { justify-content: flex-start; padding: 16px 4px 10px; }
+
+    .home-brand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 13px;
+      margin: 4px 0 14px;
+    }
+
+    .home-brand-copy { min-width: 0; }
 
     .hero-mark {
-      width: 152px;
-      height: 126px;
-      margin: 0 auto 23px;
+      flex: 0 0 74px;
+      width: 74px;
+      height: 65px;
+      margin: 0;
       position: relative;
     }
 
     .hero-block {
       position: absolute;
-      width: 54px;
-      height: 54px;
-      border-radius: 16px;
-      box-shadow: inset -8px -8px 0 rgba(16,24,40,.13), 0 12px 24px rgba(0,0,0,.22);
+      width: 29px;
+      height: 29px;
+      border-radius: 9px;
+      box-shadow: inset -4px -4px 0 rgba(16,24,40,.13), 0 7px 13px rgba(0,0,0,.2);
     }
 
-    .hero-block.one { background: var(--cyan); left: 15px; top: 4px; transform: rotate(-9deg); }
-    .hero-block.two { background: var(--lime); left: 76px; top: 12px; transform: rotate(8deg); }
-    .hero-block.three { background: var(--pink); left: 49px; top: 68px; transform: rotate(-2deg); }
+    .hero-block.one { background: var(--cyan); left: 5px; top: 2px; transform: rotate(-9deg); }
+    .hero-block.two { background: var(--lime); left: 39px; top: 7px; transform: rotate(8deg); }
+    .hero-block.three { background: var(--pink); left: 25px; top: 35px; transform: rotate(-2deg); }
     .hero-block.three::after {
       content: "";
       position: absolute;
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
       background: var(--navy);
-      right: 8px;
-      top: 8px;
+      right: 4px;
+      top: 4px;
     }
 
     .title {
       margin: 0;
-      text-align: center;
-      font-size: clamp(47px, 14vw, 72px);
+      text-align: left;
+      font-size: clamp(38px, 10vw, 50px);
       line-height: .92;
       letter-spacing: -.075em;
       font-weight: 1000;
@@ -223,35 +235,20 @@
     .title span { color: var(--lime); }
 
     .tagline {
-      text-align: center;
+      text-align: left;
       color: var(--muted);
       font-weight: 650;
-      font-size: 16px;
-      line-height: 1.45;
-      max-width: 380px;
-      margin: 20px auto 30px;
+      font-size: 10px;
+      line-height: 1.35;
+      max-width: 245px;
+      margin: 5px 0 0;
     }
-
-    .home-best {
-      display: flex;
-      justify-content: center;
-      align-items: baseline;
-      gap: 9px;
-      margin-bottom: 26px;
-      color: var(--muted);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      font-weight: 900;
-    }
-
-    .home-best strong { color: var(--cyan); font-size: 26px; letter-spacing: -.03em; }
 
     .home-profile-button {
       width: 100%;
-      min-height: 58px;
-      margin: -9px 0 13px;
-      padding: 8px 11px;
+      min-height: 60px;
+      margin: 0;
+      padding: 8px 10px;
       display: grid;
       grid-template-columns: 42px minmax(0, 1fr) auto;
       gap: 10px;
@@ -269,7 +266,25 @@
     .home-profile-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--muted); font-size: 9px; white-space: nowrap; text-overflow: ellipsis; }
     .home-profile-track { height: 5px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.28); }
     .home-profile-fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--lime)); transition: width .4s ease; }
-    .home-profile-open { color: var(--lime); font-size: 9px; font-weight: 1000; letter-spacing: .08em; }
+    .home-profile-best { min-width: 54px; text-align: right; }
+    .home-profile-best small { display: block; color: var(--muted); font-size: 7px; font-weight: 950; letter-spacing: .12em; }
+    .home-profile-best strong { display: block; margin-top: 2px; color: var(--cyan); font-size: 19px; line-height: 1; letter-spacing: -.03em; }
+
+    .home-section-label { margin: 12px 2px 6px; color: var(--muted); font-size: 8px; font-weight: 1000; letter-spacing: .18em; }
+    .home-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .home-endless-button { grid-column: 1 / -1; min-height: 55px; padding: 7px 12px 10px; }
+    .home-endless-button strong, .home-endless-button span { display: block; }
+    .home-endless-button strong { font-size: 17px; }
+    .home-endless-button span { margin-top: 1px; font-size: 7px; letter-spacing: .12em; opacity: .62; }
+    .home-mode-card { min-width: 0; height: 70px; min-height: 70px; }
+    .home-mode-card strong, .home-mode-card > span { display: block; }
+    .home-mode-card > strong { font-size: 13px; line-height: 1.12; }
+    .home-utility-grid { display: grid; grid-template-columns: repeat(4, 58px); justify-content: center; gap: 10px; margin-top: 13px; }
+    .home-utility-button { width: 58px; min-height: 58px; padding: 0; display: grid; place-items: center; border-radius: 17px; }
+    .home-utility-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; color: var(--cyan); background: rgba(57,231,208,.1); font-size: 23px; line-height: 1; font-weight: 1000; }
+    .home-utility-button:nth-child(2) .home-utility-icon { color: var(--orange); background: rgba(255,173,66,.1); }
+    .home-utility-button:nth-child(3) .home-utility-icon { color: var(--lime); background: rgba(216,255,79,.1); }
+    .home-utility-button:nth-child(4) .home-utility-icon { color: var(--pink); background: rgba(255,92,168,.1); }
 
     #profileScreen { padding: 18px 2px 12px; }
     .profile-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -325,24 +340,27 @@
     .settings-status { min-height: 18px; margin: 8px 2px 4px; color: var(--lime); font-size: 9px; text-align: center; }
 
     .daily-card {
-      margin: 0 0 14px;
+      margin: 0;
       padding: 0;
     }
 
     .secondary-btn.daily-button {
-      min-height: 62px;
-      padding: 9px 15px 10px;
+      height: 70px;
+      min-height: 70px;
+      padding: 9px 10px;
       color: var(--ink);
       background: linear-gradient(135deg, var(--orange), var(--pink));
       border: 0;
       box-shadow: inset 0 -6px 0 rgba(16,24,40,.13), 0 12px 24px rgba(255,92,168,.1);
-      text-align: left;
+      text-align: center;
     }
-    .daily-button-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .daily-button-row strong { font-size: 16px; letter-spacing: .035em; }
-    .daily-button-row span { font-size: 9px; font-weight: 950; letter-spacing: .08em; opacity: .72; }
-    .daily-button-status { display: block; margin-top: 2px; font-size: 9px; font-weight: 900; letter-spacing: .07em; opacity: .76; }
-    .rush-home-button { background: linear-gradient(135deg, rgba(155,114,255,.3), rgba(57,231,208,.22)); border-color: rgba(155,114,255,.48); }
+    .daily-button-top, .daily-button-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .daily-button-top strong { min-width: 0; font-size: 12px; line-height: 1.1; letter-spacing: .01em; white-space: nowrap; }
+    .daily-progress { flex: 0 0 auto; color: var(--ink); font-size: 13px; font-weight: 1000; letter-spacing: -.02em; }
+    .daily-button-bottom { margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(16,24,40,.16); }
+    .daily-date, .daily-reset { font-size: 7px; font-weight: 1000; letter-spacing: .065em; opacity: .72; white-space: nowrap; }
+    .daily-reset b { font: inherit; }
+    .rush-home-button { height: 70px; min-height: 70px; padding: 9px 10px; background: linear-gradient(135deg, rgba(155,114,255,.3), rgba(57,231,208,.22)); border-color: rgba(155,114,255,.48); text-align: center; }
 
     #recordsScreen { padding: 18px 2px 12px; }
     .records-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -418,6 +436,8 @@
       letter-spacing: .13em;
       margin-top: 24px;
     }
+
+    #homeScreen .version { margin-top: 13px; font-size: 8px; }
 
     #gameScreen { padding-top: 14px; }
 
@@ -1687,6 +1707,15 @@
       .app { padding-top: max(10px, env(safe-area-inset-top)); }
       .topbar { min-height: 40px; }
       .icon-btn { width: 40px; height: 40px; }
+      #homeScreen { padding-top: 8px; }
+      .home-brand { margin: 1px 0 9px; }
+      .home-profile-button { min-height: 56px; }
+      .home-section-label { margin-top: 9px; }
+      .home-mode-card, .secondary-btn.daily-button, .rush-home-button { height: 64px; min-height: 64px; }
+      .daily-button-bottom { margin-top: 5px; padding-top: 4px; }
+      .home-utility-grid { margin-top: 9px; }
+      .home-utility-button { min-height: 54px; }
+      #homeScreen .version { margin-top: 9px; }
       .stats { margin: 4px 0 8px; }
       .power-panel { margin-bottom: 7px; padding-top: 7px; padding-bottom: 7px; }
       .stat { min-height: 50px; }
@@ -1711,33 +1740,40 @@
     </header>
 
     <section class="screen active" id="homeScreen" aria-label="DeBlockle home">
-      <div class="hero-mark" aria-hidden="true">
-        <span class="hero-block one"></span><span class="hero-block two"></span><span class="hero-block three"></span>
+      <div class="home-brand">
+        <div class="hero-mark" aria-hidden="true">
+          <span class="hero-block one"></span><span class="hero-block two"></span><span class="hero-block three"></span>
+        </div>
+        <div class="home-brand-copy">
+          <h1 class="title">De<span>Block</span>le</h1>
+          <p class="tagline">Fit the pieces. Clear the lines. Keep the board alive.</p>
+        </div>
       </div>
-      <h1 class="title">De<span>Block</span>le</h1>
-      <p class="tagline">Fit the pieces. Clear the lines.<br>Keep the board alive.</p>
-      <div class="home-best"><span>Best score</span><strong id="homeBest">0</strong></div>
-      <button class="home-profile-button" id="profileButton">
+      <button class="home-profile-button" id="profileButton" aria-label="Open player profile">
         <span class="home-profile-level" id="homeProfileLevel">LV 1</span>
         <span class="home-profile-copy"><strong id="homeProfileTitle">NEW BLOCK</strong><small id="homeProfileXp">0 / 150 XP</small><span class="home-profile-track"><span class="home-profile-fill" id="homeProfileFill"></span></span></span>
-        <span class="home-profile-open">PROFILE ›</span>
+        <span class="home-profile-best"><small>BEST</small><strong id="homeBest">0</strong></span>
       </button>
-      <div class="daily-card">
-        <button class="secondary-btn daily-button" id="dailyButton">
-          <span class="daily-button-row"><strong>☀ DAILY DEBLOCKLE</strong><span id="dailyDateLabel">TODAY</span></span>
-          <span class="daily-button-status" id="dailyStatus">10 SHARDS • OFFICIAL READY</span>
-        </button>
-        <span id="dailyRuleHome" hidden></span><span id="dailyStreak" hidden></span><span id="dailyCountdown" hidden></span>
+
+      <p class="home-section-label">PLAY</p>
+      <div class="home-mode-grid">
+        <button class="primary-btn home-endless-button" id="playButton"><strong>PLAY ENDLESS</strong><span>BUILD YOUR BEST SCORE</span></button>
+        <div class="daily-card home-mode-card">
+          <button class="secondary-btn daily-button" id="dailyButton">
+            <span class="daily-button-top"><strong>☀ DAILY DEBLOCKLE</strong><span class="daily-progress" id="dailyProgress">—/10</span></span>
+            <span class="daily-button-bottom"><span class="daily-date" id="dailyDateLabel">TODAY</span><span class="daily-reset">NEXT <b id="dailyCountdown">00:00:00</b></span></span>
+          </button>
+        </div>
+        <button class="secondary-btn rush-home-button home-mode-card" id="rushButton"><strong>⚡ DEBLOCKLE RUSH</strong></button>
       </div>
-      <div class="button-stack">
-        <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
-        <button class="secondary-btn rush-home-button" id="rushButton">⚡ PLAY DEBLOCKLE RUSH</button>
-        <button class="secondary-btn" id="leaderboardsButton">LEADERBOARDS</button>
-        <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
-        <button class="secondary-btn" id="settingsButton">SETTINGS</button>
-        <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
+
+      <div class="home-utility-grid" aria-label="More options">
+        <button class="secondary-btn home-utility-button" id="leaderboardsButton" aria-label="Leaderboards" title="Leaderboards"><span class="home-utility-icon" aria-hidden="true">▥</span></button>
+        <button class="secondary-btn home-utility-button" id="achievementsButton" aria-label="Achievements" title="Achievements"><span class="home-utility-icon" aria-hidden="true">★</span></button>
+        <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
+        <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.34 • SETTINGS & ACCESSIBILITY</div>
+      <div class="version">DEBLOCKLE BUILD v0.38 • CLEAN DAILY CARD</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
@@ -2040,7 +2076,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.34";
+    const BUILD = "v0.38";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2525,15 +2561,11 @@
       const today = localDateKey();
       const result = state.daily.results?.[today];
       const officialResult = result?.shardVersion === DAILY_SHARD_VERSION ? result : null;
-      const template = dailyTemplateForDate(today);
-      const streak = displayedDailyStreak(today);
       $("dailyDateLabel").textContent = formatDailyDate(today);
-      $("dailyRuleHome").innerHTML = `<strong>Shard Hunt:</strong> Clear ${DAILY_SHARD_TARGET} Shards from today's ${template.name} board before ${DAILY_SET_LIMIT} sets run out.`;
       $("dailyCountdown").textContent = formatCountdown(secondsUntilTomorrow());
-      $("dailyStreak").textContent = `${streak} / ${state.daily.longestStreak} day${state.daily.longestStreak === 1 ? "" : "s"}`;
-      $("dailyStatus").textContent = officialResult
-        ? `${officialResult.shards}/${DAILY_SHARD_TARGET} SHARDS • PRACTICE AVAILABLE`
-        : `${DAILY_SHARD_TARGET} SHARDS • OFFICIAL READY`;
+      $("dailyProgress").textContent = officialResult
+        ? `${Math.min(DAILY_SHARD_TARGET, Number(officialResult.shards) || 0)}/${DAILY_SHARD_TARGET}`
+        : `—/${DAILY_SHARD_TARGET}`;
       $("dailyButton").setAttribute("aria-label", officialResult ? "Practice today's Daily Shard Hunt" : "Play today's official Daily Shard Hunt");
     }
 
