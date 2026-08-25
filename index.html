@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.30</title>
+  <title>DeBlockle v0.32</title>
   <style>
     :root {
       --ink: #101828;
@@ -41,6 +41,54 @@
       font-family: Inter, ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
       overscroll-behavior: none;
       touch-action: manipulation;
+    }
+
+    body[data-theme="neon"] {
+      --ink: #03171d;
+      --navy: #061a21;
+      --panel: #0b2830;
+      --panel-2: #103743;
+      --cell: #174652;
+      --cell-border: #216170;
+      --cream: #efffff;
+      --muted: #8fb7bf;
+      --lime: #7dff6b;
+      --cyan: #36ffe0;
+      --pink: #ff4ecb;
+      --orange: #ffc857;
+      background: radial-gradient(circle at 12% 4%, rgba(54,255,224,.2), transparent 30%), radial-gradient(circle at 92% 18%, rgba(255,78,203,.15), transparent 28%), linear-gradient(165deg, #08272d 0%, #03151b 65%, #071b22 100%);
+    }
+
+    body[data-theme="sunset"] {
+      --ink: #241225;
+      --navy: #261528;
+      --panel: #3a2038;
+      --panel-2: #4c2944;
+      --cell: #5a334d;
+      --cell-border: #74435e;
+      --cream: #fff4df;
+      --muted: #d1a9b8;
+      --lime: #ffe26b;
+      --cyan: #ff8d72;
+      --pink: #ff6b9e;
+      --orange: #ff9b54;
+      background: radial-gradient(circle at 12% 4%, rgba(255,155,84,.22), transparent 30%), radial-gradient(circle at 92% 18%, rgba(255,107,158,.18), transparent 28%), linear-gradient(165deg, #40233b 0%, #231426 65%, #30182c 100%);
+    }
+
+    body[data-theme="void"] {
+      --ink: #0d0b22;
+      --navy: #100d27;
+      --panel: #1c173c;
+      --panel-2: #29204f;
+      --cell: #352a5c;
+      --cell-border: #4b3b79;
+      --cream: #f6f1ff;
+      --muted: #aaa0cc;
+      --lime: #c8ff62;
+      --cyan: #61e8ff;
+      --pink: #c86bff;
+      --orange: #ffae62;
+      background: radial-gradient(circle at 12% 4%, rgba(97,232,255,.16), transparent 30%), radial-gradient(circle at 92% 18%, rgba(200,107,255,.18), transparent 28%), linear-gradient(165deg, #1b1640 0%, #0d0b21 65%, #15102e 100%);
     }
 
     button { font: inherit; }
@@ -198,6 +246,61 @@
     }
 
     .home-best strong { color: var(--cyan); font-size: 26px; letter-spacing: -.03em; }
+
+    .home-profile-button {
+      width: 100%;
+      min-height: 58px;
+      margin: -9px 0 13px;
+      padding: 8px 11px;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid rgba(57,231,208,.22);
+      border-radius: 16px;
+      color: var(--cream);
+      background: rgba(57,231,208,.065);
+      cursor: pointer;
+      text-align: left;
+    }
+    .home-profile-level { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; color: var(--navy); background: linear-gradient(135deg, var(--lime), var(--cyan)); font-size: 11px; font-weight: 1000; }
+    .home-profile-copy { min-width: 0; }
+    .home-profile-copy strong { display: block; color: var(--cyan); font-size: 9px; letter-spacing: .1em; }
+    .home-profile-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--muted); font-size: 9px; white-space: nowrap; text-overflow: ellipsis; }
+    .home-profile-track { height: 5px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.28); }
+    .home-profile-fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--lime)); transition: width .4s ease; }
+    .home-profile-open { color: var(--lime); font-size: 9px; font-weight: 1000; letter-spacing: .08em; }
+
+    #profileScreen { padding: 18px 2px 12px; }
+    .profile-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
+    .profile-intro { margin: 0 0 14px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .profile-hero { padding: 16px; border: 1px solid rgba(216,255,79,.24); border-radius: 20px; background: linear-gradient(145deg, rgba(216,255,79,.11), rgba(57,231,208,.055)); }
+    .profile-hero-top { display: grid; grid-template-columns: 70px 1fr; gap: 13px; align-items: center; }
+    .profile-level-badge { display: grid; place-items: center; width: 70px; height: 70px; border-radius: 22px; color: var(--navy); background: linear-gradient(135deg, var(--lime), var(--cyan)); box-shadow: inset 0 -7px 0 rgba(16,24,40,.13); font-size: 22px; font-weight: 1000; }
+    .profile-hero-copy span { display: block; color: var(--muted); font-size: 9px; font-weight: 950; letter-spacing: .12em; }
+    .profile-hero-copy strong { display: block; margin-top: 3px; color: var(--cream); font-size: 22px; }
+    .profile-hero-copy small { display: block; margin-top: 3px; color: var(--cyan); font-size: 10px; font-weight: 900; }
+    .profile-xp-track { height: 11px; margin-top: 14px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.3); }
+    .profile-xp-fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--orange), var(--lime), var(--cyan)); transition: width .45s ease; }
+    .profile-xp-copy { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; color: var(--muted); font-size: 9px; font-weight: 900; }
+    .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .profile-stat { padding: 11px; border-radius: 14px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.07); }
+    .profile-stat span { display: block; color: var(--muted); font-size: 8px; font-weight: 950; letter-spacing: .1em; }
+    .profile-stat strong { display: block; margin-top: 4px; color: var(--cream); font-size: 14px; }
+    .profile-section-title { margin: 17px 0 8px; color: var(--orange); font-size: 10px; font-weight: 1000; letter-spacing: .12em; }
+    .level-road { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+    .level-road span { display: grid; place-items: center; aspect-ratio: 1; border-radius: 8px; color: var(--muted); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.06); font-size: 8px; font-weight: 950; }
+    .level-road span.reached { color: var(--navy); background: var(--lime); border-color: transparent; }
+    .level-road span.current { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    .level-road span.reward::after { content: "•"; margin-left: 1px; color: var(--pink); }
+    .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .theme-card { min-height: 92px; padding: 11px; border: 1px solid rgba(255,255,255,.09); border-radius: 15px; color: var(--cream); background: rgba(255,255,255,.05); text-align: left; cursor: pointer; }
+    .theme-card.selected { border-color: var(--lime); box-shadow: 0 0 17px rgba(216,255,79,.12); }
+    .theme-card:disabled { opacity: .4; cursor: not-allowed; }
+    .theme-swatches { display: flex; gap: 5px; margin-bottom: 9px; }
+    .theme-swatches i { width: 18px; height: 18px; border-radius: 6px; }
+    .theme-card strong { display: block; font-size: 12px; }
+    .theme-card small { display: block; margin-top: 3px; color: var(--muted); font-size: 8px; font-weight: 850; }
 
     .daily-card {
       margin: 0 0 14px;
@@ -954,6 +1057,89 @@
       100% { transform: scale(.2); opacity: 0; }
     }
 
+    /* Theme identities stay on stable board and tray layers. Temporary clear,
+       Blast, Cross and Power states keep sole control of their own effects. */
+    body[data-theme="neon"] .board-shell {
+      background:
+        linear-gradient(rgba(54,255,224,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(54,255,224,.045) 1px, transparent 1px),
+        linear-gradient(145deg, #0b3039, #05191f);
+      background-size: 18px 18px, 18px 18px, auto;
+      border-color: rgba(54,255,224,.72);
+      box-shadow:
+        0 0 0 1px rgba(125,255,107,.12),
+        0 0 16px rgba(54,255,224,.28),
+        0 0 34px rgba(54,255,224,.1),
+        var(--shadow),
+        inset 0 0 18px rgba(54,255,224,.07);
+    }
+
+    body[data-theme="neon"] .cell:not(.filled):not(.preview-valid):not(.preview-invalid):not(.clearing):not(.cross-fire):not(.exploding):not(.tier3-wave) {
+      border-color: rgba(54,255,224,.42);
+      box-shadow: inset 0 0 7px rgba(54,255,224,.08), 0 0 5px rgba(54,255,224,.08);
+    }
+
+    body[data-theme="neon"] #gameScreen:not(.powered) .cell.filled:not(.bomb):not(.cross):not(.clearing):not(.cross-fire):not(.exploding):not(.tier3-wave),
+    body[data-theme="neon"] #gameScreen:not(.powered) .piece-dot.on:not(.bomb-dot):not(.cross-dot) {
+      border-color: rgba(125,255,107,.72);
+      box-shadow:
+        inset -3px -3px 0 rgba(3,23,29,.2),
+        inset 0 0 0 1px rgba(235,255,255,.28),
+        0 0 7px rgba(54,255,224,.62),
+        0 0 14px rgba(54,255,224,.18);
+    }
+
+    body[data-theme="neon"] .primary-btn {
+      box-shadow: 0 0 18px rgba(125,255,107,.2), inset 0 -4px 0 rgba(3,23,29,.16);
+    }
+
+    body[data-theme="neon"] .profile-hero,
+    body[data-theme="neon"] .record-card {
+      border-color: rgba(54,255,224,.25);
+      box-shadow: inset 0 0 20px rgba(54,255,224,.035), 0 0 15px rgba(54,255,224,.05);
+    }
+
+    body[data-theme="sunset"] .board-shell {
+      background:
+        radial-gradient(circle at 50% -15%, rgba(255,226,107,.72) 0 8%, rgba(255,155,84,.32) 22%, transparent 48%),
+        linear-gradient(180deg, #67334d 0%, #3f243e 45%, #23182f 100%);
+      border-color: rgba(255,155,84,.72);
+      box-shadow:
+        0 -5px 22px rgba(255,155,84,.2),
+        0 8px 28px rgba(255,107,158,.14),
+        var(--shadow),
+        inset 0 1px 0 rgba(255,226,107,.28),
+        inset 0 -12px 24px rgba(35,20,38,.28);
+    }
+
+    body[data-theme="sunset"] .cell:not(.filled):not(.preview-valid):not(.preview-invalid):not(.clearing):not(.cross-fire):not(.exploding):not(.tier3-wave) {
+      background: linear-gradient(160deg, rgba(116,67,94,.98), rgba(76,41,68,.98));
+      border-color: rgba(255,155,84,.28);
+      box-shadow: inset 0 1px 0 rgba(255,226,107,.07);
+    }
+
+    body[data-theme="sunset"] #gameScreen:not(.powered) .cell.filled:not(.bomb):not(.cross):not(.clearing):not(.cross-fire):not(.exploding):not(.tier3-wave),
+    body[data-theme="sunset"] #gameScreen:not(.powered) .piece-dot.on:not(.bomb-dot):not(.cross-dot) {
+      background: linear-gradient(145deg, #ffbd70 0%, #ff8d72 48%, #ff6b9e 100%);
+      border-color: rgba(255,226,107,.48);
+      box-shadow:
+        inset -3px -3px 0 rgba(36,18,37,.17),
+        inset 0 1px 0 rgba(255,244,223,.35),
+        0 0 8px rgba(255,107,158,.22);
+    }
+
+    body[data-theme="sunset"] .primary-btn {
+      background: linear-gradient(135deg, #ffe26b, #ff9b54);
+      box-shadow: 0 9px 20px rgba(255,107,158,.13), inset 0 -4px 0 rgba(36,18,37,.13);
+    }
+
+    body[data-theme="sunset"] .profile-hero,
+    body[data-theme="sunset"] .record-card,
+    body[data-theme="sunset"] .stat {
+      background: linear-gradient(145deg, rgba(255,155,84,.12), rgba(255,107,158,.075));
+      border-color: rgba(255,155,84,.2);
+    }
+
     .toast {
       min-height: 30px;
       display: grid;
@@ -1272,6 +1458,18 @@
       font-weight: 800;
     }
 
+    .xp-result-panel { margin-top: 12px; padding: 12px 13px; overflow: hidden; border: 1px solid rgba(216,255,79,.2); border-radius: 17px; background: rgba(216,255,79,.065); }
+    .xp-result-panel[hidden] { display: none; }
+    .xp-result-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .xp-result-head strong { color: var(--lime); font-size: 12px; letter-spacing: .08em; }
+    .xp-result-head span { color: var(--cyan); font-size: 16px; font-weight: 1000; }
+    .xp-result-track { height: 8px; margin-top: 9px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.28); }
+    .xp-result-fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--orange), var(--lime), var(--cyan)); }
+    .xp-result-panel.animate .xp-result-fill { animation: xpFillGain .9s cubic-bezier(.2,.75,.2,1) .2s both; }
+    @keyframes xpFillGain { from { width: var(--xp-start); } to { width: var(--xp-end); } }
+    .xp-result-breakdown { margin: 7px 0 0 !important; color: var(--muted) !important; font-size: 9px !important; line-height: 1.35 !important; text-align: center; }
+    .xp-result-reward { display: block; margin-top: 7px; color: var(--orange); font-size: 9px; font-weight: 1000; text-align: center; }
+
     .continue-btn { background: linear-gradient(135deg, var(--lime), var(--cyan)); }
     .continue-btn.hidden { display: none; }
     .post-run-choices { display: grid; gap: 12px; }
@@ -1471,6 +1669,11 @@
       <h1 class="title">De<span>Block</span>le</h1>
       <p class="tagline">Fit the pieces. Clear the lines.<br>Keep the board alive.</p>
       <div class="home-best"><span>Best score</span><strong id="homeBest">0</strong></div>
+      <button class="home-profile-button" id="profileButton">
+        <span class="home-profile-level" id="homeProfileLevel">LV 1</span>
+        <span class="home-profile-copy"><strong id="homeProfileTitle">NEW BLOCK</strong><small id="homeProfileXp">0 / 150 XP</small><span class="home-profile-track"><span class="home-profile-fill" id="homeProfileFill"></span></span></span>
+        <span class="home-profile-open">PROFILE ›</span>
+      </button>
       <div class="daily-card">
         <button class="secondary-btn daily-button" id="dailyButton">
           <span class="daily-button-row"><strong>☀ DAILY DEBLOCKLE</strong><span id="dailyDateLabel">TODAY</span></span>
@@ -1485,7 +1688,31 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.30 • SHAREABLE RESULTS</div>
+      <div class="version">DEBLOCKLE BUILD v0.32 • ENHANCED THEMES</div>
+    </section>
+
+    <section class="screen" id="profileScreen" aria-label="Local player profile">
+      <h1 class="profile-heading">Player Profile</h1>
+      <p class="profile-intro">Every genuine run builds your local profile. Themes are cosmetic and never affect scoring.</p>
+      <div class="profile-hero">
+        <div class="profile-hero-top">
+          <span class="profile-level-badge" id="profileLevelBadge">1</span>
+          <span class="profile-hero-copy"><span>PLAYER LEVEL</span><strong id="profileTitle">New Block</strong><small id="profileNextReward">Next reward at Level 4</small></span>
+        </div>
+        <div class="profile-xp-track"><div class="profile-xp-fill" id="profileXpFill"></div></div>
+        <div class="profile-xp-copy"><span id="profileXpProgress">0 / 150 XP</span><span id="profileTotalXp">0 TOTAL XP</span></div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat"><span>FAVOURITE MODE</span><strong id="profileFavouriteMode">—</strong></div>
+        <div class="profile-stat"><span>ACHIEVEMENTS</span><strong id="profileAchievements">0 / 12</strong></div>
+        <div class="profile-stat"><span>GENUINE RUNS</span><strong id="profileRuns">0</strong></div>
+        <div class="profile-stat"><span>SELECTED THEME</span><strong id="profileTheme">Classic</strong></div>
+      </div>
+      <p class="profile-section-title">LEVEL ROAD • 1–20</p>
+      <div class="level-road" id="profileLevelRoad"></div>
+      <p class="profile-section-title">BOARD & SCORE-CARD THEMES</p>
+      <div class="theme-grid" id="profileThemeGrid"></div>
+      <div class="button-stack"><button class="primary-btn" id="profileHomeButton">BACK TO HOME</button></div>
     </section>
 
     <section class="screen" id="recordsScreen" aria-label="DeBlockle leaderboards">
@@ -1615,6 +1842,9 @@
         <button class="secondary-btn" id="devRushClearButton">RUSH CLEAR</button>
         <button class="secondary-btn" id="devMeterButton">METER CUE</button>
         <button class="secondary-btn" id="devShareButton">SHARE CARD</button>
+        <button class="secondary-btn" id="devProfileButton">XP RESULT</button>
+        <button class="secondary-btn" id="devNeonThemeButton">NEON PREVIEW</button>
+        <button class="secondary-btn" id="devSunsetThemeButton">SUNSET PREVIEW</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
@@ -1649,6 +1879,12 @@
         <div class="summary-box"><span id="finalRunTypeLabel">Run time</span><strong id="finalRunType">0:00</strong></div>
       </div>
       <p class="run-status" id="runStatus">Best score: 0</p>
+      <div class="xp-result-panel" id="xpResultPanel" hidden>
+        <div class="xp-result-head"><strong id="xpResultLevel">LEVEL 1</strong><span id="xpResultGain">+0 XP</span></div>
+        <div class="xp-result-track"><div class="xp-result-fill" id="xpResultFill"></div></div>
+        <p class="xp-result-breakdown" id="xpResultBreakdown"></p>
+        <span class="xp-result-reward" id="xpResultReward"></span>
+      </div>
       <div class="daily-result-panel" id="dailyResultPanel" hidden>
         <div class="daily-result-heading"><span id="dailyResultType">OFFICIAL RESULT</span><span id="dailyResultDate">TODAY</span></div>
         <div class="daily-medal" id="dailyMedal">0 / 10 SHARDS</div>
@@ -1722,7 +1958,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.30";
+    const BUILD = "v0.32";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -1749,7 +1985,26 @@
     const DAILY_DATA_KEY = "deblockle_v022_daily";
     const CAMPAIGN_DATA_KEY = "deblockle_v028_campaign";
     const RUSH_DATA_KEY = "deblockle_v029_rush";
+    const PROFILE_KEY = "deblockle_v031_profile";
     const SOUND_KEY = "deblockle_v01_sound";
+
+    const XP_LEVEL_THRESHOLDS = [0, 150, 350, 650, 1000, 1450, 2000, 2650, 3400, 4250, 5200, 6250, 7400, 8650, 10000, 11550, 13200, 14950, 16800, 18800];
+    const PROFILE_THEMES = [
+      { id: "classic", name: "Classic", unlockLevel: 1, swatches: ["#d8ff4f", "#39e7d0", "#ff5ca8"], shareBackground: ["#27344a", "#172133", "#101828"], shareBrand: "#d8ff4f" },
+      { id: "neon", name: "Neon Grid", unlockLevel: 4, swatches: ["#7dff6b", "#36ffe0", "#ff4ecb"], shareBackground: ["#0b3038", "#061a21", "#031219"], shareBrand: "#36ffe0" },
+      { id: "sunset", name: "Sunset Circuit", unlockLevel: 8, swatches: ["#ffe26b", "#ff9b54", "#ff6b9e"], shareBackground: ["#553044", "#321c34", "#211120"], shareBrand: "#ff9b54" },
+      { id: "void", name: "Deep Void", unlockLevel: 13, swatches: ["#c8ff62", "#61e8ff", "#c86bff"], shareBackground: ["#29204f", "#171232", "#0d0b21"], shareBrand: "#c86bff" }
+    ];
+    const PROFILE_REWARDS = [
+      { level: 3, label: "TITLE • LINE MAKER" },
+      { level: 4, label: "THEME • NEON GRID" },
+      { level: 6, label: "TITLE • GRID RUNNER" },
+      { level: 8, label: "THEME • SUNSET CIRCUIT" },
+      { level: 10, label: "TITLE • POWER PLAYER" },
+      { level: 13, label: "THEME • DEEP VOID" },
+      { level: 15, label: "TITLE • BOARD ARCHITECT" },
+      { level: 20, label: "TITLE • FULL DEBLOCKLE" }
+    ];
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
     const TEST_INTERSTITIAL = new URLSearchParams(window.location.search).get("adtest") === "1";
@@ -1874,6 +2129,13 @@
 
     const DEFAULT_CAMPAIGN_DATA = { completed: [] };
     const DEFAULT_RUSH_DATA = { best: 0, bestBoards: 0, bestLines: 0, runs: 0, lastStartTemplate: -1 };
+    const DEFAULT_PROFILE_DATA = {
+      xp: 0,
+      selectedTheme: "classic",
+      unlockedThemes: ["classic"],
+      modeRuns: { endless: 0, rush: 0, daily: 0 },
+      lastXpGain: 0
+    };
 
     function readJSON(key, fallback) {
       try {
@@ -1901,6 +2163,7 @@
       dailyEndReason: "",
       lastDailyResult: null,
       lastShareResult: null,
+      lastXpResult: null,
       rushBoardIndex: 0,
       rushBoardOrder: [],
       rushPattern: null,
@@ -1938,6 +2201,7 @@
       powerActive: false,
       powerTier: 0,
       powerSetsRemaining: 0,
+      runStartAchievementCount: 0,
       runStartedAt: 0,
       runDurationMs: 0,
       sessionCompletedRuns: 0,
@@ -1949,6 +2213,7 @@
       daily: { ...DEFAULT_DAILY_DATA, ...readJSON(DAILY_DATA_KEY, {}) },
       campaign: { ...DEFAULT_CAMPAIGN_DATA, ...readJSON(CAMPAIGN_DATA_KEY, {}) },
       rush: { ...DEFAULT_RUSH_DATA, ...readJSON(RUSH_DATA_KEY, {}) },
+      profile: { ...DEFAULT_PROFILE_DATA, ...readJSON(PROFILE_KEY, {}) },
       specialTutorials: { bomb: false, cross: false, ...readJSON(SPECIAL_TUTORIAL_KEY, {}) },
       recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -2314,6 +2579,222 @@
       sound("select");
     }
 
+    function unlockedAchievementCount() {
+      return ACHIEVEMENTS.filter((achievement) => state.achievements[achievement.id]).length;
+    }
+
+    function profileLevelFromXp(xp = state.profile.xp) {
+      let level = 1;
+      XP_LEVEL_THRESHOLDS.forEach((threshold, index) => {
+        if (xp >= threshold) level = index + 1;
+      });
+      return Math.min(20, level);
+    }
+
+    function profileLevelProgress(xp = state.profile.xp) {
+      const level = profileLevelFromXp(xp);
+      const start = XP_LEVEL_THRESHOLDS[level - 1];
+      if (level >= 20) return { level, start, end: start, current: Math.max(0, xp - start), needed: 0, percent: 100 };
+      const end = XP_LEVEL_THRESHOLDS[level];
+      return { level, start, end, current: Math.max(0, xp - start), needed: end - start, percent: Math.max(0, Math.min(100, ((xp - start) / (end - start)) * 100)) };
+    }
+
+    function profileTitleForLevel(level) {
+      if (level >= 20) return "Full DeBlockle";
+      if (level >= 15) return "Board Architect";
+      if (level >= 10) return "Power Player";
+      if (level >= 6) return "Grid Runner";
+      if (level >= 3) return "Line Maker";
+      return "New Block";
+    }
+
+    function profileThemeDefinition(id = state.profile.selectedTheme) {
+      return PROFILE_THEMES.find((theme) => theme.id === id) || PROFILE_THEMES[0];
+    }
+
+    function nextProfileReward(level) {
+      return PROFILE_REWARDS.find((reward) => reward.level > level) || null;
+    }
+
+    function saveProfile() {
+      if (!TEST_SAVE_DISABLED) localStorage.setItem(PROFILE_KEY, JSON.stringify(state.profile));
+    }
+
+    function unlockProfileThemes(level = profileLevelFromXp()) {
+      const newlyUnlocked = [];
+      PROFILE_THEMES.forEach((theme) => {
+        if (theme.unlockLevel <= level && !state.profile.unlockedThemes.includes(theme.id)) {
+          state.profile.unlockedThemes.push(theme.id);
+          if (theme.unlockLevel > 1) newlyUnlocked.push(theme.name);
+        }
+      });
+      return newlyUnlocked;
+    }
+
+    function applyProfileTheme() {
+      const theme = profileThemeDefinition();
+      document.body.dataset.theme = theme.id;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme.shareBackground[2]);
+    }
+
+    function initialiseProfile() {
+      const hadProfileSave = Boolean(localStorage.getItem(PROFILE_KEY));
+      state.profile.xp = Math.max(0, Number(state.profile.xp) || 0);
+      state.profile.modeRuns = { ...DEFAULT_PROFILE_DATA.modeRuns, ...(state.profile.modeRuns || {}) };
+      state.profile.unlockedThemes = Array.isArray(state.profile.unlockedThemes) ? [...new Set(state.profile.unlockedThemes)] : ["classic"];
+      if (!hadProfileSave) {
+        const dailyRuns = Object.values(state.daily.results || {}).filter((result) => result?.shardVersion === DAILY_SHARD_VERSION).length;
+        const endlessRuns = Math.max(0, (Number(state.lifetime.runs) || 0) - dailyRuns);
+        const rushRuns = Math.max(0, Number(state.rush.runs) || 0);
+        const historicalXp = (endlessRuns * 65) + (rushRuns * 80) + (dailyRuns * 120) + (unlockedAchievementCount() * 50);
+        state.profile.xp = Math.min(5000, historicalXp);
+        state.profile.modeRuns = { endless: endlessRuns, rush: rushRuns, daily: dailyRuns };
+      }
+      unlockProfileThemes();
+      if (!state.profile.unlockedThemes.includes(state.profile.selectedTheme) || !PROFILE_THEMES.some((theme) => theme.id === state.profile.selectedTheme)) state.profile.selectedTheme = "classic";
+      applyProfileTheme();
+      saveProfile();
+    }
+
+    function profileFavouriteMode() {
+      const entries = [
+        ["Endless", Number(state.profile.modeRuns.endless) || 0],
+        ["Rush", Number(state.profile.modeRuns.rush) || 0],
+        ["Daily", Number(state.profile.modeRuns.daily) || 0]
+      ];
+      if (!entries.some(([, count]) => count > 0)) return "No runs yet";
+      return entries.sort((left, right) => right[1] - left[1])[0][0];
+    }
+
+    function renderHomeProfile() {
+      const progress = profileLevelProgress();
+      $("homeProfileLevel").textContent = `LV ${progress.level}`;
+      $("homeProfileTitle").textContent = profileTitleForLevel(progress.level).toUpperCase();
+      $("homeProfileXp").textContent = progress.level >= 20 ? `${formatScore(state.profile.xp)} XP • MAX LEVEL` : `${formatScore(progress.current)} / ${formatScore(progress.needed)} XP`;
+      $("homeProfileFill").style.width = `${progress.percent}%`;
+    }
+
+    function renderProfile() {
+      const progress = profileLevelProgress();
+      const achievementCount = unlockedAchievementCount();
+      const totalRuns = Object.values(state.profile.modeRuns).reduce((sum, count) => sum + (Number(count) || 0), 0);
+      const nextReward = nextProfileReward(progress.level);
+      const theme = profileThemeDefinition();
+      $("profileLevelBadge").textContent = progress.level;
+      $("profileTitle").textContent = profileTitleForLevel(progress.level);
+      $("profileNextReward").textContent = nextReward ? `Next: ${nextReward.label.replace(" • ", " — ")} at Level ${nextReward.level}` : "All progression rewards unlocked";
+      $("profileXpFill").style.width = `${progress.percent}%`;
+      $("profileXpProgress").textContent = progress.level >= 20 ? "MAX LEVEL REACHED" : `${formatScore(progress.current)} / ${formatScore(progress.needed)} XP`;
+      $("profileTotalXp").textContent = `${formatScore(state.profile.xp)} TOTAL XP`;
+      $("profileFavouriteMode").textContent = profileFavouriteMode();
+      $("profileAchievements").textContent = `${achievementCount} / ${ACHIEVEMENTS.length}`;
+      $("profileRuns").textContent = formatScore(totalRuns);
+      $("profileTheme").textContent = theme.name;
+      $("profileLevelRoad").innerHTML = Array.from({ length: 20 }, (_, index) => {
+        const level = index + 1;
+        const classes = [level <= progress.level ? "reached" : "", level === progress.level ? "current" : "", PROFILE_REWARDS.some((reward) => reward.level === level) ? "reward" : ""].filter(Boolean).join(" ");
+        return `<span class="${classes}" title="Level ${level}${PROFILE_REWARDS.some((reward) => reward.level === level) ? " reward" : ""}">${level}</span>`;
+      }).join("");
+      $("profileThemeGrid").innerHTML = "";
+      PROFILE_THEMES.forEach((item) => {
+        const unlocked = state.profile.unlockedThemes.includes(item.id);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `theme-card${item.id === state.profile.selectedTheme ? " selected" : ""}`;
+        button.disabled = !unlocked;
+        button.innerHTML = `<span class="theme-swatches">${item.swatches.map((colour) => `<i style="background:${colour}"></i>`).join("")}</span><strong>${item.name}</strong><small>${item.id === state.profile.selectedTheme ? "SELECTED" : unlocked ? "TAP TO USE" : `UNLOCKS AT LEVEL ${item.unlockLevel}`}</small>`;
+        button.setAttribute("aria-label", unlocked ? `${item.name} theme${item.id === state.profile.selectedTheme ? ", selected" : ""}` : `${item.name} theme, unlocks at level ${item.unlockLevel}`);
+        if (unlocked) button.addEventListener("click", () => safeAction("Select profile theme", () => selectProfileTheme(item.id)));
+        $("profileThemeGrid").appendChild(button);
+      });
+      renderHomeProfile();
+    }
+
+    function selectProfileTheme(id) {
+      if (!state.profile.unlockedThemes.includes(id)) return;
+      state.profile.selectedTheme = id;
+      applyProfileTheme();
+      saveProfile();
+      renderProfile();
+      sound("select");
+    }
+
+    function openProfile() {
+      renderProfile();
+      showScreen("profileScreen");
+      setGameBackVisible(false);
+      sound("select");
+    }
+
+    function calculateRunXp(isNewBest, isNewRushBest) {
+      const breakdown = [];
+      let gain = 0;
+      if (state.mode === "rush") {
+        const runXp = 60 + Math.min(180, Math.floor(state.score / 250)) + Math.min(90, state.lines * 3);
+        const boardXp = state.rushBoardsCleared * 35;
+        gain += runXp + boardXp;
+        breakdown.push(`Rush +${runXp}`);
+        if (boardXp) breakdown.push(`Boards +${boardXp}`);
+      } else if (state.mode === "daily") {
+        const huntXp = 50 + Math.min(120, state.shardsCollected * 12);
+        gain += huntXp;
+        breakdown.push(`Shard Hunt +${huntXp}`);
+        if (state.dailyCompleted) { gain += 120; breakdown.push("Complete +120"); }
+        if (state.dailyOfficial) { gain += 40; breakdown.push("Official +40"); }
+      } else {
+        const runXp = 50 + Math.min(240, Math.floor(state.score / 150)) + Math.min(120, state.lines * 4);
+        gain += runXp;
+        breakdown.push(`Endless +${runXp}`);
+      }
+      if (isNewBest || isNewRushBest) { gain += 75; breakdown.push("New record +75"); }
+      const tierXp = [0, 20, 45, 80][state.highestTierReached] || 0;
+      if (tierXp) { gain += tierXp; breakdown.push(`Tier ${state.highestTierReached} +${tierXp}`); }
+      const newAchievements = Math.max(0, unlockedAchievementCount() - state.runStartAchievementCount);
+      if (newAchievements) {
+        const achievementXp = newAchievements * 60;
+        gain += achievementXp;
+        breakdown.push(`${newAchievements} achievement${newAchievements === 1 ? "" : "s"} +${achievementXp}`);
+      }
+      return { gain, breakdown };
+    }
+
+    function awardRunXp(isNewBest, isNewRushBest, isCampaign) {
+      if (TEST_SAVE_DISABLED || isCampaign) return null;
+      const oldXp = state.profile.xp;
+      const oldLevel = profileLevelFromXp(oldXp);
+      const calculated = calculateRunXp(isNewBest, isNewRushBest);
+      state.profile.xp += calculated.gain;
+      state.profile.lastXpGain = calculated.gain;
+      const modeKey = state.mode === "daily" ? "daily" : state.mode === "rush" ? "rush" : "endless";
+      state.profile.modeRuns[modeKey] = (Number(state.profile.modeRuns[modeKey]) || 0) + 1;
+      const newLevel = profileLevelFromXp();
+      const unlockedThemes = unlockProfileThemes(newLevel);
+      const crossedRewards = PROFILE_REWARDS.filter((reward) => reward.level > oldLevel && reward.level <= newLevel).map((reward) => reward.label);
+      saveProfile();
+      renderHomeProfile();
+      return { ...calculated, oldXp, newXp: state.profile.xp, oldLevel, newLevel, rewards: [...crossedRewards, ...unlockedThemes.map((name) => `THEME • ${name.toUpperCase()}`)] };
+    }
+
+    function renderXpResult(result) {
+      state.lastXpResult = result;
+      const panel = $("xpResultPanel");
+      panel.hidden = !result;
+      panel.classList.remove("animate");
+      if (!result) return;
+      const before = profileLevelProgress(result.oldXp);
+      const after = profileLevelProgress(result.newXp);
+      const crossedLevel = result.newLevel > result.oldLevel;
+      $("xpResultLevel").textContent = crossedLevel ? `LEVEL UP • ${result.newLevel}` : `LEVEL ${result.newLevel}`;
+      $("xpResultGain").textContent = `+${formatScore(result.gain)} XP`;
+      $("xpResultBreakdown").textContent = result.breakdown.join(" • ");
+      $("xpResultReward").textContent = result.rewards.length ? `UNLOCKED: ${[...new Set(result.rewards)].join(" • ")}` : profileLevelFromXp() >= 20 ? "MAX LEVEL • XP CONTINUES TO TRACK" : "";
+      panel.style.setProperty("--xp-start", `${crossedLevel ? 0 : before.percent}%`);
+      panel.style.setProperty("--xp-end", `${after.percent}%`);
+      $("xpResultFill").style.width = `${after.percent}%`;
+      void panel.offsetWidth;
+      panel.classList.add("animate");
+    }
+
     function currentCampaignLevel() { return CAMPAIGN_LEVELS[state.campaignLevelIndex] || CAMPAIGN_LEVELS[0]; }
 
     function campaignLevelUnlocked(index) {
@@ -2571,10 +3052,11 @@
       canvas.width = 1080;
       canvas.height = 1080;
       const context = canvas.getContext("2d");
+      const cardTheme = profileThemeDefinition();
       const background = context.createLinearGradient(0, 0, 1080, 1080);
-      background.addColorStop(0, "#27344a");
-      background.addColorStop(.52, "#172133");
-      background.addColorStop(1, "#101828");
+      background.addColorStop(0, cardTheme.shareBackground[0]);
+      background.addColorStop(.52, cardTheme.shareBackground[1]);
+      background.addColorStop(1, cardTheme.shareBackground[2]);
       context.fillStyle = background;
       context.fillRect(0, 0, 1080, 1080);
 
@@ -2582,7 +3064,7 @@
       for (let row = 0; row < 8; row += 1) {
         for (let col = 0; col < 8; col += 1) {
           const active = (row + col * 2) % 5 === 0;
-          context.fillStyle = active ? result.accent : "#ffffff";
+          context.fillStyle = active ? cardTheme.shareBrand : "#ffffff";
           roundedCanvasRect(context, 695 + col * 44, -35 + row * 44, 34, 34, 7);
           context.fill();
         }
@@ -2590,7 +3072,7 @@
       context.globalAlpha = 1;
 
       context.textAlign = "left";
-      context.fillStyle = "#d8ff4f";
+      context.fillStyle = cardTheme.shareBrand;
       context.font = "1000 62px system-ui, -apple-system, sans-serif";
       context.fillText("DEBLOCKLE", 76, 116);
       context.fillStyle = "#8795aa";
@@ -2633,7 +3115,7 @@
       context.fillStyle = "#8795aa";
       context.font = "700 22px system-ui, -apple-system, sans-serif";
       context.fillText("keanegjd.github.io/deblockle-mobile-game", 540, 978);
-      context.fillStyle = result.accent;
+      context.fillStyle = cardTheme.shareBrand;
       context.fillRect(76, 1028, 928, 7);
       return canvas;
     }
@@ -2908,6 +3390,7 @@
       updateCampaignUI();
       updateRushUI();
       renderDailyHome();
+      renderHomeProfile();
     }
 
     function unlockedPowerTier(energy = state.energy) {
@@ -4139,6 +4622,7 @@
       closeOverlay("devOverlay");
       state.running = false;
       state.mode = "endless";
+      renderXpResult(null);
       state.lastShareResult = {
         source: "test",
         mode: "ENDLESS DEBLOCKLE",
@@ -4180,6 +4664,58 @@
       openOverlay("gameOverOverlay");
     }
 
+    function prepareDevProfileTest() {
+      if (!DEV_MODE) return;
+      closeOverlay("devOverlay");
+      state.running = false;
+      state.mode = "endless";
+      state.lastShareResult = null;
+      $("gameOverTitle").textContent = "XP result preview";
+      $("newBest").textContent = "DEVELOPER TEST • NOTHING SAVED";
+      $("finalScorePanel").hidden = false;
+      $("finalScore").textContent = "12,450";
+      $("finalLines").textContent = "24";
+      $("finalBlocks").textContent = "186";
+      $("finalSetsLabel").textContent = "Sets completed";
+      $("finalSets").textContent = "8";
+      $("finalCombo").textContent = "×4";
+      $("finalLargest").textContent = "3";
+      $("finalSpecials").textContent = "2 / 1";
+      $("finalTier").textContent = "Tier 3";
+      $("finalRunTypeLabel").textContent = "Run time";
+      $("finalRunType").textContent = "3:12";
+      $("runStatus").textContent = "Preview the XP breakdown, level-up bar and cosmetic reward.";
+      $("dailyResultPanel").hidden = true;
+      $("campaignResultPanel").hidden = true;
+      $("resultSharePanel").hidden = true;
+      renderXpResult({
+        gain: 285,
+        oldXp: 600,
+        newXp: 885,
+        oldLevel: 3,
+        newLevel: 4,
+        breakdown: ["Endless +130", "New record +75", "Tier 3 +80"],
+        rewards: ["THEME • NEON GRID"]
+      });
+      $("postRunContinueButton").classList.add("hidden");
+      $("postRunChoices").classList.remove("hidden");
+      $("againButton").textContent = "START FRESH RUN";
+      $("homeButton").textContent = "BACK TO HOME";
+      openOverlay("gameOverOverlay");
+    }
+
+    function previewDevTheme(id) {
+      if (!DEV_MODE || !PROFILE_THEMES.some((theme) => theme.id === id)) return;
+      closeOverlay("devOverlay");
+      if (!state.profile.unlockedThemes.includes(id)) state.profile.unlockedThemes.push(id);
+      state.profile.selectedTheme = id;
+      applyProfileTheme();
+      renderHomeProfile();
+      showScreen("homeScreen");
+      setGameBackVisible(false);
+      sound("select");
+    }
+
     function restartCurrentMode() {
       if (state.mode === "daily") startGame("daily", state.dailyDate, state.dailyPreview);
       else if (state.mode === "rush") startGame("rush");
@@ -4219,6 +4755,7 @@
       state.dailyEndReason = "";
       state.lastDailyResult = null;
       state.lastShareResult = null;
+      state.lastXpResult = null;
       state.rushBoardIndex = 0;
       state.rushBoardOrder = [];
       state.rushPattern = null;
@@ -4249,6 +4786,7 @@
       state.bombsDetonated = 0;
       state.crossesActivated = 0;
       state.highestTierReached = 0;
+      state.runStartAchievementCount = unlockedAchievementCount();
       state.rerolls = mode === "endless" || mode === "rush" ? 2 : 0;
       state.setPlaced = 0;
       state.energy = TEST_MODE && mode !== "campaign" ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
@@ -4349,6 +4887,7 @@
       }
       updateBest(true);
       recordRunProgress();
+      renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
       state.lastShareResult = !isCampaign && !TEST_SAVE_DISABLED ? buildRunShareResult(isNewBest, isNewRushBest) : null;
       $("finalScorePanel").hidden = isDaily || isCampaign;
       $("finalScore").textContent = formatScore(state.score);
@@ -4599,6 +5138,8 @@
     $("dailyButton").addEventListener("click", () => safeAction("Start daily challenge", () => startDailyGame()));
     $("rushButton").addEventListener("click", () => safeAction("Start Rush", () => startGame("rush")));
     $("leaderboardsButton").addEventListener("click", () => safeAction("Open leaderboards", openRecords));
+    $("profileButton").addEventListener("click", () => safeAction("Open profile", openProfile));
+    $("profileHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("recordsHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("shareRushRecordButton").addEventListener("click", () => safeAction("Share Rush record", () => shareRecord("rush")));
     $("shareEndlessRecordButton").addEventListener("click", () => safeAction("Share Endless record", () => shareRecord("endless")));
@@ -4640,6 +5181,9 @@
     $("devRushClearButton").addEventListener("click", () => safeAction("Prepare Rush clear test", () => prepareRushTest(true)));
     $("devMeterButton").addEventListener("click", () => safeAction("Prepare meter cue test", () => prepareDevScenario("meter")));
     $("devShareButton").addEventListener("click", () => safeAction("Prepare share card test", prepareDevShareTest));
+    $("devProfileButton").addEventListener("click", () => safeAction("Prepare XP result test", prepareDevProfileTest));
+    $("devNeonThemeButton").addEventListener("click", () => safeAction("Preview Neon theme", () => previewDevTheme("neon")));
+    $("devSunsetThemeButton").addEventListener("click", () => safeAction("Preview Sunset theme", () => previewDevTheme("sunset")));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
@@ -4659,6 +5203,7 @@
     createBoard();
     setGameBackVisible(false);
     repairLifetimeScoreFloor();
+    initialiseProfile();
     updateStats();
     renderAchievements();
     updateSoundButton();
