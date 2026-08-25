@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.29</title>
+  <title>DeBlockle v0.29.1</title>
   <style>
     :root {
       --ink: #101828;
@@ -1446,7 +1446,7 @@
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.29 • RUSH MODE</div>
+      <div class="version">DEBLOCKLE BUILD v0.29.1 • LEADERBOARD FIX</div>
     </section>
 
     <section class="screen" id="recordsScreen" aria-label="DeBlockle leaderboards">
@@ -1675,7 +1675,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.29";
+    const BUILD = "v0.29.1";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
     const RUSH_BOARD_BASE_BONUS = 1000;
@@ -2541,6 +2541,13 @@
       state.recorded.crosses = state.crossesActivated;
       localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
       renderAchievements();
+    }
+
+    function repairLifetimeScoreFloor() {
+      const repairedScore = Math.max(Number(state.lifetime.score) || 0, Number(state.best) || 0);
+      if (repairedScore === state.lifetime.score) return;
+      state.lifetime.score = repairedScore;
+      if (!TEST_SAVE_DISABLED) localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
     }
 
     function updateStats() {
@@ -4181,6 +4188,7 @@
 
     createBoard();
     setGameBackVisible(false);
+    repairLifetimeScoreFloor();
     updateStats();
     renderAchievements();
     updateSoundButton();
