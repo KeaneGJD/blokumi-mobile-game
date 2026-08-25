@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.48</title>
+  <title>Blokumi v0.52</title>
   <style>
     :root {
       --ink: #101828;
@@ -1548,10 +1548,10 @@
     .campaign-result-panel strong { display: block; color: var(--lime); font-size: 17px; }
     .campaign-result-panel span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
     .share-status { min-height: 16px; margin: 6px 0 0 !important; color: var(--cyan) !important; font-size: 10px !important; text-align: center; }
-    .result-share-panel { margin-top: 13px; padding: 13px; border: 1px solid rgba(57,231,208,.22); border-radius: 17px; background: rgba(57,231,208,.06); }
+    .result-share-panel { margin: 0; }
     .result-share-panel[hidden] { display: none; }
-    .result-share-title { display: block; color: var(--cyan); font-size: 10px; font-weight: 1000; letter-spacing: .11em; text-align: center; }
-    .result-share-primary { min-height: 46px; margin-top: 9px; font-size: 13px; }
+    .result-share-panel .share-status:empty { display: none; }
+    .result-share-primary { min-height: 46px; font-size: 13px; }
     .endless-loss-actions { display: grid; gap: 10px; }
     .endless-loss-actions[hidden] { display: none; }
     .rescue-btn { min-height: 58px; background: linear-gradient(135deg, var(--pink), var(--orange)); }
@@ -1768,17 +1768,17 @@
   <main class="app">
     <header class="topbar">
       <button class="icon-btn back-btn" id="backButton" aria-label="Pause game or quit to menu" title="Pause or quit" hidden>←</button>
-      <div class="mini-logo"><span class="logo-cube" aria-hidden="true"></span> DeBlockle</div>
+      <div class="mini-logo"><span class="logo-cube" aria-hidden="true"></span> Blokumi</div>
       <button class="icon-btn" id="soundButton" aria-label="Toggle sound" title="Toggle sound">♪</button>
     </header>
 
-    <section class="screen active" id="homeScreen" aria-label="DeBlockle home">
+    <section class="screen active" id="homeScreen" aria-label="Blokumi home">
       <div class="home-brand">
         <div class="hero-mark" aria-hidden="true">
           <span class="hero-block one"></span><span class="hero-block two"></span><span class="hero-block three"></span>
         </div>
         <div class="home-brand-copy">
-          <h1 class="title">De<span>Block</span>le</h1>
+          <h1 class="title"><span>Blok</span>umi</h1>
           <p class="tagline">Fit the pieces. Clear the lines. Keep the board alive.</p>
         </div>
       </div>
@@ -1792,11 +1792,11 @@
         <button class="primary-btn home-endless-button" id="playButton"><strong>PLAY ENDLESS</strong><span>BUILD YOUR BEST SCORE</span></button>
         <div class="daily-card home-mode-card">
           <button class="secondary-btn daily-button" id="dailyButton">
-            <span class="daily-button-top"><strong>☀ DAILY DEBLOCKLE</strong><span class="daily-progress" id="dailyProgress">—/10</span></span>
+            <span class="daily-button-top"><strong>☀ DAILY BLOKUMI</strong><span class="daily-progress" id="dailyProgress">—/10</span></span>
             <span class="daily-button-bottom"><span class="daily-date" id="dailyDateLabel">TODAY</span><span class="daily-reset">NEXT <b id="dailyCountdown">00:00:00</b></span></span>
           </button>
         </div>
-        <button class="secondary-btn rush-home-button home-mode-card" id="rushButton"><strong>⚡ DEBLOCKLE RUSH</strong></button>
+        <button class="secondary-btn rush-home-button home-mode-card" id="rushButton"><strong>⚡ BLOKUMI RUSH</strong></button>
       </div>
 
       <div class="home-utility-grid" aria-label="More options">
@@ -1805,12 +1805,12 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.48 • AD FREQUENCY</div>
+      <div class="version">BLOKUMI BUILD v0.52 • NAME CHANGE</div>
     </section>
 
-    <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
+    <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
       <h1 class="settings-heading">Settings</h1>
-      <p class="settings-intro">Choose how DeBlockle sounds, moves and responds. These options are stored on this device.</p>
+      <p class="settings-intro">Choose how Blokumi sounds, moves and responds. These options are stored on this device.</p>
 
       <p class="settings-group-title">FEEDBACK</p>
       <div class="settings-group">
@@ -1864,7 +1864,7 @@
       <div class="button-stack"><button class="primary-btn" id="profileHomeButton">BACK TO HOME</button></div>
     </section>
 
-    <section class="screen" id="recordsScreen" aria-label="DeBlockle leaderboards">
+    <section class="screen" id="recordsScreen" aria-label="Blokumi leaderboards">
       <h1 class="records-heading">Leaderboards</h1>
       <p class="records-intro">Your records are stored on this device. Share a score card and challenge your friends.</p>
       <div class="records-grid">
@@ -1877,8 +1877,8 @@
       <div class="button-stack"><button class="primary-btn" id="recordsHomeButton">BACK TO HOME</button></div>
     </section>
 
-    <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
-      <div class="mode-banner" id="modeBanner" hidden><span id="modeBannerTitle">Daily DeBlockle</span><span id="modeBannerStatus">Official attempt</span></div>
+    <section class="screen" id="gameScreen" aria-label="Endless Blokumi game">
+      <div class="mode-banner" id="modeBanner" hidden><span id="modeBannerTitle">Daily Blokumi</span><span id="modeBannerStatus">Official attempt</span></div>
       <div class="daily-rule-panel" id="dailyRulePanel" hidden>
         <span class="daily-rule-icon" id="dailyRuleIcon" aria-hidden="true"></span>
         <div class="daily-rule-copy">
@@ -1904,8 +1904,8 @@
 
       <div class="power-panel" id="powerPanel">
         <div>
-          <div class="meter-copy"><span>DeBlockle Meter</span><strong id="powerStatus">0 / 360</strong></div>
-          <div class="meter-track" role="progressbar" aria-label="DeBlockle Meter" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0">
+          <div class="meter-copy"><span>Blokumi Meter</span><strong id="powerStatus">0 / 360</strong></div>
+          <div class="meter-track" role="progressbar" aria-label="Blokumi Meter" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0">
             <div class="meter-fill" id="meterFill"></div>
             <span class="tier-marker one" aria-hidden="true"></span>
             <span class="tier-marker two" aria-hidden="true"></span>
@@ -1952,7 +1952,7 @@
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
       <p>Block deliveries become more challenging as your run progresses, with larger shapes joining the pool later.</p>
       <p>Daily Shard Hunt is objective-only: clear 10 glowing Shards from the pre-built board and supplied blocks before 12 sets run out. Daily has no score, randomiser or Power Meter.</p>
-      <p>DeBlockle Rush begins with 60 seconds and a pre-built board. Clear the full board to load another pattern. Marked tiles award +5 or +10 seconds when removed.</p>
+      <p>Blokumi Rush begins with 60 seconds and a pre-built board. Clear the full board to load another pattern. Marked tiles award +5 or +10 seconds when removed.</p>
       <p>Endless scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
     </div>
@@ -2043,12 +2043,11 @@
         <strong id="campaignResultTitle">LEVEL COMPLETE</strong>
         <span id="campaignResultCopy">The next puzzle is now unlocked.</span>
       </div>
-      <div class="result-share-panel" id="resultSharePanel" hidden>
-        <span class="result-share-title">SHARE YOUR RESULT</span>
-        <button class="primary-btn result-share-primary" id="shareResultButton">SHARE RESULT</button>
-        <p class="share-status" id="resultShareStatus" aria-live="polite"></p>
-      </div>
       <div class="button-stack">
+        <div class="result-share-panel" id="resultSharePanel" hidden>
+          <button class="primary-btn result-share-primary" id="shareResultButton">SHARE RESULT</button>
+          <p class="share-status" id="resultShareStatus" aria-live="polite"></p>
+        </div>
         <div class="endless-loss-actions" id="endlessLossActions" hidden>
           <button class="primary-btn rescue-btn" id="removeRowsButton"><strong>REMOVE 3 ROWS</strong><span>WATCH AN AD TO KEEP PLAYING</span></button>
           <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
@@ -2144,7 +2143,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.48";
+    const BUILD = "v0.52";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2192,7 +2191,7 @@
       { level: 10, label: "TITLE • POWER PLAYER" },
       { level: 13, label: "THEME • DEEP VOID" },
       { level: 15, label: "TITLE • BOARD ARCHITECT" },
-      { level: 20, label: "TITLE • FULL DEBLOCKLE" }
+      { level: 20, label: "TITLE • FULL BLOKUMI" }
     ];
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
@@ -2298,7 +2297,7 @@
       { id: "cross_blast", name: "Cross Blast", description: "Combine Cross and Blast effects in one clear.", icon: "※" },
       { id: "power_up", name: "Power Up", description: "Activate Tier I power.", icon: "Ⅰ" },
       { id: "chainstorm", name: "Chainstorm", description: "Activate Tier II power three times.", icon: "Ⅱ" },
-      { id: "full_deblockle", name: "Full DeBlockle", description: "Activate Tier III power three times.", icon: "Ⅲ" },
+      { id: "full_deblockle", name: "Full Blokumi", description: "Activate Tier III power three times.", icon: "Ⅲ" },
       { id: "five_alive", name: "Five Alive", description: "Reach a ×5 clear combo.", icon: "5" },
       { id: "clean_slate", name: "Clean Slate", description: "Empty a board that held at least 32 tiles.", icon: "□" },
       { id: "high_roller", name: "High Roller", description: "Score 25,000 points in one run.", icon: "★" }
@@ -2431,7 +2430,7 @@
     function safeAction(name, action) {
       try { return action(); }
       catch (error) {
-        console.error(`[DeBlockle ${BUILD}] ${name}`, error);
+        console.error(`[Blokumi ${BUILD}] ${name}`, error);
         showError(`${name} failed. ${error.message || error}`);
       }
     }
@@ -2791,7 +2790,7 @@
     }
 
     function profileTitleForLevel(level) {
-      if (level >= 20) return "Full DeBlockle";
+      if (level >= 20) return "Full Blokumi";
       if (level >= 15) return "Board Architect";
       if (level >= 10) return "Power Player";
       if (level >= 6) return "Grid Runner";
@@ -3119,7 +3118,7 @@
       const label = result.official ? "Official" : result.preview ? "Preview" : "Practice";
       const dayNumber = result.date.replaceAll("-", "");
       const shardLine = `${"💎".repeat(Math.min(10, result.shards))}${"▫️".repeat(Math.max(0, DAILY_SHARD_TARGET - result.shards))}`;
-      return `DeBlockle Daily Shard Hunt #${dayNumber}\n${result.templateName}\n${label} • ${result.completed ? "HUNT COMPLETE" : "HUNT ENDED"}\n${result.shards}/${DAILY_SHARD_TARGET} Shards • ${result.sets}/${DAILY_SET_LIMIT} sets\n${shardLine}\n${SHARE_URL}`;
+      return `Blokumi Daily Shard Hunt #${dayNumber}\n${result.templateName}\n${label} • ${result.completed ? "HUNT COMPLETE" : "HUNT ENDED"}\n${result.shards}/${DAILY_SHARD_TARGET} Shards • ${result.sets}/${DAILY_SET_LIMIT} sets\n${shardLine}\n${SHARE_URL}`;
     }
 
     function buildRunShareResult(isNewBest, isNewRushBest) {
@@ -3138,13 +3137,13 @@
             { label: "STREAK", value: String(displayedDailyStreak()) }
           ],
           text: buildDailyShare(result),
-          fileName: `deblockle-daily-${result.date}.png`
+          fileName: `blokumi-daily-${result.date}.png`
         };
       }
       if (state.mode === "rush") {
         return {
           source: "run",
-          mode: "DEBLOCKLE RUSH",
+          mode: "BLOKUMI RUSH",
           accent: "#b89cff",
           primaryLabel: "FINAL SCORE",
           primaryValue: formatScore(state.score),
@@ -3154,13 +3153,13 @@
             { label: "LINES", value: formatScore(state.lines) },
             { label: "BONUS TIME", value: `+${formatScore(state.rushTimeCollected)}s` }
           ],
-          text: `I scored ${formatScore(state.score)} in DeBlockle Rush!\n${state.rushBoardsCleared} board${state.rushBoardsCleared === 1 ? "" : "s"} cleared • ${state.lines} lines\nCan you beat my score?\n${SHARE_URL}`,
-          fileName: "deblockle-rush-result.png"
+          text: `I scored ${formatScore(state.score)} in Blokumi Rush!\n${state.rushBoardsCleared} board${state.rushBoardsCleared === 1 ? "" : "s"} cleared • ${state.lines} lines\nCan you beat my score?\n${SHARE_URL}`,
+          fileName: "blokumi-rush-result.png"
         };
       }
       return {
         source: "run",
-        mode: "ENDLESS DEBLOCKLE",
+        mode: "ENDLESS BLOKUMI",
         accent: "#d8ff4f",
         primaryLabel: "FINAL SCORE",
         primaryValue: formatScore(state.score),
@@ -3170,15 +3169,15 @@
           { label: "TILES", value: formatScore(state.blocks) },
           { label: "POWER", value: state.highestTierReached ? `TIER ${state.highestTierReached}` : "—" }
         ],
-        text: `I scored ${formatScore(state.score)} in Endless DeBlockle!\n${state.lines} lines cleared • ${state.blocks} tiles placed\nCan you beat my score?\n${SHARE_URL}`,
-        fileName: "deblockle-endless-result.png"
+        text: `I scored ${formatScore(state.score)} in Endless Blokumi!\n${state.lines} lines cleared • ${state.blocks} tiles placed\nCan you beat my score?\n${SHARE_URL}`,
+        fileName: "blokumi-endless-result.png"
       };
     }
 
     function buildRecordShareResult(type) {
       if (type === "rush") return {
         source: "record",
-        mode: "DEBLOCKLE RUSH",
+        mode: "BLOKUMI RUSH",
         accent: "#b89cff",
         primaryLabel: "BEST RUN",
         primaryValue: formatScore(state.rush.best),
@@ -3188,12 +3187,12 @@
           { label: "LINES", value: formatScore(state.rush.bestLines) },
           { label: "MODE", value: "60 SEC" }
         ],
-        text: `My DeBlockle Rush record is ${formatScore(state.rush.best)}!\n${state.rush.bestBoards} board${state.rush.bestBoards === 1 ? "" : "s"} cleared • ${state.rush.bestLines} lines\nCan you beat it?\n${SHARE_URL}`,
-        fileName: "deblockle-rush-record.png"
+        text: `My Blokumi Rush record is ${formatScore(state.rush.best)}!\n${state.rush.bestBoards} board${state.rush.bestBoards === 1 ? "" : "s"} cleared • ${state.rush.bestLines} lines\nCan you beat it?\n${SHARE_URL}`,
+        fileName: "blokumi-rush-record.png"
       };
       if (type === "lifetime") return {
         source: "record",
-        mode: "ENDLESS DEBLOCKLE",
+        mode: "ENDLESS BLOKUMI",
         accent: "#39e7d0",
         primaryLabel: "LIFETIME SCORE",
         primaryValue: formatScore(state.lifetime.score),
@@ -3203,12 +3202,12 @@
           { label: "MODE", value: "ENDLESS" },
           { label: "SAVED", value: "ON DEVICE" }
         ],
-        text: `My lifetime Endless DeBlockle score is ${formatScore(state.lifetime.score)}!\nBest run ${formatScore(state.best)} • Saved on this device\n${SHARE_URL}`,
-        fileName: "deblockle-lifetime-record.png"
+        text: `My lifetime Endless Blokumi score is ${formatScore(state.lifetime.score)}!\nBest run ${formatScore(state.best)} • Saved on this device\n${SHARE_URL}`,
+        fileName: "blokumi-lifetime-record.png"
       };
       return {
         source: "record",
-        mode: "ENDLESS DEBLOCKLE",
+        mode: "ENDLESS BLOKUMI",
         accent: "#d8ff4f",
         primaryLabel: "BEST RUN",
         primaryValue: formatScore(state.best),
@@ -3218,8 +3217,8 @@
           { label: "MODE", value: "ENDLESS" },
           { label: "SAVED", value: "ON DEVICE" }
         ],
-        text: `My best Endless DeBlockle run is ${formatScore(state.best)}!\nLifetime score ${formatScore(state.lifetime.score)} • Saved on this device\nCan you beat it?\n${SHARE_URL}`,
-        fileName: "deblockle-endless-record.png"
+        text: `My best Endless Blokumi run is ${formatScore(state.best)}!\nLifetime score ${formatScore(state.lifetime.score)} • Saved on this device\nCan you beat it?\n${SHARE_URL}`,
+        fileName: "blokumi-endless-record.png"
       };
     }
 
@@ -3272,7 +3271,7 @@
       context.textAlign = "left";
       context.fillStyle = cardTheme.shareBrand;
       context.font = "1000 62px system-ui, -apple-system, sans-serif";
-      context.fillText("DEBLOCKLE", 76, 116);
+      context.fillText("BLOKUMI", 76, 116);
       context.fillStyle = "#8795aa";
       context.font = "900 24px system-ui, -apple-system, sans-serif";
       context.fillText(result.mode, 78, 158);
@@ -3312,7 +3311,7 @@
       context.fillText("CAN YOU BEAT IT?", 540, 930);
       context.fillStyle = "#8795aa";
       context.font = "700 22px system-ui, -apple-system, sans-serif";
-      context.fillText("keanegjd.github.io/deblockle-mobile-game", 540, 978);
+      context.fillText("PLAY BLOKUMI", 540, 978);
       context.fillStyle = cardTheme.shareBrand;
       context.fillRect(76, 1028, 928, 7);
       return canvas;
@@ -3357,7 +3356,7 @@
         const canvas = createShareCardCanvas(result);
         const file = shareCardFile(canvas, result.fileName);
         if (navigator.share) {
-          const payload = { title: `${result.mode} • DeBlockle`, text: result.text };
+          const payload = { title: `${result.mode} • Blokumi`, text: result.text };
           if (file && navigator.canShare?.({ files: [file] })) payload.files = [file];
           if (status) status.textContent = "Opening share menu…";
           await navigator.share(payload);
@@ -3668,7 +3667,7 @@
         button.classList.remove("ready");
       } else if (unlockedTier > 0) {
         status.textContent = unlockedTier === 3
-          ? "FULL DEBLOCKLE READY"
+          ? "FULL BLOKUMI READY"
           : unlockedTier === 2 ? "TIER II READY • HOLD FOR III" : "TIER I READY • HOLD FOR II";
         const canActivate = state.running && !state.locked && state.setPlaced === 0;
         button.textContent = canActivate
@@ -3711,7 +3710,7 @@
     }
 
     function powerTierLabel(tier) {
-      return tier === 3 ? "FULL DEBLOCKLE READY!" : `POWER TIER ${tier} READY!`;
+      return tier === 3 ? "FULL BLOKUMI READY!" : `POWER TIER ${tier} READY!`;
     }
 
     function showPowerMeterCue(tier) {
@@ -3741,7 +3740,7 @@
       updatePowerUI();
       if (gainedEnergy > 0) animateEnergyToMeter(gainedEnergy);
       if (newTier > previousTier) {
-        const message = newTier === 3 ? "FULL DEBLOCKLE READY!" : `POWER TIER ${newTier} READY!`;
+        const message = newTier === 3 ? "FULL BLOKUMI READY!" : `POWER TIER ${newTier} READY!`;
         if (showPowerMeterCue(newTier)) {
           setToast(state.setPlaced === 0 ? message : `${message} ACTIVATE NEXT SET.`, true);
           vibrate([20, 25, 20, 25, 45]);
@@ -3810,7 +3809,7 @@
 
       if (tier === 3) {
         updatePowerUI();
-        setToast("FULL DEBLOCKLE! BOARD WIPE • ×3!", true);
+        setToast("FULL BLOKUMI! BOARD WIPE • ×3!", true);
         sound("powerOn");
         vibrate([45, 30, 70, 30, 110]);
         await playTierThreeBoardWave();
@@ -4463,7 +4462,7 @@
             state.powerActive = false;
             state.powerTier = 0;
             state.powerSetsRemaining = 0;
-            deliveryMessage = "DeBlockle Mode complete.";
+            deliveryMessage = "Blokumi Mode complete.";
             sound("powerOff");
           } else {
             deliveryMessage = `POWER ACTIVE: ${state.powerSetsRemaining} SET${state.powerSetsRemaining === 1 ? "" : "S"} LEFT!`;
@@ -4765,7 +4764,7 @@
         }
         state.energy = TIER_3_ENERGY;
         state.selected = null;
-        message = "Tier III ready: press FULL DEBLOCKLE above the board.";
+        message = "Tier III ready: press FULL BLOKUMI above the board.";
       } else if (type === "meter") {
         for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
         state.energy = TIER_1_ENERGY - 5;
@@ -4864,7 +4863,7 @@
       renderXpResult(null);
       state.lastShareResult = {
         source: "test",
-        mode: "ENDLESS DEBLOCKLE",
+        mode: "ENDLESS BLOKUMI",
         accent: "#d8ff4f",
         primaryLabel: "FINAL SCORE",
         primaryValue: "12,450",
@@ -4874,8 +4873,8 @@
           { label: "TILES", value: "186" },
           { label: "POWER", value: "TIER 2" }
         ],
-        text: `DeBlockle sharing preview\nScore 12,450 • 24 lines cleared\n${SHARE_URL}`,
-        fileName: "deblockle-share-preview.png"
+        text: `Blokumi sharing preview\nScore 12,450 • 24 lines cleared\n${SHARE_URL}`,
+        fileName: "blokumi-share-preview.png"
       };
       $("gameOverTitle").textContent = "Share card preview";
       $("newBest").textContent = "DEVELOPER TEST • NOTHING SAVED";
@@ -5094,10 +5093,10 @@
         $("modeBannerTitle").textContent = `Campaign • Level ${level.id}`;
         $("modeBannerStatus").textContent = level.chapterName;
       } else if (rushMode) {
-        $("modeBannerTitle").textContent = "DeBlockle Rush";
+        $("modeBannerTitle").textContent = "Blokumi Rush";
         $("modeBannerStatus").textContent = "60 SECOND SCORE ATTACK";
       }
-      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily DeBlockle game" : campaignMode ? `Campaign level ${currentCampaignLevel().id}` : rushMode ? "DeBlockle Rush game" : "Endless DeBlockle game");
+      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily Blokumi game" : campaignMode ? `Campaign level ${currentCampaignLevel().id}` : rushMode ? "Blokumi Rush game" : "Endless Blokumi game");
       renderBoard();
       renderTray();
       updateStats();
@@ -5186,7 +5185,7 @@
       $("gameOverTitle").textContent = isDaily ? state.dailyCompleted ? "Shard Hunt complete!" : "Shard Hunt ended" : isCampaign ? state.campaignCompleted ? "Puzzle complete!" : "Puzzle not solved" : isRush ? reason === "time" ? "Time's up!" : "No moves left!" : "Board blocked!";
       $("newBest").textContent = isDaily
         ? state.dailyPreview ? "DEVELOPER DAILY PREVIEW" : state.dailyOfficial ? "★ OFFICIAL RESULT SAVED ★" : "PRACTICE RESULT"
-        : isCampaign ? `CHAPTER ${currentCampaignLevel().chapter} • LEVEL ${currentCampaignLevel().id}` : isRush ? isNewRushBest ? "★ NEW RUSH RECORD ★" : "DEBLOCKLE RUSH" : isNewBest ? "★ NEW BEST SCORE ★" : "";
+        : isCampaign ? `CHAPTER ${currentCampaignLevel().chapter} • LEVEL ${currentCampaignLevel().id}` : isRush ? isNewRushBest ? "★ NEW RUSH RECORD ★" : "BLOKUMI RUSH" : isNewBest ? "★ NEW BEST SCORE ★" : "";
       $("runStatus").textContent = isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : isRush ? `${state.rushBoardsCleared} boards • ${state.lines} lines • Rush best ${formatScore(state.rush.best)}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
       $("dailyResultPanel").hidden = !isDaily;
       $("campaignResultPanel").hidden = !isCampaign && !isRush;
@@ -5343,7 +5342,7 @@
     function setPausePresentation(backgroundPause = false) {
       $("pauseTitle").textContent = backgroundPause ? "Paused while you were away" : "Game paused";
       $("pauseCopy").textContent = backgroundPause
-        ? "Your run stayed open while DeBlockle was in the background. Resume from exactly where you left it, or quit to the main menu."
+        ? "Your run stayed open while Blokumi was in the background. Resume from exactly where you left it, or quit to the main menu."
         : "Your current run is still here. Resume playing, or quit and return to the main menu.";
     }
 
@@ -5463,7 +5462,7 @@
         button.setAttribute("aria-pressed", button.dataset.effect === state.settings.effects ? "true" : "false");
       });
       $("settingsSystemNote").textContent = systemReducedMotion()
-        ? "Your device’s Reduced Motion setting is active, so DeBlockle is currently using Minimal effects."
+        ? "Your device’s Reduced Motion setting is active, so Blokumi is currently using Minimal effects."
         : state.settings.effects === "full" ? "Full effects are active."
           : state.settings.effects === "reduced" ? "Continuous pulses and flying energy are reduced."
             : "Animations and transitions are kept to a minimum.";
@@ -5649,7 +5648,7 @@
     $("closeHowButton").addEventListener("click", () => closeOverlay("howOverlay"));
     $("soundButton").addEventListener("click", () => safeAction("Toggle sound", toggleSound));
     $("rerollButton").addEventListener("click", () => safeAction("Randomise blocks", useReroll));
-    $("powerButton").addEventListener("click", () => safeAction("Activate DeBlockle Mode", activatePowerMode));
+    $("powerButton").addEventListener("click", () => safeAction("Activate Blokumi Mode", activatePowerMode));
     $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("standardPostRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("removeRowsButton").addEventListener("click", () => safeAction("Request row rescue", requestRowRescue));
@@ -5731,7 +5730,7 @@
       $("devMenuButton").hidden = false;
       document.querySelector(".version").textContent += " • DEV MODE";
     }
-    console.info(`DeBlockle ${BUILD} loaded`);
+    console.info(`Blokumi ${BUILD} loaded`);
   </script>
 </body>
 </html>
