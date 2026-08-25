@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.28</title>
+  <title>DeBlockle v0.29</title>
   <style>
     :root {
       --ink: #101828;
@@ -217,7 +217,17 @@
     .daily-button-row strong { font-size: 16px; letter-spacing: .035em; }
     .daily-button-row span { font-size: 9px; font-weight: 950; letter-spacing: .08em; opacity: .72; }
     .daily-button-status { display: block; margin-top: 2px; font-size: 9px; font-weight: 900; letter-spacing: .07em; opacity: .76; }
-    .campaign-home-button { background: linear-gradient(135deg, rgba(155,114,255,.28), rgba(57,231,208,.2)); border-color: rgba(155,114,255,.42); }
+    .rush-home-button { background: linear-gradient(135deg, rgba(155,114,255,.3), rgba(57,231,208,.22)); border-color: rgba(155,114,255,.48); }
+
+    #recordsScreen { padding: 18px 2px 12px; }
+    .records-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
+    .records-intro { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .records-grid { display: grid; gap: 10px; margin: 16px 0; }
+    .record-card { padding: 15px; border: 1px solid rgba(255,255,255,.1); border-radius: 17px; background: linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.04)); }
+    .record-card span { display: block; color: var(--muted); font-size: 9px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+    .record-card strong { display: block; margin-top: 5px; color: var(--lime); font-size: 28px; letter-spacing: -.04em; }
+    .record-card small { display: block; margin-top: 4px; color: var(--cream); font-size: 10px; }
+    .records-note { color: var(--muted); font-size: 10px; line-height: 1.45; text-align: center; }
 
     #campaignScreen { padding: 18px 2px 12px; }
     .campaign-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -345,6 +355,22 @@
     .campaign-rule-copy strong { display: block; color: #b89cff; font-size: 10px; letter-spacing: .07em; }
     .campaign-rule-copy span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
     .campaign-rule-progress { color: var(--cream); font-size: 10px; font-weight: 1000; white-space: nowrap; }
+
+    .rush-timer-panel {
+      margin: 2px 0 7px;
+      padding: 8px 10px;
+      border: 1px solid rgba(155,114,255,.3);
+      border-radius: 13px;
+      background: rgba(155,114,255,.08);
+    }
+    .rush-timer-panel[hidden] { display: none; }
+    .rush-timer-copy { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; color: var(--muted); font-size: 9px; font-weight: 950; letter-spacing: .1em; }
+    .rush-timer-copy strong { color: var(--cream); }
+    .rush-timer-track { height: 7px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.3); }
+    .rush-timer-fill { width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--orange), var(--lime)); transition: width .1s linear; }
+    #gameScreen.rush-mode .stat.main { background: rgba(155,114,255,.12); border-color: rgba(155,114,255,.34); }
+    #gameScreen.rush-mode .stat.main .stat-value { color: #b89cff; }
+    #gameScreen.rush-mode .cell.rush-target.filled { outline: 2px solid rgba(184,156,255,.72); outline-offset: -3px; }
 
     .stats {
       display: grid;
@@ -724,6 +750,32 @@
       100% { transform: translate(-50%, -210%) scale(.35) rotate(35deg); opacity: 0; }
     }
 
+    .time-mark {
+      position: absolute;
+      z-index: 10;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      min-width: 72%;
+      height: 48%;
+      padding: 0 2px;
+      border-radius: 999px;
+      color: var(--navy);
+      background: var(--lime);
+      box-shadow: 0 0 9px rgba(216,255,79,.8);
+      font-size: clamp(7px, 2.1vw, 11px);
+      font-weight: 1000;
+      letter-spacing: -.04em;
+      pointer-events: none;
+      animation: timePulse 1s ease-in-out infinite;
+    }
+    .time-mark.ten { color: white; background: var(--pink); box-shadow: 0 0 10px rgba(255,92,168,.85); }
+    @keyframes timePulse { 50% { transform: translate(-50%, -55%) scale(1.08); } }
+    .cell.time-collected .time-mark { animation: timeCollect .48s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes timeCollect { to { transform: translate(-50%, -180%) scale(1.35); opacity: 0; } }
+
     .cell.preview-valid { background: rgba(216,255,79,.7); border-color: var(--lime); }
     .cell.preview-invalid { background: rgba(255,100,112,.58); border-color: var(--red); }
     .cell.clearing,
@@ -1085,6 +1137,27 @@
       filter: drop-shadow(0 0 3px rgba(255,173,66,.9));
     }
 
+    .piece-dot.on.time-dot::after {
+      content: attr(data-time);
+      position: absolute;
+      z-index: 8;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      min-width: 80%;
+      height: 55%;
+      padding: 0 1px;
+      border-radius: 99px;
+      color: var(--navy);
+      background: var(--lime);
+      box-shadow: 0 0 4px rgba(216,255,79,.8);
+      font-size: clamp(6px, 1.8vw, 9px);
+      font-weight: 1000;
+    }
+    .piece-dot.on.time-dot.ten::after { color: white; background: var(--pink); box-shadow: 0 0 4px rgba(255,92,168,.8); }
+
     .piece-card:nth-child(2) .piece-dot.on { background: var(--lime); }
     .piece-card:nth-child(3) .piece-dot.on { background: var(--pink); }
 
@@ -1368,18 +1441,24 @@
       </div>
       <div class="button-stack">
         <button class="primary-btn" id="playButton">PLAY ENDLESS</button>
-        <button class="secondary-btn campaign-home-button" id="campaignButton">PUZZLE CAMPAIGN</button>
+        <button class="secondary-btn rush-home-button" id="rushButton">⚡ PLAY DEBLOCKLE RUSH</button>
+        <button class="secondary-btn" id="leaderboardsButton">LEADERBOARDS</button>
         <button class="secondary-btn" id="achievementsButton">ACHIEVEMENTS</button>
         <button class="secondary-btn" id="howButton">HOW TO PLAY</button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.28 • EXPANDED CAMPAIGN</div>
+      <div class="version">DEBLOCKLE BUILD v0.29 • RUSH MODE</div>
     </section>
 
-    <section class="screen" id="campaignScreen" aria-label="DeBlockle Puzzle Campaign">
-      <h1 class="campaign-heading">Puzzle Campaign</h1>
-      <p class="campaign-intro">Solve 25 fixed puzzles across four mechanic-focused chapters.</p>
-      <div class="campaign-screen-actions"><button class="secondary-btn" id="campaignHomeButton">BACK TO HOME</button></div>
-      <div id="campaignLevels"></div>
+    <section class="screen" id="recordsScreen" aria-label="DeBlockle leaderboards">
+      <h1 class="records-heading">Leaderboards</h1>
+      <p class="records-intro">Your current records. Worldwide rankings will be connected after Rush scoring is balanced.</p>
+      <div class="records-grid">
+        <div class="record-card"><span>Rush • Best Run</span><strong id="recordRushBest">0</strong><small id="recordRushDetail">0 boards cleared</small></div>
+        <div class="record-card"><span>Endless • Best Run</span><strong id="recordEndlessBest">0</strong><small>Your highest individual Endless score</small></div>
+        <div class="record-card"><span>Endless • Lifetime Score</span><strong id="recordEndlessLifetime">0</strong><small>All genuine Endless runs combined</small></div>
+      </div>
+      <p class="records-note">These records are stored on this device in v0.29.</p>
+      <div class="button-stack"><button class="primary-btn" id="recordsHomeButton">BACK TO HOME</button></div>
     </section>
 
     <section class="screen" id="gameScreen" aria-label="Endless DeBlockle game">
@@ -1391,6 +1470,10 @@
           <span id="dailyRuleDescription">Clear the marked gems</span>
         </div>
         <span class="daily-rule-sets" id="dailyRemainingText">12 SETS LEFT</span>
+      </div>
+      <div class="rush-timer-panel" id="rushTimerPanel" hidden>
+        <div class="rush-timer-copy"><span id="rushPatternName">BOARD 1</span><strong id="rushTimerText">60.0s</strong></div>
+        <div class="rush-timer-track"><div class="rush-timer-fill" id="rushTimerFill"></div></div>
       </div>
       <div class="campaign-rule-panel" id="campaignRulePanel" hidden>
         <span class="campaign-level-badge" id="campaignLevelBadge">1-1</span>
@@ -1455,7 +1538,7 @@
       <p>Clear lines on consecutive moves to grow your combo and score faster.</p>
       <p>Block deliveries become more challenging as your run progresses, with larger shapes joining the pool later.</p>
       <p>Daily Shard Hunt is objective-only: clear 10 glowing Shards from the pre-built board and supplied blocks before 12 sets run out. There is no score in this mode.</p>
-      <p>Puzzle Campaign uses fixed boards and fixed blocks. Complete the displayed objective to unlock the next level; points and randomisers are disabled.</p>
+      <p>DeBlockle Rush begins with 60 seconds and a pre-built board. Clear the full board to load another pattern. Marked tiles award +5 or +10 seconds when removed.</p>
       <p>Endless scoring: each placed tile earns 5 points. Clears add tile and line bonuses, then apply combo and active Power Mode multipliers.</p>
       <div class="button-stack"><button class="primary-btn" id="closeHowButton">GOT IT</button></div>
     </div>
@@ -1490,6 +1573,8 @@
         <button class="secondary-btn" id="devDailyTodayButton">DAILY TODAY</button>
         <button class="secondary-btn" id="devDailyNextButton">DAILY +1 DAY</button>
         <button class="secondary-btn" id="devDailyFinishButton">SHARD FINISH</button>
+        <button class="secondary-btn" id="devRushButton">RUSH START</button>
+        <button class="secondary-btn" id="devRushClearButton">RUSH CLEAR</button>
       </div>
       <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
@@ -1516,12 +1601,12 @@
         <div class="summary-box"><span>Tiles placed</span><strong id="finalBlocks">0</strong></div>
       </div>
       <div class="summary-grid detailed">
-        <div class="summary-box"><span>Sets completed</span><strong id="finalSets">0</strong></div>
+        <div class="summary-box"><span id="finalSetsLabel">Sets completed</span><strong id="finalSets">0</strong></div>
         <div class="summary-box"><span>Highest combo</span><strong id="finalCombo">—</strong></div>
         <div class="summary-box"><span>Largest clear</span><strong id="finalLargest">0</strong></div>
         <div class="summary-box"><span>Blasts / Crosses</span><strong id="finalSpecials">0 / 0</strong></div>
         <div class="summary-box"><span>Highest tier</span><strong id="finalTier">—</strong></div>
-        <div class="summary-box"><span>Run time</span><strong id="finalRunType">0:00</strong></div>
+        <div class="summary-box"><span id="finalRunTypeLabel">Run time</span><strong id="finalRunType">0:00</strong></div>
       </div>
       <p class="run-status" id="runStatus">Best score: 0</p>
       <div class="daily-result-panel" id="dailyResultPanel" hidden>
@@ -1590,8 +1675,10 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.28";
+    const BUILD = "v0.29";
     const SIZE = 8;
+    const RUSH_START_MS = 60 * 1000;
+    const RUSH_BOARD_BASE_BONUS = 1000;
     const DAILY_SET_LIMIT = 12;
     const DAILY_SHARD_TARGET = 10;
     const DAILY_STARTING_SHARDS = 5;
@@ -1613,6 +1700,7 @@
     const SPECIAL_TUTORIAL_KEY = "deblockle_v013_special_tutorials";
     const DAILY_DATA_KEY = "deblockle_v022_daily";
     const CAMPAIGN_DATA_KEY = "deblockle_v028_campaign";
+    const RUSH_DATA_KEY = "deblockle_v029_rush";
     const SOUND_KEY = "deblockle_v01_sound";
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
@@ -1629,6 +1717,17 @@
       { id: "fortress", name: "SHARD FORTRESS", cells: [[2,2],[2,3],[2,4],[2,5],[3,2],[3,5],[4,1],[4,2],[4,5],[4,6],[5,1],[5,3],[5,4],[5,6],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] },
       { id: "spiral", name: "OPEN SPIRAL", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,6],[3,2],[3,3],[3,4],[3,5],[3,6],[4,2],[5,2],[5,5],[5,6],[6,2],[6,3],[6,4],[6,5]] },
       { id: "hourglass", name: "HOURGLASS", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,2],[2,5],[3,3],[3,4],[4,3],[4,4],[5,2],[5,5],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] }
+    ];
+
+    const RUSH_BOARD_TEMPLATES = [
+      { id: "steps", name: "NEON STEPS", cells: [[1,1],[2,1],[2,2],[3,1],[3,2],[3,3],[4,4],[4,5],[4,6],[5,5],[5,6],[6,6]] },
+      { id: "corners", name: "FOUR CORNERS", cells: [[0,0],[0,1],[1,0],[1,1],[0,6],[0,7],[1,6],[1,7],[6,0],[6,1],[7,0],[7,1],[6,6],[6,7],[7,6],[7,7]] },
+      { id: "hourglass", name: "TIME GLASS", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,2],[2,5],[3,3],[3,4],[4,3],[4,4],[5,2],[5,5],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6]] },
+      { id: "arrows", name: "SPLIT ARROWS", cells: [[1,1],[1,6],[2,2],[2,5],[3,3],[3,4],[4,2],[4,5],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]] },
+      { id: "frame", name: "BROKEN FRAME", cells: [[0,0],[0,1],[0,2],[0,5],[0,6],[0,7],[1,0],[1,7],[3,0],[3,7],[4,0],[4,7],[6,0],[6,7],[7,0],[7,1],[7,2],[7,5],[7,6],[7,7]] },
+      { id: "lanes", name: "RUSH LANES", cells: [[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7],[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7]] },
+      { id: "spiral", name: "QUICK SPIRAL", cells: [[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,6],[3,2],[3,3],[3,4],[3,5],[3,6],[4,2],[5,2],[5,5],[5,6],[6,2],[6,3],[6,4],[6,5]] },
+      { id: "diamond", name: "FLASH DIAMOND", cells: [[0,3],[0,4],[1,2],[1,5],[2,1],[2,6],[3,0],[3,7],[4,0],[4,7],[5,1],[5,6],[6,2],[6,5],[7,3],[7,4]] }
     ];
 
     const campaignRowExcept = (row, missing = []) => Array.from({ length: SIZE }, (_, col) => [row, col]).filter(([, col]) => !missing.includes(col));
@@ -1726,6 +1825,7 @@
     };
 
     const DEFAULT_CAMPAIGN_DATA = { completed: [] };
+    const DEFAULT_RUSH_DATA = { best: 0, bestBoards: 0, bestLines: 0, runs: 0, lastStartTemplate: -1 };
 
     function readJSON(key, fallback) {
       try {
@@ -1752,6 +1852,17 @@
       dailyCompleted: false,
       dailyEndReason: "",
       lastDailyResult: null,
+      rushBoardIndex: 0,
+      rushBoardOrder: [],
+      rushPattern: null,
+      rushRemainingMs: RUSH_START_MS,
+      rushLastTickAt: 0,
+      rushPaused: false,
+      rushBoardsCleared: 0,
+      rushTimeCollected: 0,
+      rushTimeBonuses: new Map(),
+      rushTargets: new Set(),
+      rushDealCount: 0,
       campaignLevelIndex: 0,
       campaignSetIndex: 0,
       campaignPlacements: 0,
@@ -1787,6 +1898,7 @@
       lifetime: { ...DEFAULT_LIFETIME, ...readJSON(LIFETIME_STATS_KEY, {}) },
       daily: { ...DEFAULT_DAILY_DATA, ...readJSON(DAILY_DATA_KEY, {}) },
       campaign: { ...DEFAULT_CAMPAIGN_DATA, ...readJSON(CAMPAIGN_DATA_KEY, {}) },
+      rush: { ...DEFAULT_RUSH_DATA, ...readJSON(RUSH_DATA_KEY, {}) },
       specialTutorials: { bomb: false, cross: false, ...readJSON(SPECIAL_TUTORIAL_KEY, {}) },
       recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -1804,6 +1916,7 @@
     let activeSpecialTutorial = null;
     let tutorialSessionSeen = new Set();
     let activeDealRandom = null;
+    let rushTimerHandle = null;
 
     function safeAction(name, action) {
       try { return action(); }
@@ -1862,6 +1975,7 @@
       $("specialTutorialCopy").textContent = isBomb
         ? "Clear the Blast Block’s row or column to detonate it. The explosion destroys occupied tiles up to two spaces away."
         : "Clear its row to sweep the column, or clear its column to sweep the row.";
+      if (state.mode === "rush") state.rushPaused = true;
       openOverlay("specialTutorialOverlay");
       sound("select");
     }
@@ -1876,6 +1990,10 @@
       activeSpecialTutorial = null;
       closeOverlay("specialTutorialOverlay");
       showNextSpecialTutorial();
+      if (state.mode === "rush" && !activeSpecialTutorial && !specialTutorialQueue.length) {
+        state.rushPaused = false;
+        state.rushLastTickAt = Date.now();
+      }
     }
 
     function formatScore(value) { return Math.max(0, value).toLocaleString("en-GB"); }
@@ -1943,8 +2061,8 @@
       return DAILY_BOARD_TEMPLATES[hashSeed(`deblockle-shard-layout:${dateKey}`) % DAILY_BOARD_TEMPLATES.length];
     }
 
-    function dailyBaseScoreMultiplier() { return state.mode === "endless" ? 1 : 0; }
-    function dailyClearScoreMultiplier() { return state.mode === "endless" ? 1 : 0; }
+    function dailyBaseScoreMultiplier() { return state.mode === "daily" || state.mode === "campaign" ? 0 : 1; }
+    function dailyClearScoreMultiplier() { return state.mode === "daily" || state.mode === "campaign" ? 0 : 1; }
 
     function updateDailyGauntletUI() {
       const dailyMode = state.mode === "daily";
@@ -2014,6 +2132,132 @@
         ? `${officialResult.shards}/${DAILY_SHARD_TARGET} SHARDS • PRACTICE AVAILABLE`
         : `${DAILY_SHARD_TARGET} SHARDS • OFFICIAL READY`;
       $("dailyButton").setAttribute("aria-label", officialResult ? "Practice today's Daily Shard Hunt" : "Play today's official Daily Shard Hunt");
+    }
+
+    function shuffledRushTemplates() {
+      const indexes = RUSH_BOARD_TEMPLATES.map((_, index) => index);
+      for (let index = indexes.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [indexes[index], indexes[swapIndex]] = [indexes[swapIndex], indexes[index]];
+      }
+      if (indexes.length > 1 && indexes[0] === state.rush.lastStartTemplate) {
+        [indexes[0], indexes[1]] = [indexes[1], indexes[0]];
+      }
+      return indexes;
+    }
+
+    function setupRushBoard() {
+      if (state.mode !== "rush") return;
+      if (!state.rushBoardOrder.length || state.rushBoardIndex >= state.rushBoardOrder.length) {
+        state.rushBoardOrder = shuffledRushTemplates();
+        state.rushBoardIndex = 0;
+      }
+      const templateIndex = state.rushBoardOrder[state.rushBoardIndex];
+      state.rushBoardIndex += 1;
+      if (state.rushBoardsCleared === 0) {
+        state.rush.lastStartTemplate = templateIndex;
+        if (!TEST_SAVE_DISABLED) localStorage.setItem(RUSH_DATA_KEY, JSON.stringify(state.rush));
+      }
+      state.rushPattern = RUSH_BOARD_TEMPLATES[templateIndex];
+      state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+      state.rushTimeBonuses = new Map();
+      state.rushTargets = new Set();
+      state.rushPattern.cells.forEach(([row, col]) => {
+        state.board[row][col] = 1;
+        state.rushTargets.add(`${row},${col}`);
+      });
+      const candidates = [...state.rushPattern.cells];
+      const fiveIndex = Math.floor(Math.random() * candidates.length);
+      const [fiveCell] = candidates.splice(fiveIndex, 1);
+      const tenIndex = Math.floor(Math.random() * candidates.length);
+      const [tenCell] = candidates.splice(tenIndex, 1);
+      state.rushTimeBonuses.set(fiveCell.join(","), 5);
+      state.rushTimeBonuses.set(tenCell.join(","), 10);
+      updateRushUI();
+    }
+
+    function addRushTime(milliseconds) {
+      if (state.mode !== "rush" || milliseconds <= 0) return;
+      state.rushRemainingMs += milliseconds;
+      state.rushTimeCollected += milliseconds / 1000;
+      updateRushUI();
+    }
+
+    function collectRushTimeBonuses(keys) {
+      if (state.mode !== "rush") return 0;
+      let seconds = 0;
+      keys.forEach((key) => {
+        const value = state.rushTimeBonuses.get(key) || 0;
+        if (value) seconds += value;
+      });
+      if (seconds) addRushTime(seconds * 1000);
+      return seconds;
+    }
+
+    function updateRushUI() {
+      const rushMode = state.mode === "rush";
+      $("rushTimerPanel").hidden = !rushMode;
+      if (!rushMode) return;
+      const seconds = Math.max(0, state.rushRemainingMs / 1000);
+      $("rushTimerText").textContent = `${seconds.toFixed(1)}s`;
+      if ($("bestValue") && state.mode === "rush") $("bestValue").textContent = `${seconds.toFixed(1)}s`;
+      $("rushTimerFill").style.width = `${Math.max(0, Math.min(100, (state.rushRemainingMs / RUSH_START_MS) * 100))}%`;
+      $("rushPatternName").textContent = `BOARD ${state.rushBoardsCleared + 1} • ${state.rushPattern?.name || "GET READY"} • ${state.rushTargets.size} LEFT`;
+    }
+
+    function tickRushTimer() {
+      if (state.mode !== "rush" || !state.running || state.rushPaused) return;
+      const now = Date.now();
+      if (!state.rushLastTickAt) state.rushLastTickAt = now;
+      const elapsed = Math.max(0, now - state.rushLastTickAt);
+      state.rushLastTickAt = now;
+      state.rushRemainingMs = Math.max(0, state.rushRemainingMs - elapsed);
+      updateRushUI();
+      if (state.rushRemainingMs <= 0 && !state.locked) endGame("time");
+    }
+
+    function startRushTimer() {
+      window.clearInterval(rushTimerHandle);
+      state.rushLastTickAt = Date.now();
+      rushTimerHandle = window.setInterval(tickRushTimer, 100);
+    }
+
+    function stopRushTimer() {
+      window.clearInterval(rushTimerHandle);
+      rushTimerHandle = null;
+    }
+
+    function completeRushBoard() {
+      if (state.mode !== "rush" || state.rushTargets.size > 0) return false;
+      state.rushBoardsCleared += 1;
+      const boardBonus = RUSH_BOARD_BASE_BONUS + ((state.rushBoardsCleared - 1) * 250);
+      state.score += boardBonus;
+      showScoreBurst(`BOARD CLEAR +${formatScore(boardBonus)}`, true);
+      setupRushBoard();
+      state.pieces = dealPieceSet(poweredSpecialCount());
+      state.setPlaced = 0;
+      state.selected = null;
+      renderBoard();
+      renderTray();
+      updateStats();
+      setToast(`BOARD ${state.rushBoardsCleared} CLEARED! NEXT PATTERN LOADED.`, true);
+      sound("achievement");
+      vibrate([25, 20, 40]);
+      return true;
+    }
+
+    function renderRecords() {
+      $("recordRushBest").textContent = formatScore(state.rush.best);
+      $("recordRushDetail").textContent = `${formatScore(state.rush.bestBoards)} board${state.rush.bestBoards === 1 ? "" : "s"} cleared • ${formatScore(state.rush.bestLines)} lines`;
+      $("recordEndlessBest").textContent = formatScore(state.best);
+      $("recordEndlessLifetime").textContent = formatScore(state.lifetime.score);
+    }
+
+    function openRecords() {
+      renderRecords();
+      showScreen("recordsScreen");
+      setGameBackVisible(false);
+      sound("select");
     }
 
     function currentCampaignLevel() { return CAMPAIGN_LEVELS[state.campaignLevelIndex] || CAMPAIGN_LEVELS[0]; }
@@ -2278,7 +2522,7 @@
     }
 
     function recordRunProgress() {
-      if (TEST_SAVE_DISABLED || state.mode === "campaign") return;
+      if (TEST_SAVE_DISABLED || state.mode === "campaign" || state.mode === "rush") return;
       if (!state.recorded.run) {
         state.lifetime.runs += 1;
         state.recorded.run = true;
@@ -2302,9 +2546,11 @@
     function updateStats() {
       const dailyMode = state.mode === "daily";
       const campaignMode = state.mode === "campaign";
+      const rushMode = state.mode === "rush";
       const shardsLeft = Math.max(0, DAILY_SHARD_TARGET - state.shardsCollected);
       $("gameScreen").classList.toggle("daily-mode", dailyMode);
       $("gameScreen").classList.toggle("campaign-mode", campaignMode);
+      $("gameScreen").classList.toggle("rush-mode", rushMode);
       $("powerPanel").hidden = campaignMode;
       $("rerollButton").hidden = campaignMode;
       if (campaignMode) {
@@ -2320,20 +2566,21 @@
         $("comboLabel").textContent = "Placed";
         $("comboValue").textContent = state.campaignPlacements;
       } else {
-        $("bestLabel").textContent = dailyMode ? "Sets left" : "Best";
-        $("bestValue").textContent = dailyMode ? Math.max(0, DAILY_SET_LIMIT - state.setsCompleted) : formatScore(state.best);
+        $("bestLabel").textContent = dailyMode ? "Sets left" : rushMode ? "Time" : "Best";
+        $("bestValue").textContent = dailyMode ? Math.max(0, DAILY_SET_LIMIT - state.setsCompleted) : rushMode ? `${Math.max(0, state.rushRemainingMs / 1000).toFixed(1)}s` : formatScore(state.best);
         $("scoreLabel").textContent = dailyMode ? "Shards left" : "Score";
         $("scoreValue").textContent = dailyMode ? shardsLeft : formatScore(state.score);
         $("dailyObjectiveGem").hidden = !dailyMode;
-        $("comboLabel").textContent = dailyMode ? "Collected" : "Combo";
-        $("comboValue").textContent = dailyMode ? state.shardsCollected : state.combo > 1 ? `×${state.combo}` : "—";
+        $("comboLabel").textContent = dailyMode ? "Collected" : rushMode ? "Boards" : "Combo";
+        $("comboValue").textContent = dailyMode ? state.shardsCollected : rushMode ? state.rushBoardsCleared : state.combo > 1 ? `×${state.combo}` : "—";
       }
       $("homeBest").textContent = formatScore(state.best);
-      $("comboValue").classList.toggle("hot", !dailyMode && !campaignMode && state.combo > 1);
+      $("comboValue").classList.toggle("hot", !dailyMode && !campaignMode && !rushMode && state.combo > 1);
       updateRerollControl();
       updatePowerUI();
       updateDailyGauntletUI();
       updateCampaignUI();
+      updateRushUI();
       renderDailyHome();
     }
 
@@ -2408,7 +2655,8 @@
         piece.cells.forEach((cell) => {
           const occupiedBySpecial = (piece.bombCell && piece.bombCell[0] === cell[0] && piece.bombCell[1] === cell[1])
             || (piece.crossCell && piece.crossCell[0] === cell[0] && piece.crossCell[1] === cell[1])
-            || (piece.shardCell && piece.shardCell[0] === cell[0] && piece.shardCell[1] === cell[1]);
+            || (piece.shardCell && piece.shardCell[0] === cell[0] && piece.shardCell[1] === cell[1])
+            || (piece.timeBonusCell && piece.timeBonusCell[0] === cell[0] && piece.timeBonusCell[1] === cell[1]);
           if (!occupiedBySpecial) targets.push({ piece, pieceIndex, cell });
         });
       });
@@ -2466,6 +2714,10 @@
         sound("powerOn");
         vibrate([45, 30, 70, 30, 110]);
         await playTierThreeBoardWave();
+        if (state.mode === "rush") {
+          collectRushTimeBonuses([...state.rushTimeBonuses.keys()]);
+          state.rushTargets.clear();
+        }
         state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
       } else if (tier === 2) {
         seedBoardBombs(3);
@@ -2473,6 +2725,7 @@
       ensurePoweredSpecials(state.pieces, poweredSpecialCount());
       if (tier === 3) boardEl.classList.add("instant-clear");
       renderBoard();
+      if (tier === 3 && state.mode === "rush") completeRushBoard();
       if (tier === 3) {
         void boardEl.offsetWidth;
         boardEl.classList.remove("instant-clear");
@@ -2680,6 +2933,19 @@
 
     function dealPieceSet(specialCount = 0) {
       if (state.mode === "campaign") return campaignPieceSet();
+      if (state.mode === "rush") {
+        const pieces = generatePieceSet(specialCount);
+        state.rushDealCount += 1;
+        if (state.rushDealCount > 1 && state.rushDealCount % 2 === 0) {
+          const targets = specialTargets(pieces);
+          if (targets.length) {
+            const target = targets[Math.floor(Math.random() * targets.length)];
+            target.piece.timeBonusCell = [...target.cell];
+            target.piece.timeBonusSeconds = state.rushDealCount % 4 === 0 ? 10 : 5;
+          }
+        }
+        return pieces;
+      }
       if (state.mode !== "daily") return generatePieceSet(specialCount);
       const previousRandom = activeDealRandom;
       activeDealRandom = seededRandom(`deblockle-daily:${state.dailyDate}:delivery:${state.dailyDealIndex}`);
@@ -2725,21 +2991,31 @@
         const col = index % SIZE;
         // Clearing is a temporary animation state. Removing it here restores
         // the cleared board spaces so they can immediately accept new blocks.
-        cell.classList.remove("clearing", "exploding", "cross-clearing", "cross-triggering", "cross-fire", "cross-fire-occupied", "cross-fire-origin", "tier3-wave", "shard-collected");
+        cell.classList.remove("clearing", "exploding", "cross-clearing", "cross-triggering", "cross-fire", "cross-fire-occupied", "cross-fire-origin", "tier3-wave", "shard-collected", "time-collected");
         cell.style.removeProperty("--cross-delay");
         cell.style.removeProperty("--wave-delay");
         cell.classList.toggle("filled", Boolean(state.board[row][col]));
         cell.classList.toggle("bomb", state.board[row][col] === 2);
         cell.classList.toggle("cross", state.board[row][col] === 3);
+        cell.classList.toggle("rush-target", Boolean(state.board[row][col]) && state.rushTargets.has(`${row},${col}`));
         cell.classList.toggle("shard", Boolean(state.board[row][col]) && state.shards.has(`${row},${col}`));
         cell.querySelector(".shard-mark")?.remove();
+        cell.querySelector(".time-mark")?.remove();
         if (state.board[row][col] && state.shards.has(`${row},${col}`)) {
           const shard = document.createElement("span");
           shard.className = "shard-mark";
           shard.setAttribute("aria-hidden", "true");
           cell.appendChild(shard);
         }
-        cell.setAttribute("aria-label", `Row ${row + 1}, column ${col + 1}${state.shards.has(`${row},${col}`) ? ", contains a Shard" : ""}`);
+        const timeBonus = state.rushTimeBonuses.get(`${row},${col}`);
+        if (state.board[row][col] && timeBonus) {
+          const mark = document.createElement("span");
+          mark.className = `time-mark${timeBonus === 10 ? " ten" : ""}`;
+          mark.textContent = `+${timeBonus}`;
+          mark.setAttribute("aria-hidden", "true");
+          cell.appendChild(mark);
+        }
+        cell.setAttribute("aria-label", `Row ${row + 1}, column ${col + 1}${state.shards.has(`${row},${col}`) ? ", contains a Shard" : ""}${timeBonus ? `, contains plus ${timeBonus} seconds` : ""}`);
       });
       checkSpecialTutorials();
     }
@@ -2760,7 +3036,7 @@
         card.classList.toggle("selected", state.selected === index && !piece.used);
         card.classList.toggle("used", piece.used);
         card.classList.toggle("cannot-fit", !piece.used && !canShapeFitAnywhere(piece));
-        card.setAttribute("aria-label", piece.used ? `${piece.name}, placed` : `Choose ${piece.name}${piece.shardCell ? ", containing a Shard" : ""}`);
+        card.setAttribute("aria-label", piece.used ? `${piece.name}, placed` : `Choose ${piece.name}${piece.shardCell ? ", containing a Shard" : ""}${piece.timeBonusCell ? `, containing plus ${piece.timeBonusSeconds || 5} seconds` : ""}`);
         card.addEventListener("pointerdown", (event) => safeAction("Begin drag", () => beginDrag(index, event)));
         card.addEventListener("keydown", (event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -2781,6 +3057,11 @@
             if (piece.bombCell && piece.bombCell[0] === row && piece.bombCell[1] === col) dot.classList.add("bomb-dot");
             if (piece.crossCell && piece.crossCell[0] === row && piece.crossCell[1] === col) dot.classList.add("cross-dot");
             if (piece.shardCell && piece.shardCell[0] === row && piece.shardCell[1] === col) dot.classList.add("shard-dot");
+            if (piece.timeBonusCell && piece.timeBonusCell[0] === row && piece.timeBonusCell[1] === col) {
+              dot.classList.add("time-dot");
+              if (piece.timeBonusSeconds === 10) dot.classList.add("ten");
+              dot.dataset.time = `+${piece.timeBonusSeconds || 5}`;
+            }
             grid.appendChild(dot);
           }
         }
@@ -2811,6 +3092,11 @@
           if (piece.bombCell && piece.bombCell[0] === row && piece.bombCell[1] === col) dot.classList.add("bomb-dot");
           if (piece.crossCell && piece.crossCell[0] === row && piece.crossCell[1] === col) dot.classList.add("cross-dot");
           if (piece.shardCell && piece.shardCell[0] === row && piece.shardCell[1] === col) dot.classList.add("shard-dot");
+          if (piece.timeBonusCell && piece.timeBonusCell[0] === row && piece.timeBonusCell[1] === col) {
+            dot.classList.add("time-dot");
+            if (piece.timeBonusSeconds === 10) dot.classList.add("ten");
+            dot.dataset.time = `+${piece.timeBonusSeconds || 5}`;
+          }
           grid.appendChild(dot);
         }
       }
@@ -3001,6 +3287,9 @@
         if (piece.shardCell && piece.shardCell[0] === offsetRow && piece.shardCell[1] === offsetCol) {
           state.shards.add(`${targetRow},${targetCol}`);
         }
+        if (piece.timeBonusCell && piece.timeBonusCell[0] === offsetRow && piece.timeBonusCell[1] === offsetCol) {
+          state.rushTimeBonuses.set(`${targetRow},${targetCol}`, piece.timeBonusSeconds || 5);
+        }
       });
       piece.used = true;
       state.setPlaced += 1;
@@ -3008,7 +3297,7 @@
       state.blocks += piece.cells.length;
       const placementScore = Math.round(piece.cells.length * 5 * powerMultiplier() * dailyBaseScoreMultiplier());
       state.score += placementScore;
-      if (state.mode === "endless") showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
+      if (state.mode === "endless" || state.mode === "rush") showScoreBurst(`+${formatScore(placementScore)}`, state.powerActive);
       checkScoreAchievement();
       state.selected = null;
       renderBoard();
@@ -3016,6 +3305,12 @@
       sound("place");
 
       const cleared = await clearCompletedLines();
+      if (state.mode === "rush" && completeRushBoard()) {
+        state.locked = false;
+        updateStats();
+        if (state.rushRemainingMs <= 0) endGame("time");
+        return;
+      }
       if (state.mode === "daily" && state.shardsCollected >= DAILY_SHARD_TARGET) {
         state.locked = false;
         updateStats();
@@ -3100,6 +3395,7 @@
 
       const remaining = state.pieces.filter((item) => !item.used);
       if (remaining.length && !remaining.some(canShapeFitAnywhere)) endGame(state.mode === "campaign" ? "campaignBlocked" : "blocked");
+      else if (state.mode === "rush" && state.rushRemainingMs <= 0) endGame("time");
     }
 
     async function clearCompletedLines() {
@@ -3199,6 +3495,10 @@
       }
 
       const removedCells = new Set([...lineCells, ...crossCells, ...blastCells]);
+      const collectedTimeKeys = state.mode === "rush"
+        ? [...removedCells].filter((key) => state.rushTimeBonuses.has(key))
+        : [];
+      const collectedTimeSeconds = collectRushTimeBonuses(collectedTimeKeys);
       const collectedShardKeys = state.mode === "daily" || state.mode === "campaign"
         ? [...removedCells].filter((key) => state.shards.has(key))
         : [];
@@ -3223,7 +3523,7 @@
       const clearScore = Math.round((lineCells.size * 10 + lineCount * 75 + crossOnlyCount * 10 + crossBonus + explosionOnlyCount * 10 + chainBonus)
         * multiplier * powerMultiplier() * dailyClearScoreMultiplier(lineCount, triggeredBombs.size, triggeredCrosses.size));
       state.score += clearScore;
-      if (state.mode === "endless") showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
+      if (state.mode === "endless" || state.mode === "rush") showScoreBurst(`+${formatScore(clearScore)}${state.combo > 1 ? ` ×${state.combo}` : ""}`, triggeredBombs.size > 0 || triggeredCrosses.size > 0 || lineCount >= 2);
       checkScoreAchievement();
 
       crossPathDelays.forEach((delayMs, key) => {
@@ -3240,6 +3540,7 @@
         const [row, col] = key.split(",").map(Number);
         const cell = boardEl.children[(row * SIZE) + col];
         if (collectedShardKeys.includes(key)) cell.classList.add("shard-collected");
+        if (collectedTimeKeys.includes(key)) cell.classList.add("time-collected");
         if (triggeredBombs.has(key)) cell.classList.add("exploding");
         else if (crossPathDelays.has(key)) return;
         else if (blastCells.has(key)) cell.classList.add("exploding");
@@ -3263,8 +3564,9 @@
               ? `DOUBLE CLEAR! ×${multiplier}`
               : state.combo > 1 ? `COMBO ×${multiplier}` : "LINE CLEARED!";
       const shardPhrase = collectedShardKeys.length ? ` • ${collectedShardKeys.length} SHARD${collectedShardKeys.length === 1 ? "" : "S"}` : "";
-      const scorePhrase = state.mode === "endless" ? `  +${formatScore(clearScore)}` : "";
-      setToast(`${phrase}${shardPhrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}${scorePhrase}`, true);
+      const timePhrase = collectedTimeSeconds ? ` • +${collectedTimeSeconds} SECONDS` : "";
+      const scorePhrase = state.mode === "endless" || state.mode === "rush" ? `  +${formatScore(clearScore)}` : "";
+      setToast(`${phrase}${shardPhrase}${timePhrase}${state.powerActive ? ` • POWER ×${powerMultiplier()}` : ""}${scorePhrase}`, true);
       sound(triggeredBombs.size ? "blast" : triggeredCrosses.size ? "cross" : lineCount >= 2 ? "bigClear" : "clear");
       vibrate(triggeredBombs.size ? [45, 30, 65] : triggeredCrosses.size ? [22, 24, 22, 24, 40] : lineCount >= 2 ? [25, 35, 45] : 30);
       const maxCrossDelay = crossPathDelays.size ? Math.max(...crossPathDelays.values()) : 0;
@@ -3278,6 +3580,8 @@
         const [row, col] = key.split(",").map(Number);
         state.board[row][col] = 0;
         state.shards.delete(key);
+        state.rushTimeBonuses.delete(key);
+        state.rushTargets.delete(key);
       });
       renderBoard();
       if (occupiedBeforeClear >= 32 && state.board.every((row) => row.every((cell) => cell === 0))) unlockAchievement("clean_slate");
@@ -3423,8 +3727,32 @@
       setToast("FINAL SHARD: place the Single block in the bottom-right space.", true);
     }
 
+    function prepareRushTest(clearReady = false) {
+      if (!DEV_MODE) return;
+      startGame("rush");
+      if (!clearReady) {
+        setToast("RUSH TEST: timer, patterns and bonus-time deliveries are active.", true);
+        return;
+      }
+      state.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+      state.rushTimeBonuses = new Map();
+      state.rushTargets = new Set();
+      for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+      state.rushTimeBonuses.set(`${SIZE - 1},3`, 10);
+      for (let col = 0; col < SIZE - 1; col += 1) state.rushTargets.add(`${SIZE - 1},${col}`);
+      state.pieces = makeDevPieces();
+      state.selected = 0;
+      state.setPlaced = 0;
+      state.locked = false;
+      renderBoard();
+      renderTray();
+      updateStats();
+      setToast("RUSH CLEAR: place the Single block in the bottom-right space.", true);
+    }
+
     function restartCurrentMode() {
       if (state.mode === "daily") startGame("daily", state.dailyDate, state.dailyPreview);
+      else if (state.mode === "rush") startGame("rush");
       else if (state.mode === "campaign") {
         const nextIndex = state.campaignCompleted ? state.campaignLevelIndex + 1 : state.campaignLevelIndex;
         if (nextIndex < CAMPAIGN_LEVELS.length) startCampaignLevel(nextIndex);
@@ -3439,6 +3767,7 @@
     }
 
     function startGame(mode = "endless", dailyDate = "", dailyPreview = false, campaignLevelIndex = 0) {
+      stopRushTimer();
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
       closeOverlay("pauseOverlay");
@@ -3459,6 +3788,17 @@
       state.dailyCompleted = false;
       state.dailyEndReason = "";
       state.lastDailyResult = null;
+      state.rushBoardIndex = 0;
+      state.rushBoardOrder = [];
+      state.rushPattern = null;
+      state.rushRemainingMs = RUSH_START_MS;
+      state.rushLastTickAt = 0;
+      state.rushPaused = false;
+      state.rushBoardsCleared = 0;
+      state.rushTimeCollected = 0;
+      state.rushTimeBonuses = new Map();
+      state.rushTargets = new Set();
+      state.rushDealCount = 0;
       state.campaignLevelIndex = mode === "campaign" ? campaignLevelIndex : state.campaignLevelIndex;
       state.campaignSetIndex = 0;
       state.campaignPlacements = 0;
@@ -3478,7 +3818,7 @@
       state.bombsDetonated = 0;
       state.crossesActivated = 0;
       state.highestTierReached = 0;
-      state.rerolls = mode === "endless" ? 2 : 0;
+      state.rerolls = mode === "endless" || mode === "rush" ? 2 : 0;
       state.setPlaced = 0;
       state.energy = TEST_MODE && mode !== "campaign" ? [0, TIER_1_ENERGY, TIER_2_ENERGY, TIER_3_ENERGY][TEST_TIER] : 0;
       state.powerActive = false;
@@ -3489,9 +3829,10 @@
       state.recorded = { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false };
       state.locked = false;
       state.running = true;
-      state.pieces = dealPieceSet();
       setupDailyShardBoard();
       setupCampaignBoard();
+      setupRushBoard();
+      state.pieces = dealPieceSet();
       if (TEST_TUTORIAL && mode !== "campaign") {
         addSpecialType(state.pieces, "bomb");
         addSpecialType(state.pieces, "cross");
@@ -3505,7 +3846,8 @@
       setGameBackVisible(true);
       const dailyMode = state.mode === "daily";
       const campaignMode = state.mode === "campaign";
-      $("modeBanner").hidden = !dailyMode && !campaignMode;
+      const rushMode = state.mode === "rush";
+      $("modeBanner").hidden = !dailyMode && !campaignMode && !rushMode;
       if (dailyMode) {
         $("modeBannerTitle").textContent = `Daily • ${formatDailyDate(state.dailyDate)}`;
         $("modeBannerStatus").textContent = `${state.dailyPreview ? "Preview" : state.dailyOfficial ? "Official" : "Practice"} • ${DAILY_SHARD_TARGET} Shards`;
@@ -3513,20 +3855,25 @@
         const level = currentCampaignLevel();
         $("modeBannerTitle").textContent = `Campaign • Level ${level.id}`;
         $("modeBannerStatus").textContent = level.chapterName;
+      } else if (rushMode) {
+        $("modeBannerTitle").textContent = "DeBlockle Rush";
+        $("modeBannerStatus").textContent = "60 SECOND SCORE ATTACK";
       }
-      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily DeBlockle game" : campaignMode ? `Campaign level ${currentCampaignLevel().id}` : "Endless DeBlockle game");
+      $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily DeBlockle game" : campaignMode ? `Campaign level ${currentCampaignLevel().id}` : rushMode ? "DeBlockle Rush game" : "Endless DeBlockle game");
       renderBoard();
       renderTray();
       updateStats();
       setToast(dailyMode
         ? `${state.dailyTemplate.name}: clear ${DAILY_SHARD_TARGET} Shards before ${DAILY_SET_LIMIT} sets run out.`
-        : campaignMode ? `${currentCampaignLevel().name}: ${currentCampaignLevel().description}.` : "Press and drag a block onto the board.");
+        : campaignMode ? `${currentCampaignLevel().name}: ${currentCampaignLevel().description}.` : rushMode ? `${state.rushPattern.name}: clear the board and collect bonus time!` : "Press and drag a block onto the board.");
       sound("start");
+      if (rushMode) startRushTimer();
       if (TEST_GAME_OVER) window.setTimeout(endGame, 250);
     }
 
     function endGame(reason = "blocked") {
       if (!state.running) return;
+      stopRushTimer();
       state.running = false;
       state.locked = true;
       state.dailyEndReason = state.mode === "daily" ? reason : "";
@@ -3536,8 +3883,11 @@
       const isCampaign = state.mode === "campaign";
       if (!isCampaign) state.sessionCompletedRuns += 1;
       const isDaily = state.mode === "daily";
+      const isRush = state.mode === "rush";
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
-      const isNewBest = !isDaily && !isCampaign && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
+      const previousRushBest = state.rush.best;
+      const isNewBest = !isDaily && !isCampaign && !isRush && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
+      const isNewRushBest = isRush && !TEST_SAVE_DISABLED && state.score > previousRushBest;
       if (isDaily) {
         state.lastDailyResult = {
           date: state.dailyDate,
@@ -3555,27 +3905,39 @@
         };
         recordOfficialDailyResult(state.lastDailyResult);
       }
+      if (isRush && !TEST_SAVE_DISABLED) {
+        state.rush.runs += 1;
+        if (state.score > state.rush.best) {
+          state.rush.best = state.score;
+          state.rush.bestBoards = state.rushBoardsCleared;
+          state.rush.bestLines = state.lines;
+        }
+        localStorage.setItem(RUSH_DATA_KEY, JSON.stringify(state.rush));
+        renderRecords();
+      }
       updateBest(true);
       recordRunProgress();
       $("finalScorePanel").hidden = isDaily || isCampaign;
       $("finalScore").textContent = formatScore(state.score);
       $("finalLines").textContent = formatScore(state.lines);
       $("finalBlocks").textContent = formatScore(state.blocks);
-      $("finalSets").textContent = formatScore(state.setsCompleted);
+      $("finalSetsLabel").textContent = isRush ? "Boards cleared" : "Sets completed";
+      $("finalSets").textContent = formatScore(isRush ? state.rushBoardsCleared : state.setsCompleted);
       $("finalCombo").textContent = state.highestCombo ? `×${state.highestCombo}` : "—";
       $("finalLargest").textContent = formatScore(state.largestClear);
       $("finalSpecials").textContent = `${formatScore(state.bombsDetonated)} / ${formatScore(state.crossesActivated)}`;
       $("finalTier").textContent = state.highestTierReached ? `Tier ${state.highestTierReached}` : "—";
-      $("finalRunType").textContent = formatDuration(state.runDurationMs);
-      $("gameOverTitle").textContent = isDaily ? state.dailyCompleted ? "Shard Hunt complete!" : "Shard Hunt ended" : isCampaign ? state.campaignCompleted ? "Puzzle complete!" : "Puzzle not solved" : "Board blocked!";
+      $("finalRunTypeLabel").textContent = isRush ? "Time collected" : "Run time";
+      $("finalRunType").textContent = isRush ? `+${formatScore(state.rushTimeCollected)}s` : formatDuration(state.runDurationMs);
+      $("gameOverTitle").textContent = isDaily ? state.dailyCompleted ? "Shard Hunt complete!" : "Shard Hunt ended" : isCampaign ? state.campaignCompleted ? "Puzzle complete!" : "Puzzle not solved" : isRush ? reason === "time" ? "Time's up!" : "No moves left!" : "Board blocked!";
       $("newBest").textContent = isDaily
         ? state.dailyPreview ? "DEVELOPER DAILY PREVIEW" : state.dailyOfficial ? "★ OFFICIAL RESULT SAVED ★" : "PRACTICE RESULT"
-        : isCampaign ? `CHAPTER ${currentCampaignLevel().chapter} • LEVEL ${currentCampaignLevel().id}` : isNewBest ? "★ NEW BEST SCORE ★" : "";
+        : isCampaign ? `CHAPTER ${currentCampaignLevel().chapter} • LEVEL ${currentCampaignLevel().id}` : isRush ? isNewRushBest ? "★ NEW RUSH RECORD ★" : "DEBLOCKLE RUSH" : isNewBest ? "★ NEW BEST SCORE ★" : "";
       $("runStatus").textContent = isDaily
         ? `${state.shardsCollected} / ${DAILY_SHARD_TARGET} Shards • ${Math.min(state.setsCompleted, DAILY_SET_LIMIT)} / ${DAILY_SET_LIMIT} sets • Streak ${displayedDailyStreak()}`
-        : isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
+        : isCampaign ? `${currentCampaignLevel().description} • ${campaignProgressText()}` : isRush ? `${state.rushBoardsCleared} boards • ${state.lines} lines • Rush best ${formatScore(state.rush.best)}` : `Best score ${formatScore(state.best)} • Run ${state.sessionCompletedRuns} this session`;
       $("dailyResultPanel").hidden = !isDaily;
-      $("campaignResultPanel").hidden = !isCampaign;
+      $("campaignResultPanel").hidden = !isCampaign && !isRush;
       if (isDaily) {
         $("dailyResultType").textContent = `${state.dailyPreview ? "DEVELOPER PREVIEW" : state.dailyOfficial ? "OFFICIAL RESULT" : "PRACTICE RESULT"} • ${state.dailyTemplate.name}`;
         $("dailyResultDate").textContent = formatDailyDate(state.dailyDate);
@@ -3591,6 +3953,11 @@
           : "The supplied blocks have a fixed solution. Restart and try again.";
         $("againButton").textContent = state.campaignCompleted ? lastLevel ? "CAMPAIGN COMPLETE" : "NEXT LEVEL" : "TRY AGAIN";
         $("homeButton").textContent = "LEVEL SELECT";
+      } else if (isRush) {
+        $("campaignResultTitle").textContent = `${formatScore(state.rushBoardsCleared)} BOARD${state.rushBoardsCleared === 1 ? "" : "S"} CLEARED`;
+        $("campaignResultCopy").textContent = `${formatScore(state.lines)} lines • +${formatScore(state.rushTimeCollected)} seconds collected`;
+        $("againButton").textContent = "PLAY RUSH AGAIN";
+        $("homeButton").textContent = "BACK TO HOME";
       } else {
         $("againButton").textContent = isDaily ? state.dailyPreview ? "REPLAY PREVIEW" : "PRACTICE TODAY'S SHARD HUNT" : "PLAY AGAIN";
         $("homeButton").textContent = "BACK TO HOME";
@@ -3635,6 +4002,7 @@
     }
 
     function goHome() {
+      stopRushTimer();
       state.running = false;
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
@@ -3656,12 +4024,17 @@
     function openPauseMenu() {
       if (!state.running || state.locked) return;
       cleanUpDrag();
+      if (state.mode === "rush") state.rushPaused = true;
       openOverlay("pauseOverlay");
       sound("select");
     }
 
     function resumeGame() {
       closeOverlay("pauseOverlay");
+      if (state.mode === "rush") {
+        state.rushPaused = false;
+        state.rushLastTickAt = Date.now();
+      }
       setToast("Run resumed.");
     }
 
@@ -3669,6 +4042,7 @@
       if (!state.running) return;
       const campaignMode = state.mode === "campaign";
       cleanUpDrag();
+      stopRushTimer();
       state.running = false;
       state.locked = false;
       recordRunProgress();
@@ -3753,8 +4127,9 @@
 
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
     $("dailyButton").addEventListener("click", () => safeAction("Start daily challenge", () => startDailyGame()));
-    $("campaignButton").addEventListener("click", () => safeAction("Open campaign", openCampaign));
-    $("campaignHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
+    $("rushButton").addEventListener("click", () => safeAction("Start Rush", () => startGame("rush")));
+    $("leaderboardsButton").addEventListener("click", () => safeAction("Open leaderboards", openRecords));
+    $("recordsHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("againButton").addEventListener("click", () => safeAction("Restart game", restartCurrentMode));
     $("homeButton").addEventListener("click", () => safeAction("Return after run", returnAfterRun));
     $("backButton").addEventListener("click", () => safeAction("Pause game", openPauseMenu));
@@ -3786,6 +4161,8 @@
     $("devDailyTodayButton").addEventListener("click", () => safeAction("Preview today's daily", () => startDailyGame(0, true)));
     $("devDailyNextButton").addEventListener("click", () => safeAction("Preview tomorrow's daily", () => startDailyGame(1, true)));
     $("devDailyFinishButton").addEventListener("click", () => safeAction("Prepare daily finish test", prepareDailyFinishTest));
+    $("devRushButton").addEventListener("click", () => safeAction("Start Rush test", () => prepareRushTest(false)));
+    $("devRushClearButton").addEventListener("click", () => safeAction("Prepare Rush clear test", () => prepareRushTest(true)));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
@@ -3808,6 +4185,7 @@
     renderAchievements();
     updateSoundButton();
     renderDailyHome();
+    renderRecords();
     window.setInterval(renderDailyHome, 1000);
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
