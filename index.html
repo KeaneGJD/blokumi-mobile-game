@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.46</title>
+  <title>DeBlockle v0.47</title>
   <style>
     :root {
       --ink: #101828;
@@ -282,7 +282,7 @@
     .home-profile-best strong { display: block; margin-top: 2px; color: var(--cyan); font-size: 19px; line-height: 1; letter-spacing: -.03em; }
 
     .home-section-label { margin: 19px 2px 7px; color: var(--muted); font-size: 8px; font-weight: 1000; letter-spacing: .18em; }
-    .home-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .home-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 36px; }
     .home-endless-button { grid-column: 1 / -1; min-height: 55px; padding: 7px 12px 10px; }
     .home-endless-button strong, .home-endless-button span { display: block; }
     .home-endless-button strong { font-size: 17px; }
@@ -1743,7 +1743,7 @@
       .hero-mark { transform: scale(.86); margin: -12px 0 -13px; }
       .title { font-size: clamp(60px, 18.5vw, 76px); }
       .home-profile-button { min-height: 56px; }
-      .home-section-label { margin-top: 13px; }
+      .home-mode-grid { margin-top: 30px; }
       .home-mode-card, .secondary-btn.daily-button, .rush-home-button { height: 64px; min-height: 64px; }
       .daily-button-bottom { margin-top: 5px; padding-top: 4px; }
       .home-utility-grid { margin-top: 22px; }
@@ -1805,7 +1805,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.46 • RESULT FLOW POLISH</div>
+      <div class="version">DEBLOCKLE BUILD v0.47 • HOMEPAGE SPACING</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
@@ -2144,7 +2144,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.46";
+    const BUILD = "v0.47";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
