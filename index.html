@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>DeBlockle v0.45</title>
+  <title>DeBlockle v0.46</title>
   <style>
     :root {
       --ink: #101828;
@@ -349,6 +349,7 @@
     .settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .settings-actions .secondary-btn { min-height: 48px; padding: 9px; font-size: 10px; }
     .settings-status { min-height: 18px; margin: 8px 2px 4px; color: var(--lime); font-size: 9px; text-align: center; }
+    .settings-home-actions { margin-top: 24px; }
 
     .daily-card {
       margin: 0;
@@ -1550,10 +1551,20 @@
     .result-share-panel { margin-top: 13px; padding: 13px; border: 1px solid rgba(57,231,208,.22); border-radius: 17px; background: rgba(57,231,208,.06); }
     .result-share-panel[hidden] { display: none; }
     .result-share-title { display: block; color: var(--cyan); font-size: 10px; font-weight: 1000; letter-spacing: .11em; text-align: center; }
-    .result-share-copy { margin: 4px 0 10px !important; color: var(--muted) !important; font-size: 10px !important; line-height: 1.35 !important; text-align: center; }
-    .result-share-primary { min-height: 44px; font-size: 13px; }
-    .result-share-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .result-share-actions .secondary-btn { min-height: 37px; padding: 8px; font-size: 9px; }
+    .result-share-primary { min-height: 46px; margin-top: 9px; font-size: 13px; }
+    .endless-loss-actions { display: grid; gap: 10px; }
+    .endless-loss-actions[hidden] { display: none; }
+    .rescue-btn { min-height: 58px; background: linear-gradient(135deg, var(--pink), var(--orange)); }
+    .rescue-btn strong, .rescue-btn span { display: block; }
+    .rescue-btn strong { font-size: 14px; }
+    .rescue-btn span { margin-top: 3px; font-size: 8px; letter-spacing: .1em; opacity: .72; }
+    .share-choice-card { text-align: center; }
+    .share-choice-copy { margin: 0 0 14px !important; font-size: 11px !important; }
+    .social-share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .social-share-button { min-width: 0; min-height: 54px; padding: 7px 3px; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; color: var(--cream); background: rgba(255,255,255,.06); font-size: 8px; font-weight: 950; cursor: pointer; }
+    .social-share-button span { display: block; margin-bottom: 4px; color: var(--cyan); font-size: 19px; line-height: 1; }
+    .share-file-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
+    .share-file-actions .secondary-btn { min-height: 42px; padding: 8px; font-size: 9px; }
 
     .test-ad-card { text-align: center; }
 
@@ -1777,7 +1788,6 @@
         <span class="home-profile-best"><small>BEST</small><strong id="homeBest">0</strong></span>
       </button>
 
-      <p class="home-section-label">PLAY</p>
       <div class="home-mode-grid">
         <button class="primary-btn home-endless-button" id="playButton"><strong>PLAY ENDLESS</strong><span>BUILD YOUR BEST SCORE</span></button>
         <div class="daily-card home-mode-card">
@@ -1795,7 +1805,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">DEBLOCKLE BUILD v0.45 • RELEASE CANDIDATE</div>
+      <div class="version">DEBLOCKLE BUILD v0.46 • RESULT FLOW POLISH</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="DeBlockle settings and accessibility">
@@ -1827,7 +1837,7 @@
         <button class="secondary-btn" id="replayBlastTutorialButton" type="button">REPLAY BLAST</button>
         <button class="secondary-btn" id="replayCrossTutorialButton" type="button">REPLAY CROSS</button>
       </div>
-      <div class="button-stack"><button class="primary-btn" id="settingsHomeButton">BACK TO HOME</button></div>
+      <div class="button-stack settings-home-actions"><button class="primary-btn" id="settingsHomeButton">BACK TO HOME</button></div>
     </section>
 
     <section class="screen" id="profileScreen" aria-label="Local player profile">
@@ -2035,21 +2045,43 @@
       </div>
       <div class="result-share-panel" id="resultSharePanel" hidden>
         <span class="result-share-title">SHARE YOUR RESULT</span>
-        <p class="result-share-copy">Creates a branded score card for social media and messaging apps.</p>
         <button class="primary-btn result-share-primary" id="shareResultButton">SHARE RESULT</button>
-        <div class="result-share-actions">
-          <button class="secondary-btn" id="copyResultButton">COPY RESULT</button>
-          <button class="secondary-btn" id="saveResultImageButton">SAVE IMAGE</button>
-        </div>
         <p class="share-status" id="resultShareStatus" aria-live="polite"></p>
       </div>
       <div class="button-stack">
-        <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
+        <div class="endless-loss-actions" id="endlessLossActions" hidden>
+          <button class="primary-btn rescue-btn" id="removeRowsButton"><strong>REMOVE 3 ROWS</strong><span>WATCH AN AD TO KEEP PLAYING</span></button>
+          <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
+        </div>
+        <button class="primary-btn continue-btn" id="standardPostRunContinueButton">CONTINUE</button>
         <div class="post-run-choices hidden" id="postRunChoices">
           <button class="primary-btn" id="againButton">PLAY AGAIN</button>
           <button class="secondary-btn" id="homeButton">BACK TO HOME</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="shareOptionsOverlay" role="dialog" aria-modal="true" aria-labelledby="shareOptionsTitle">
+    <div class="modal share-choice-card">
+      <h2 id="shareOptionsTitle">Share result</h2>
+      <p class="share-choice-copy">Choose where to share your result card.</p>
+      <div class="social-share-grid" aria-label="Social sharing options">
+        <button class="social-share-button" id="shareFacebookButton"><span>f</span>Facebook</button>
+        <button class="social-share-button" id="shareXButton"><span>ᵏ</span>X</button>
+        <button class="social-share-button" id="shareInstagramButton"><span>◎</span>Instagram</button>
+        <button class="social-share-button" id="shareLinkedInButton"><span>in</span>LinkedIn</button>
+        <button class="social-share-button" id="shareDiscordButton"><span>☵</span>Discord</button>
+      </div>
+      <div class="share-file-actions">
+        <button class="secondary-btn" id="copyResultImageButton">COPY IMAGE</button>
+        <button class="secondary-btn" id="saveResultImageButton">SAVE IMAGE</button>
+      </div>
+      <div class="button-stack">
+        <button class="primary-btn" id="systemShareResultButton">MORE SHARE OPTIONS</button>
+        <button class="secondary-btn" id="closeShareOptionsButton">CANCEL</button>
+      </div>
+      <p class="share-status" id="shareOptionsStatus" aria-live="polite"></p>
     </div>
   </div>
 
@@ -2089,6 +2121,20 @@
     </div>
   </div>
 
+  <div class="overlay" id="rewardedRowsOverlay" role="dialog" aria-modal="true" aria-labelledby="rewardedRowsTitle">
+    <div class="modal test-ad-card">
+      <span class="ad-badge">DEVELOPMENT ONLY</span>
+      <div class="test-ad-screen">
+        <strong id="rewardedRowsTitle">TEST REWARDED AD</strong>
+        <span>The Android build will grant the row rescue only after the advert finishes.</span>
+      </div>
+      <div class="button-stack">
+        <button class="primary-btn" id="completeRewardedRowsButton">FINISH TEST AD</button>
+        <button class="secondary-btn" id="cancelRewardedRowsButton">AD UNAVAILABLE</button>
+      </div>
+    </div>
+  </div>
+
   <div class="achievement-toast" id="achievementToast" role="status">
     <span class="achievement-toast-icon" id="achievementToastIcon">★</span>
     <span><small>ACHIEVEMENT UNLOCKED</small><strong id="achievementToastName">First Break</strong></span>
@@ -2098,7 +2144,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.45";
+    const BUILD = "v0.46";
     const SHARE_URL = "https://keanegjd.github.io/deblockle-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2348,6 +2394,8 @@
       runStartAchievementCount: 0,
       runStartedAt: 0,
       runDurationMs: 0,
+      endlessRescueUsed: false,
+      runFinalized: false,
       sessionCompletedRuns: 0,
       lastInterstitialAt: 0,
       appBackgrounded: false,
@@ -3319,8 +3367,48 @@
         await copyShareText(result, statusId);
         if (status) status.textContent = "Result copied — share it wherever you like.";
       } catch (error) {
-        if (error?.name !== "AbortError" && status) status.textContent = "Sharing unavailable — try Copy Result or Save Image.";
+        if (error?.name !== "AbortError" && status) status.textContent = "Sharing unavailable — try Copy Image or Save Image.";
         else if (status) status.textContent = "";
+      }
+    }
+
+    function openShareOptions() {
+      if (!state.lastShareResult) return;
+      $("resultShareStatus").textContent = "";
+      $("shareOptionsStatus").textContent = "";
+      openOverlay("shareOptionsOverlay");
+    }
+
+    function openSocialShare(network) {
+      const result = state.lastShareResult;
+      if (!result) return;
+      const encodedText = encodeURIComponent(result.text);
+      const encodedUrl = encodeURIComponent(SHARE_URL);
+      const urls = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+        x: `https://twitter.com/intent/tweet?text=${encodedText}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
+      };
+      if (urls[network]) {
+        window.open(urls[network], "_blank", "noopener,noreferrer");
+        $("shareOptionsStatus").textContent = "Opening share window…";
+        return;
+      }
+      $("shareOptionsStatus").textContent = `${network === "instagram" ? "Instagram" : "Discord"} uses your device's share menu.`;
+      return shareResultData(result, "shareOptionsStatus");
+    }
+
+    async function copyShareImage(result, statusId) {
+      if (!result) return;
+      const status = statusId ? $(statusId) : null;
+      try {
+        const canvas = createShareCardCanvas(result);
+        const blob = await new Promise((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Image unavailable")), "image/png"));
+        if (!navigator.clipboard?.write || typeof ClipboardItem !== "function") throw new Error("Clipboard images unavailable");
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        if (status) status.textContent = "Result image copied!";
+      } catch (error) {
+        if (status) status.textContent = "Copy Image isn’t supported here — use Save Image instead.";
       }
     }
 
@@ -4806,12 +4894,14 @@
       $("finalTier").textContent = "Tier 2";
       $("finalRunTypeLabel").textContent = "Run time";
       $("finalRunType").textContent = "3:12";
-      $("runStatus").textContent = "Use Share, Copy Result and Save Image to test every fallback.";
+      $("runStatus").textContent = "Use Share Result to open and test every sharing option.";
       $("dailyResultPanel").hidden = true;
       $("campaignResultPanel").hidden = true;
       $("resultSharePanel").hidden = false;
       $("resultShareStatus").textContent = "";
       $("postRunContinueButton").classList.add("hidden");
+      $("endlessLossActions").hidden = true;
+      $("standardPostRunContinueButton").classList.add("hidden");
       $("postRunChoices").classList.remove("hidden");
       $("againButton").textContent = "START FRESH RUN";
       $("homeButton").textContent = "BACK TO HOME";
@@ -4855,6 +4945,8 @@
         rewards: ["THEME • NEON GRID"]
       });
       $("postRunContinueButton").classList.add("hidden");
+      $("endlessLossActions").hidden = true;
+      $("standardPostRunContinueButton").classList.add("hidden");
       $("postRunChoices").classList.remove("hidden");
       $("againButton").textContent = "START FRESH RUN";
       $("homeButton").textContent = "BACK TO HOME";
@@ -4909,6 +5001,8 @@
       stopRushTimer();
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
+      closeOverlay("rewardedRowsOverlay");
+      closeOverlay("shareOptionsOverlay");
       closeOverlay("pauseOverlay");
       closeOverlay("specialTutorialOverlay");
       closeOverlay("devOverlay");
@@ -4971,6 +5065,8 @@
       state.powerSetsRemaining = 0;
       state.runStartedAt = Date.now();
       state.runDurationMs = 0;
+      state.endlessRescueUsed = false;
+      state.runFinalized = false;
       state.recorded = { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false };
       state.locked = false;
       state.running = true;
@@ -5026,14 +5122,15 @@
       setGameBackVisible(false);
       state.runDurationMs = Date.now() - state.runStartedAt;
       const isCampaign = state.mode === "campaign";
-      if (!isCampaign) state.sessionCompletedRuns += 1;
+      const wasFinalized = state.runFinalized;
+      if (!isCampaign && !wasFinalized) state.sessionCompletedRuns += 1;
       const isDaily = state.mode === "daily";
       const isRush = state.mode === "rush";
       const previousBest = Number(localStorage.getItem(BEST_KEY) || 0);
       const previousRushBest = state.rush.best;
       const isNewBest = !isDaily && !isCampaign && !isRush && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
       const isNewRushBest = isRush && !TEST_SAVE_DISABLED && state.score > previousRushBest;
-      if (isDaily) {
+      if (isDaily && !wasFinalized) {
         state.lastDailyResult = {
           date: state.dailyDate,
           official: state.dailyOfficial,
@@ -5050,7 +5147,7 @@
         };
         recordOfficialDailyResult(state.lastDailyResult);
       }
-      if (isRush && !TEST_SAVE_DISABLED) {
+      if (isRush && !TEST_SAVE_DISABLED && !wasFinalized) {
         state.rush.runs += 1;
         if (state.score > state.rush.best) {
           state.rush.best = state.score;
@@ -5062,8 +5159,11 @@
       }
       updateBest(true);
       recordRunProgress();
-      renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
+      if (!wasFinalized) renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
+      state.runFinalized = true;
       state.lastShareResult = !isCampaign && !TEST_SAVE_DISABLED ? buildRunShareResult(isNewBest, isNewRushBest) : null;
+      $("gameOverTitle").hidden = false;
+      $("newBest").hidden = false;
       $("finalScorePanel").hidden = isDaily || isCampaign;
       $("runSummaryPrimary").hidden = isDaily;
       $("runSummaryDetailed").hidden = isDaily;
@@ -5111,6 +5211,9 @@
         $("homeButton").textContent = "BACK TO HOME";
       }
       $("postRunContinueButton").classList.remove("hidden");
+      const rescueAvailable = state.mode === "endless" && reason === "blocked" && !state.endlessRescueUsed;
+      $("endlessLossActions").hidden = !rescueAvailable;
+      $("standardPostRunContinueButton").classList.toggle("hidden", rescueAvailable);
       $("postRunChoices").classList.add("hidden");
       updateStats();
       sound((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? "achievement" : "gameOver");
@@ -5130,12 +5233,74 @@
 
     function revealPostRunChoices() {
       $("postRunContinueButton").classList.add("hidden");
+      $("standardPostRunContinueButton").classList.add("hidden");
+      $("endlessLossActions").hidden = true;
+      if (state.mode === "endless") {
+        $("gameOverTitle").textContent = "What next?";
+        $("newBest").hidden = true;
+        $("finalScorePanel").hidden = true;
+        $("runSummaryPrimary").hidden = true;
+        $("runSummaryDetailed").hidden = true;
+        $("runStatus").hidden = true;
+        $("xpResultPanel").hidden = true;
+        $("dailyResultPanel").hidden = true;
+        $("campaignResultPanel").hidden = true;
+        $("resultSharePanel").hidden = true;
+      }
       $("postRunChoices").classList.remove("hidden");
     }
 
     function continueAfterRun() {
-      if (shouldShowInterstitial()) openOverlay("interstitialOverlay");
+      if (state.mode === "endless" || shouldShowInterstitial()) openOverlay("interstitialOverlay");
       else revealPostRunChoices();
+    }
+
+    function requestRowRescue() {
+      if (state.mode !== "endless" || state.endlessRescueUsed) return;
+      openOverlay("rewardedRowsOverlay");
+    }
+
+    function completeRowRescue() {
+      if (state.mode !== "endless" || state.endlessRescueUsed) return;
+      const rows = state.board
+        .map((row, index) => ({ index, count: row.filter(Boolean).length }))
+        .filter((row) => row.count > 0)
+        .sort((a, b) => b.count - a.count || b.index - a.index)
+        .slice(0, 3);
+      rows.forEach(({ index }) => {
+        for (let col = 0; col < SIZE; col += 1) {
+          state.board[index][col] = 0;
+          const key = `${index},${col}`;
+          state.shards.delete(key);
+          state.rushTimeBonuses.delete(key);
+          state.rushTargets.delete(key);
+        }
+      });
+      state.endlessRescueUsed = true;
+      state.recorded.continue = true;
+      if (!TEST_SAVE_DISABLED) {
+        state.lifetime.continues += 1;
+        state.lifetime.interstitials += 1;
+        localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
+        renderAchievements();
+      }
+      state.runStartedAt = Date.now() - state.runDurationMs;
+      state.running = true;
+      state.locked = false;
+      closeOverlay("rewardedRowsOverlay");
+      closeOverlay("gameOverOverlay");
+      setGameBackVisible(true);
+      renderBoard();
+      renderTray();
+      updateStats();
+      setToast(`${rows.length} row${rows.length === 1 ? "" : "s"} removed — keep the run alive!`, true);
+      sound("powerCue");
+      vibrate([25, 30, 45]);
+    }
+
+    function cancelRowRescue() {
+      closeOverlay("rewardedRowsOverlay");
+      $("resultShareStatus").textContent = "Ad unavailable — your board was not changed.";
     }
 
     function closeInterstitial(wasShown) {
@@ -5156,6 +5321,8 @@
       state.pausedByBackground = false;
       closeOverlay("gameOverOverlay");
       closeOverlay("interstitialOverlay");
+      closeOverlay("rewardedRowsOverlay");
+      closeOverlay("shareOptionsOverlay");
       closeOverlay("pauseOverlay");
       closeOverlay("devOverlay");
       state.mode = "endless";
@@ -5252,9 +5419,9 @@
       setGameBackVisible(false);
     }
 
-    function shareLastResult() { return shareResultData(state.lastShareResult, "resultShareStatus"); }
-    function copyLastResult() { return copyShareText(state.lastShareResult, "resultShareStatus"); }
-    function saveLastResultImage() { saveShareImage(state.lastShareResult, "resultShareStatus"); }
+    function shareLastResult() { openShareOptions(); }
+    function copyLastResultImage() { return copyShareImage(state.lastShareResult, "shareOptionsStatus"); }
+    function saveLastResultImage() { saveShareImage(state.lastShareResult, "shareOptionsStatus"); }
     function shareRecord(type) {
       const result = buildRecordShareResult(type);
       return shareResultData(result, "recordsShareStatus");
@@ -5482,11 +5649,22 @@
     $("rerollButton").addEventListener("click", () => safeAction("Randomise blocks", useReroll));
     $("powerButton").addEventListener("click", () => safeAction("Activate DeBlockle Mode", activatePowerMode));
     $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
+    $("standardPostRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
+    $("removeRowsButton").addEventListener("click", () => safeAction("Request row rescue", requestRowRescue));
+    $("completeRewardedRowsButton").addEventListener("click", () => safeAction("Complete row rescue advert", completeRowRescue));
+    $("cancelRewardedRowsButton").addEventListener("click", () => safeAction("Cancel row rescue advert", cancelRowRescue));
     $("closeInterstitialButton").addEventListener("click", () => safeAction("Close test interstitial", () => closeInterstitial(true)));
     $("adUnavailableButton").addEventListener("click", () => safeAction("Simulate unavailable ad", () => closeInterstitial(false)));
     $("shareResultButton").addEventListener("click", () => safeAction("Share result", shareLastResult));
-    $("copyResultButton").addEventListener("click", () => safeAction("Copy result", copyLastResult));
+    $("shareFacebookButton").addEventListener("click", () => safeAction("Share to Facebook", () => openSocialShare("facebook")));
+    $("shareXButton").addEventListener("click", () => safeAction("Share to X", () => openSocialShare("x")));
+    $("shareInstagramButton").addEventListener("click", () => safeAction("Share to Instagram", () => openSocialShare("instagram")));
+    $("shareLinkedInButton").addEventListener("click", () => safeAction("Share to LinkedIn", () => openSocialShare("linkedin")));
+    $("shareDiscordButton").addEventListener("click", () => safeAction("Share to Discord", () => openSocialShare("discord")));
+    $("copyResultImageButton").addEventListener("click", () => safeAction("Copy result image", copyLastResultImage));
     $("saveResultImageButton").addEventListener("click", () => safeAction("Save result image", saveLastResultImage));
+    $("systemShareResultButton").addEventListener("click", () => safeAction("Open device share options", () => shareResultData(state.lastShareResult, "shareOptionsStatus")));
+    $("closeShareOptionsButton").addEventListener("click", () => closeOverlay("shareOptionsOverlay"));
     $("devMenuButton").addEventListener("click", () => openOverlay("devOverlay"));
     $("closeDevButton").addEventListener("click", () => closeOverlay("devOverlay"));
     $("devNormalButton").addEventListener("click", () => safeAction("Prepare normal clear test", () => prepareDevScenario("normal")));
