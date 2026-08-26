@@ -693,6 +693,7 @@
     .milestone-banner.chain { --milestone-glow: rgba(255,149,68,.78); color: #ffd29a; }
     .milestone-banner.crossfire { --milestone-glow: rgba(218,104,255,.8); color: #f0bdff; }
     .milestone-banner.overload { --milestone-glow: rgba(57,231,208,.8); color: var(--cyan); }
+    .milestone-banner.nice { --milestone-glow: rgba(57,231,208,.72); color: #a9fff2; }
     .milestone-banner.awesome { --milestone-glow: rgba(255,92,168,.78); color: #ffb2d5; }
     .milestone-banner.clean { --milestone-glow: rgba(216,255,79,.76); color: var(--lime); }
     .milestone-banner.show { animation: milestoneFloat 1.08s cubic-bezier(.18,.75,.25,1) both; }
@@ -1972,7 +1973,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.71 • SINGLE DAILY RESULT</div>
+      <div class="version">BLOKUMI BUILD v0.72 • SPECIALS & THREE-LINE CUE</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2164,6 +2165,7 @@
         <button class="secondary-btn" id="devRushClearButton">RUSH CLEAR</button>
         <button class="secondary-btn" id="devMeterButton">METER CUE</button>
         <button class="secondary-btn" id="devCleanSweepButton">CLEAN SWEEP</button>
+        <button class="secondary-btn" id="devThreeLineButton">3-LINE NICE</button>
         <button class="secondary-btn" id="devFourLineButton">4-LINE AWESOME</button>
         <button class="secondary-btn" id="devChainReactionButton">CHAIN REACTION</button>
         <button class="secondary-btn" id="devCrossfireButton">CROSSFIRE</button>
@@ -2324,7 +2326,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.71";
+    const BUILD = "v0.72";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -3859,6 +3861,7 @@
       overload: { text: "OVERLOAD!", className: "overload", vibration: [28,22,40,22,58] },
       chainReaction: { text: "CHAIN REACTION!", className: "chain", vibration: [34,24,50] },
       crossfire: { text: "CROSSFIRE!", className: "crossfire", vibration: [24,20,24,20,42] },
+      nice: { text: "NICE!", className: "nice", vibration: [20,24,36] },
       awesome: { text: "AWESOME!", className: "awesome", vibration: [25,28,48] },
       cleanSweep: { text: "CLEAN SWEEP!", className: "clean", vibration: [22,32,45] }
     };
@@ -4377,8 +4380,10 @@
     }
 
     function specialChanceForStage(stage) {
-      if (stage === "early") return 0;
-      if (stage === "mid") return .08;
+      const endlessBoost = state.mode === "endless";
+      if (stage === "early") return endlessBoost ? .06 : 0;
+      if (stage === "mid") return endlessBoost ? .12 : .08;
+      if (endlessBoost) return state.setsCompleted >= 20 ? .19 : .16;
       return state.setsCompleted >= 20 ? .15 : .12;
     }
 
@@ -4414,7 +4419,8 @@
       if (gameRandom() < specialChance) {
         const piece = pieces[Math.floor(gameRandom() * pieces.length)];
         const specialCell = piece.cells[Math.floor(gameRandom() * piece.cells.length)];
-        if (gameRandom() < .68) piece.bombCell = [...specialCell];
+        const bombShare = state.mode === "endless" ? .64 : .68;
+        if (gameRandom() < bombShare) piece.bombCell = [...specialCell];
         else piece.crossCell = [...specialCell];
       }
       return applyDailyShardDelivery(pieces);
@@ -5093,6 +5099,8 @@
             ? "crossfire"
             : lineCount >= 4
               ? "awesome"
+              : lineCount === 3
+                ? "nice"
               : naturallyEmptiedBoard
                 ? "cleanSweep"
                 : "";
@@ -5161,6 +5169,17 @@
       } else if (type === "cleanSweep") {
         for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
         message = "Clean Sweep ready: place the Single block in the bottom-right space.";
+      } else if (type === "threeLine") {
+        for (let row = 0; row < SIZE - 1; row += 1) {
+          for (let col = 0; col < 3; col += 1) state.board[row][col] = 1;
+        }
+        state.board[0][7] = 1;
+        state.pieces = [
+          { name: "Line 3 H", cells: [[0,0],[0,1],[0,2]], used: false },
+          { name: "Single", cells: [[0,0]], used: false },
+          { name: "Double H", cells: [[0,0],[0,1]], used: false }
+        ];
+        message = "Nice ready: place the three-block line across the bottom-left.";
       } else if (type === "fourLine") {
         for (let row = 0; row < SIZE - 1; row += 1) {
           for (let col = 0; col < 4; col += 1) state.board[row][col] = 1;
@@ -6384,6 +6403,7 @@
     $("devRushClearButton").addEventListener("click", () => safeAction("Prepare Rush clear test", () => prepareRushTest(true)));
     $("devMeterButton").addEventListener("click", () => safeAction("Prepare meter cue test", () => prepareDevScenario("meter")));
     $("devCleanSweepButton").addEventListener("click", () => safeAction("Prepare Clean Sweep test", () => prepareDevScenario("cleanSweep")));
+    $("devThreeLineButton").addEventListener("click", () => safeAction("Prepare three-line test", () => prepareDevScenario("threeLine")));
     $("devFourLineButton").addEventListener("click", () => safeAction("Prepare four-line test", () => prepareDevScenario("fourLine")));
     $("devChainReactionButton").addEventListener("click", () => safeAction("Prepare Chain Reaction test", () => prepareDevScenario("chainReaction")));
     $("devCrossfireButton").addEventListener("click", () => safeAction("Prepare Crossfire test", () => prepareDevScenario("crossfire")));
