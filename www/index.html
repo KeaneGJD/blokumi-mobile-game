@@ -363,6 +363,7 @@
     .settings-system-note { margin: 9px 2px 14px; min-height: 15px; color: var(--cyan); font-size: 9px; line-height: 1.4; }
     .settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .settings-actions .secondary-btn { min-height: 48px; padding: 9px; font-size: 10px; }
+    .settings-actions.single { grid-template-columns: 1fr; }
     .settings-status { min-height: 18px; margin: 8px 2px 4px; color: var(--lime); font-size: 9px; text-align: center; }
     .settings-home-actions { margin-top: 24px; }
 
@@ -666,6 +667,40 @@
       0% { transform: translate(-50%, -36%) scale(.94); opacity: 0; }
       13%, 70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
       100% { transform: translate(-50%, -88%) scale(.98); opacity: 0; }
+    }
+    .milestone-banner {
+      position: absolute;
+      z-index: 21;
+      left: 50%;
+      top: 50%;
+      width: max-content;
+      max-width: calc(100% - 24px);
+      padding: 12px 18px;
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(13,21,35,.9);
+      box-shadow: 0 0 25px var(--milestone-glow, rgba(216,255,79,.38)), 0 8px 22px rgba(0,0,0,.35);
+      text-shadow: 0 0 11px var(--milestone-glow, rgba(216,255,79,.55));
+      font-size: clamp(19px, 6vw, 27px);
+      font-weight: 1000;
+      letter-spacing: .065em;
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translate(-50%, -42%) scale(.84);
+      pointer-events: none;
+    }
+    .milestone-banner.chain { --milestone-glow: rgba(255,149,68,.7); color: #ffd29a; border-color: rgba(255,168,82,.82); }
+    .milestone-banner.crossfire { --milestone-glow: rgba(218,104,255,.72); color: #f0bdff; border-color: rgba(218,104,255,.82); }
+    .milestone-banner.overload { --milestone-glow: rgba(57,231,208,.72); color: var(--cyan); border-color: rgba(57,231,208,.82); }
+    .milestone-banner.awesome { --milestone-glow: rgba(255,92,168,.7); color: #ffb2d5; border-color: rgba(255,92,168,.82); }
+    .milestone-banner.clean { --milestone-glow: rgba(216,255,79,.68); color: var(--lime); border-color: rgba(216,255,79,.82); }
+    .milestone-banner.show { animation: milestoneFloat 1.08s cubic-bezier(.18,.75,.25,1) both; }
+    @keyframes milestoneFloat {
+      0% { transform: translate(-50%, -34%) scale(.8); opacity: 0; }
+      18%, 66% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -90%) scale(1.04); opacity: 0; }
     }
 
     .meter-copy {
@@ -1847,7 +1882,8 @@
       transition-duration: .001ms !important;
       scroll-behavior: auto !important;
     }
-    body[data-effects="minimal"] .power-ready-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
+    body[data-effects="minimal"] .power-ready-banner.show,
+    body[data-effects="minimal"] .milestone-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
     body[data-effects="minimal"] .end-transition.show { animation: none !important; opacity: 1; visibility: visible; }
     body[data-effects="minimal"] .end-transition.show .end-transition-text { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
     body[data-effects="minimal"] #gameOverOverlay.open,
@@ -1886,7 +1922,8 @@
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-      .power-ready-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
+      .power-ready-banner.show,
+      .milestone-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
       .end-transition.show { animation: none !important; opacity: 1; visibility: visible; }
       .end-transition.show .end-transition-text { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
       #gameOverOverlay.open,
@@ -1935,7 +1972,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.66 • NATIVE TEST ADS</div>
+      <div class="version">BLOKUMI BUILD v0.67 • MILESTONE MOMENTS</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -1967,6 +2004,10 @@
         <button class="secondary-btn" id="replayBlastTutorialButton" type="button">REPLAY BLAST</button>
         <button class="secondary-btn" id="replayCrossTutorialButton" type="button">REPLAY CROSS</button>
       </div>
+      <p class="settings-group-title">SUPPORT</p>
+      <div class="settings-actions single">
+        <button class="secondary-btn" id="rateBlokumiButton" type="button">★ RATE BLOKUMI</button>
+      </div>
       <div class="button-stack settings-home-actions"><button class="primary-btn" id="settingsHomeButton">BACK TO HOME</button></div>
     </section>
 
@@ -1983,7 +2024,7 @@
       </div>
       <div class="profile-stats">
         <div class="profile-stat"><span>FAVOURITE MODE</span><strong id="profileFavouriteMode">—</strong></div>
-        <div class="profile-stat"><span>ACHIEVEMENTS</span><strong id="profileAchievements">0 / 12</strong></div>
+        <div class="profile-stat"><span>ACHIEVEMENTS</span><strong id="profileAchievements">0 / 19</strong></div>
         <div class="profile-stat"><span>GENUINE RUNS</span><strong id="profileRuns">0</strong></div>
         <div class="profile-stat"><span>SELECTED THEME</span><strong id="profileTheme">Classic</strong></div>
       </div>
@@ -2046,6 +2087,7 @@
 
       <div class="board-shell">
         <div class="power-ready-banner" id="powerReadyBanner" aria-live="polite">POWER TIER 1 READY!</div>
+        <div class="milestone-banner" id="milestoneBanner" role="status" aria-live="polite">CLEAN SWEEP!</div>
         <div class="end-transition" id="endTransition" aria-live="assertive" aria-hidden="true"><strong class="end-transition-text" id="endTransitionText">BOARD BLOCKED!</strong></div>
         <div class="board" id="board" role="grid" aria-label="8 by 8 game board"></div>
       </div>
@@ -2121,6 +2163,11 @@
         <button class="secondary-btn" id="devRushButton">RUSH START</button>
         <button class="secondary-btn" id="devRushClearButton">RUSH CLEAR</button>
         <button class="secondary-btn" id="devMeterButton">METER CUE</button>
+        <button class="secondary-btn" id="devCleanSweepButton">CLEAN SWEEP</button>
+        <button class="secondary-btn" id="devFourLineButton">4-LINE AWESOME</button>
+        <button class="secondary-btn" id="devChainReactionButton">CHAIN REACTION</button>
+        <button class="secondary-btn" id="devCrossfireButton">CROSSFIRE</button>
+        <button class="secondary-btn" id="devOverloadButton">OVERLOAD</button>
         <button class="secondary-btn" id="devShareButton">SHARE CARD</button>
         <button class="secondary-btn" id="devProfileButton">XP RESULT</button>
         <button class="secondary-btn" id="devNeonThemeButton">NEON PREVIEW</button>
@@ -2275,7 +2322,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.66";
+    const BUILD = "v0.67";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2293,6 +2340,11 @@
     const CROSS_FIRE_STEP_MS = 38;
     const CROSS_FIRE_DURATION_MS = 380;
     const ENDLESS_RUNS_PER_INTERSTITIAL = 3;
+    const REVIEW_MIN_ACTIVE_MS = 5 * 60 * 1000;
+    const REVIEW_MIN_COMPLETED_GAMES = 3;
+    const REVIEW_RETRY_MS = 180 * 24 * 60 * 60 * 1000;
+    const PLAY_REVIEW_ENABLED = false;
+    const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.keanecgames.blokumi";
     const ADMOB_TEST_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
     const ADMOB_TEST_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
     const BEST_KEY = "deblockle_v01_best";
@@ -2307,6 +2359,7 @@
     const PROFILE_KEY = "deblockle_v031_profile";
     const SETTINGS_KEY = "deblockle_v034_settings";
     const SOUND_KEY = "deblockle_v01_sound";
+    const REVIEW_DATA_KEY = "blokumi_v067_review_prompt";
 
     const DEFAULT_FEEDBACK_SETTINGS = { haptics: true, screenShake: true, effects: "full" };
 
@@ -2434,7 +2487,14 @@
       { id: "full_deblockle", name: "Full Blokumi", description: "Activate Tier III power three times.", icon: "Ⅲ" },
       { id: "five_alive", name: "Five Alive", description: "Reach a ×5 clear combo.", icon: "5" },
       { id: "clean_slate", name: "Clean Slate", description: "Empty a board that held at least 32 tiles.", icon: "□" },
-      { id: "high_roller", name: "High Roller", description: "Score 25,000 points in one run.", icon: "★" }
+      { id: "high_roller", name: "High Roller", description: "Score 25,000 points in one run.", icon: "★" },
+      { id: "double_detonation", name: "Double Detonation", description: "Detonate two or more Blast Blocks in one clear.", icon: "✹" },
+      { id: "double_cross", name: "Double Cross", description: "Activate two or more Cross Blocks in one clear.", icon: "✚" },
+      { id: "crossfire", name: "Crossfire", description: "Activate three or more Cross Blocks in one clear.", icon: "╋" },
+      { id: "overload", name: "Overload", description: "Trigger four or more Blast and Cross Blocks together.", icon: "※" },
+      { id: "clean_sweep", name: "Clean Sweep", description: "Naturally clear every occupied tile from the board.", icon: "◇" },
+      { id: "four_line", name: "Awesome!", description: "Clear four or more lines in one move.", icon: "4" },
+      { id: "master_builder", name: "Master Builder", description: "Score 35,000 points in one Endless run.", icon: "◆" }
     ];
 
     const DEFAULT_LIFETIME = {
@@ -2459,6 +2519,7 @@
       modeRuns: { endless: 0, rush: 0, daily: 0 },
       lastXpGain: 0
     };
+    const DEFAULT_REVIEW_DATA = { activePlayMs: 0, completedGames: 0, lastRequestAt: 0, positiveMoment: false };
 
     function readJSON(key, fallback) {
       try {
@@ -2542,6 +2603,7 @@
       rush: { ...DEFAULT_RUSH_DATA, ...readJSON(RUSH_DATA_KEY, {}) },
       profile: { ...DEFAULT_PROFILE_DATA, ...readJSON(PROFILE_KEY, {}) },
       settings: { ...DEFAULT_FEEDBACK_SETTINGS, ...readJSON(SETTINGS_KEY, {}) },
+      review: { ...DEFAULT_REVIEW_DATA, ...readJSON(REVIEW_DATA_KEY, {}) },
       specialTutorials: { bomb: false, cross: false, ...readJSON(SPECIAL_TUTORIAL_KEY, {}) },
       recorded: { run: false, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0, continue: false },
       sound: localStorage.getItem(SOUND_KEY) !== "off"
@@ -3722,10 +3784,88 @@
       achievementQueue.push(achievement);
       renderAchievements();
       showNextAchievement();
+      notePositiveReviewMoment();
     }
 
     function checkScoreAchievement() {
       if (state.score >= 25000) unlockAchievement("high_roller");
+      if (state.mode === "endless" && state.score >= 35000) unlockAchievement("master_builder");
+    }
+
+    const MILESTONE_PRESENTATION = {
+      overload: { text: "OVERLOAD!", className: "overload", vibration: [28,22,40,22,58] },
+      chainReaction: { text: "CHAIN REACTION!", className: "chain", vibration: [34,24,50] },
+      crossfire: { text: "CROSSFIRE!", className: "crossfire", vibration: [24,20,24,20,42] },
+      awesome: { text: "AWESOME!", className: "awesome", vibration: [25,28,48] },
+      cleanSweep: { text: "CLEAN SWEEP!", className: "clean", vibration: [22,32,45] }
+    };
+    let milestoneTimer = 0;
+
+    function showMilestoneCelebration(type) {
+      if (state.mode === "campaign") return;
+      const presentation = MILESTONE_PRESENTATION[type];
+      if (!presentation) return;
+      const banner = $("milestoneBanner");
+      window.clearTimeout(milestoneTimer);
+      banner.textContent = presentation.text;
+      banner.className = `milestone-banner ${presentation.className}`;
+      void banner.offsetWidth;
+      banner.classList.add("show");
+      sound("milestone");
+      vibrate(presentation.vibration);
+      notePositiveReviewMoment();
+      milestoneTimer = window.setTimeout(() => banner.classList.remove("show"), 1120);
+    }
+
+    function saveReviewData() {
+      if (!TEST_SAVE_DISABLED) localStorage.setItem(REVIEW_DATA_KEY, JSON.stringify(state.review));
+    }
+
+    function notePositiveReviewMoment() {
+      if (TEST_SAVE_DISABLED) return;
+      state.review.positiveMoment = true;
+      saveReviewData();
+    }
+
+    function trackActiveReviewPlaytime() {
+      if (TEST_SAVE_DISABLED || !state.running || state.appBackgrounded || document.hidden) return;
+      if ($("pauseOverlay").classList.contains("open") || $("specialTutorialOverlay").classList.contains("open")) return;
+      state.review.activePlayMs += 1000;
+      if (state.review.activePlayMs % 30000 === 0) saveReviewData();
+    }
+
+    function reviewPromptEligible() {
+      return PLAY_REVIEW_ENABLED
+        && !TEST_SAVE_DISABLED
+        && state.review.activePlayMs >= REVIEW_MIN_ACTIVE_MS
+        && state.review.completedGames >= REVIEW_MIN_COMPLETED_GAMES
+        && state.review.positiveMoment
+        && Date.now() - state.review.lastRequestAt >= REVIEW_RETRY_MS
+        && Date.now() - state.lastInterstitialAt >= 30000
+        && $("homeScreen").classList.contains("active");
+    }
+
+    async function requestNativeReviewIfEligible() {
+      if (!reviewPromptEligible()) return;
+      const nativeReview = window.Capacitor?.Plugins?.InAppReview;
+      if (!nativeReview?.requestReview) return;
+      state.review.lastRequestAt = Date.now();
+      state.review.positiveMoment = false;
+      saveReviewData();
+      await nativeReview.requestReview();
+    }
+
+    function scheduleNativeReviewCheck() {
+      window.setTimeout(() => safeAction("Review prompt", requestNativeReviewIfEligible), 900);
+    }
+
+    function rateBlokumi() {
+      if (!PLAY_REVIEW_ENABLED) {
+        $("settingsStatus").textContent = "RATING WILL BECOME AVAILABLE WHEN BLOKUMI IS LIVE ON GOOGLE PLAY.";
+        sound("select");
+        return;
+      }
+      window.open(PLAY_STORE_URL, "_blank", "noopener,noreferrer");
     }
 
     function currentLifetimeTotal(field, runValue, recordedValue) {
@@ -4801,9 +4941,14 @@
       state.bombsDetonated += triggeredBombs.size;
       state.crossesActivated += triggeredCrosses.size;
       if (currentLifetimeTotal("bombs", state.bombsDetonated, state.recorded.bombs) >= 10) unlockAchievement("kaboom");
+      if (triggeredBombs.size >= 2) unlockAchievement("double_detonation");
       if (triggeredBombs.size >= 3) unlockAchievement("chain_reaction");
       if (currentLifetimeTotal("crosses", state.crossesActivated, state.recorded.crosses) >= 10) unlockAchievement("crossed_out");
+      if (triggeredCrosses.size >= 2) unlockAchievement("double_cross");
+      if (triggeredCrosses.size >= 3) unlockAchievement("crossfire");
       if (triggeredCrosses.size && triggeredBombs.size) unlockAchievement("cross_blast");
+      if (triggeredBombs.size && triggeredCrosses.size && triggeredBombs.size + triggeredCrosses.size >= 4) unlockAchievement("overload");
+      if (lineCount >= 4) unlockAchievement("four_line");
       const crossOnlyCount = [...crossCells].filter((key) => !lineCells.has(key)).length;
       const explosionOnlyCount = [...blastCells].filter((key) => !lineCells.has(key) && !crossCells.has(key)).length;
       const chainBonus = Math.max(0, triggeredBombs.size - 1) * 100;
@@ -4873,7 +5018,22 @@
         state.rushTargets.delete(key);
       });
       renderBoard();
-      if (occupiedBeforeClear >= 32 && state.board.every((row) => row.every((cell) => cell === 0))) unlockAchievement("clean_slate");
+      const naturallyEmptiedBoard = state.board.every((row) => row.every((cell) => cell === 0));
+      if (occupiedBeforeClear >= 32 && naturallyEmptiedBoard) unlockAchievement("clean_slate");
+      if (naturallyEmptiedBoard) unlockAchievement("clean_sweep");
+
+      const milestoneType = triggeredBombs.size && triggeredCrosses.size && triggeredBombs.size + triggeredCrosses.size >= 4
+        ? "overload"
+        : triggeredBombs.size >= 3
+          ? "chainReaction"
+          : triggeredCrosses.size >= 3
+            ? "crossfire"
+            : lineCount >= 4
+              ? "awesome"
+              : naturallyEmptiedBoard
+                ? "cleanSweep"
+                : "";
+      if (milestoneType) showMilestoneCelebration(milestoneType);
       addEnergy(removedCells.size + lineCount * 4);
       return lineCount;
     }
@@ -4935,6 +5095,34 @@
       if (type === "normal") {
         for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
         message = "Normal clear ready: place the Single block in the bottom-right space.";
+      } else if (type === "cleanSweep") {
+        for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+        message = "Clean Sweep ready: place the Single block in the bottom-right space.";
+      } else if (type === "fourLine") {
+        for (let row = 0; row < SIZE - 1; row += 1) {
+          for (let col = 0; col < 4; col += 1) state.board[row][col] = 1;
+        }
+        state.board[0][7] = 1;
+        state.pieces = [
+          { name: "Line 4 H", cells: [[0,0],[0,1],[0,2],[0,3]], used: false },
+          { name: "Single", cells: [[0,0]], used: false },
+          { name: "Double H", cells: [[0,0],[0,1]], used: false }
+        ];
+        message = "Awesome ready: place the four-block line across the bottom-left.";
+      } else if (type === "chainReaction" || type === "crossfire" || type === "overload") {
+        for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
+        state.board[0][7] = 1;
+        if (type === "chainReaction") {
+          [1,3,5].forEach((col) => { state.board[SIZE - 1][col] = 2; });
+          message = "Chain Reaction ready: place the Single block in the bottom-right space.";
+        } else if (type === "crossfire") {
+          [1,3,5].forEach((col) => { state.board[SIZE - 1][col] = 3; });
+          message = "Crossfire ready: place the Single block in the bottom-right space.";
+        } else {
+          [0,2].forEach((col) => { state.board[SIZE - 1][col] = 2; });
+          [4,6].forEach((col) => { state.board[SIZE - 1][col] = 3; });
+          message = "Overload ready: place the Single block in the bottom-right space.";
+        }
       } else if (type === "bomb") {
         for (let col = 0; col < SIZE - 1; col += 1) state.board[SIZE - 1][col] = 1;
         state.board[SIZE - 1][3] = 2;
@@ -5318,6 +5506,11 @@
       const previousRushBest = state.rush.best;
       const isNewBest = !isDaily && !isCampaign && !isRush && !TEST_SAVE_DISABLED && state.score >= previousBest && state.score > 0;
       const isNewRushBest = isRush && !TEST_SAVE_DISABLED && state.score > previousRushBest;
+      if (!isCampaign && !wasFinalized && !TEST_SAVE_DISABLED) {
+        state.review.completedGames += 1;
+        if (isNewBest || isNewRushBest || state.dailyCompleted) state.review.positiveMoment = true;
+        saveReviewData();
+      }
       if (isDaily && !wasFinalized) {
         state.lastDailyResult = {
           date: state.dailyDate,
@@ -5663,6 +5856,8 @@
 
     function goHome() {
       hideEndTransition();
+      window.clearTimeout(milestoneTimer);
+      $("milestoneBanner").classList.remove("show");
       stopRushTimer();
       state.running = false;
       state.appBackgrounded = false;
@@ -5679,6 +5874,7 @@
       updateStats();
       showScreen("homeScreen");
       setGameBackVisible(false);
+      scheduleNativeReviewCheck();
     }
 
     function returnAfterRun() {
@@ -5939,6 +6135,13 @@
           return;
         }
 
+        if (type === "milestone") {
+          playTone(620, 880, .12, "triangle", .035);
+          playTone(880, 1180, .14, "sine", .04, .075);
+          playTone(1180, 1480, .16, "triangle", .032, .15);
+          return;
+        }
+
         if (type === "reroll") {
           const tickTimes = [0, .032, .067, .105, .148, .196, .251, .313, .384, .465];
           tickTimes.forEach((tickAt, index) => {
@@ -6043,6 +6246,7 @@
     $("testFeedbackButton").addEventListener("click", () => safeAction("Test feedback settings", testFeedbackSettings));
     $("replayBlastTutorialButton").addEventListener("click", () => safeAction("Replay Blast tutorial", () => replaySpecialTutorial("bomb")));
     $("replayCrossTutorialButton").addEventListener("click", () => safeAction("Replay Cross tutorial", () => replaySpecialTutorial("cross")));
+    $("rateBlokumiButton").addEventListener("click", () => safeAction("Rate Blokumi", rateBlokumi));
     $("profileButton").addEventListener("click", () => safeAction("Open profile", openProfile));
     $("profileHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("recordsHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
@@ -6096,6 +6300,11 @@
     $("devRushButton").addEventListener("click", () => safeAction("Start Rush test", () => prepareRushTest(false)));
     $("devRushClearButton").addEventListener("click", () => safeAction("Prepare Rush clear test", () => prepareRushTest(true)));
     $("devMeterButton").addEventListener("click", () => safeAction("Prepare meter cue test", () => prepareDevScenario("meter")));
+    $("devCleanSweepButton").addEventListener("click", () => safeAction("Prepare Clean Sweep test", () => prepareDevScenario("cleanSweep")));
+    $("devFourLineButton").addEventListener("click", () => safeAction("Prepare four-line test", () => prepareDevScenario("fourLine")));
+    $("devChainReactionButton").addEventListener("click", () => safeAction("Prepare Chain Reaction test", () => prepareDevScenario("chainReaction")));
+    $("devCrossfireButton").addEventListener("click", () => safeAction("Prepare Crossfire test", () => prepareDevScenario("crossfire")));
+    $("devOverloadButton").addEventListener("click", () => safeAction("Prepare Overload test", () => prepareDevScenario("overload")));
     $("devShareButton").addEventListener("click", () => safeAction("Prepare share card test", prepareDevShareTest));
     $("devProfileButton").addEventListener("click", () => safeAction("Prepare XP result test", prepareDevProfileTest));
     $("devNeonThemeButton").addEventListener("click", () => safeAction("Preview Neon theme", () => previewDevTheme("neon")));
@@ -6139,6 +6348,7 @@
       renderSettings();
     });
     window.setInterval(renderDailyHome, 1000);
+    window.setInterval(trackActiveReviewPlaytime, 1000);
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
     if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
     if (TEST_TUTORIAL) document.querySelector(".version").textContent += " • TUTORIAL TEST";
