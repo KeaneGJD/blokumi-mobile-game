@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>Blokumi v0.59</title>
+  <title>Blokumi v0.60</title>
   <style>
     :root {
       --ink: #101828;
@@ -1837,7 +1837,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.59 • STABLE TIER III BOARD</div>
+      <div class="version">BLOKUMI BUILD v0.60 • COMPACT RUSH PLAY</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2176,7 +2176,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.59";
+    const BUILD = "v0.60";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2734,7 +2734,9 @@
 
     function updateRushUI() {
       const rushMode = state.mode === "rush";
-      $("rushTimerPanel").hidden = !rushMode;
+      // Rush time, score and board count already live in the compact stat row.
+      // Keep the larger board-name/time strip hidden so the tray fits without scrolling.
+      $("rushTimerPanel").hidden = true;
       if (!rushMode) return;
       const seconds = Math.max(0, state.rushRemainingMs / 1000);
       $("rushTimerText").textContent = `${seconds.toFixed(1)}s`;
@@ -5133,14 +5135,12 @@
       const dailyMode = state.mode === "daily";
       const campaignMode = state.mode === "campaign";
       const rushMode = state.mode === "rush";
-      $("modeBanner").hidden = !campaignMode && !rushMode;
+      // Campaign still needs its level context; Rush uses the compact HUD below.
+      $("modeBanner").hidden = !campaignMode;
       if (campaignMode) {
         const level = currentCampaignLevel();
         $("modeBannerTitle").textContent = `Campaign • Level ${level.id}`;
         $("modeBannerStatus").textContent = level.chapterName;
-      } else if (rushMode) {
-        $("modeBannerTitle").textContent = "Blokumi Rush";
-        $("modeBannerStatus").textContent = "60 SECOND SCORE ATTACK";
       }
       $("gameScreen").setAttribute("aria-label", dailyMode ? "Daily Blokumi game" : campaignMode ? `Campaign level ${currentCampaignLevel().id}` : rushMode ? "Blokumi Rush game" : "Endless Blokumi game");
       renderBoard();
