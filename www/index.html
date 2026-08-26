@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>Blokumi v0.65</title>
+  <title>Blokumi v0.66</title>
   <style>
     :root {
       --ink: #101828;
@@ -1935,7 +1935,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.65 • NATIVE LAUNCH HANDOFF</div>
+      <div class="version">BLOKUMI BUILD v0.66 • NATIVE TEST ADS</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2102,7 +2102,7 @@
 
   <div class="overlay" id="devOverlay" role="dialog" aria-modal="true" aria-labelledby="devTitle">
     <div class="modal dev-card">
-      <span class="ad-badge">DEVELOPMENT ONLY</span>
+      <span class="ad-badge">BROWSER FALLBACK</span>
       <h2 id="devTitle">Test Menu</h2>
       <p>Load a prepared effect board, or inspect block generation at different stages of a run.</p>
       <div class="dev-grid">
@@ -2243,7 +2243,7 @@
       <span class="ad-badge">DEVELOPMENT ONLY</span>
       <div class="test-ad-screen">
         <strong id="interstitialTitle">TEST INTERSTITIAL AD</strong>
-        <span>A standard interstitial advert would appear here in the Android build.</span>
+        <span>Android uses Google's real test advert. This card keeps the browser build testable.</span>
       </div>
       <div class="button-stack">
         <button class="primary-btn" id="closeInterstitialButton">CLOSE TEST AD</button>
@@ -2254,10 +2254,10 @@
 
   <div class="overlay" id="rewardedRowsOverlay" role="dialog" aria-modal="true" aria-labelledby="rewardedRowsTitle">
     <div class="modal test-ad-card">
-      <span class="ad-badge">DEVELOPMENT ONLY</span>
+      <span class="ad-badge">BROWSER FALLBACK</span>
       <div class="test-ad-screen">
         <strong id="rewardedRowsTitle">TEST REWARDED AD</strong>
-        <span>The Android build will grant the row rescue only after the advert finishes.</span>
+        <span>Android uses Google's real rewarded test advert and grants rows only after completion.</span>
       </div>
       <div class="button-stack">
         <button class="primary-btn" id="completeRewardedRowsButton">FINISH TEST AD</button>
@@ -2275,7 +2275,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.65";
+    const BUILD = "v0.66";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2293,6 +2293,8 @@
     const CROSS_FIRE_STEP_MS = 38;
     const CROSS_FIRE_DURATION_MS = 380;
     const ENDLESS_RUNS_PER_INTERSTITIAL = 3;
+    const ADMOB_TEST_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
+    const ADMOB_TEST_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
     const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
@@ -2558,6 +2560,10 @@
     let tutorialSessionSeen = new Set();
     let activeDealRandom = null;
     let rushTimerHandle = null;
+    let nativeAdsReady = false;
+    let nativeInterstitialReady = false;
+    let nativeRewardedReady = false;
+    let nativeAdBusy = false;
     let endTransitionTimer = null;
 
     function safeAction(name, action) {
@@ -5420,6 +5426,153 @@
       return (Number(state.lifetime.endlessRunsSinceAd) || 0) >= ENDLESS_RUNS_PER_INTERSTITIAL;
     }
 
+    function getNativeAdMob() {
+      if (window.Capacitor?.getPlatform?.() !== "android") return null;
+      return window.Capacitor?.Plugins?.AdMob || null;
+    }
+
+    async function preloadNativeInterstitial() {
+      const adMob = getNativeAdMob();
+      if (!nativeAdsReady || !adMob) return false;
+      try {
+        await adMob.prepareInterstitial({
+          adId: ADMOB_TEST_INTERSTITIAL_ID,
+          isTesting: true,
+          immersiveMode: true
+        });
+        nativeInterstitialReady = true;
+        return true;
+      } catch (error) {
+        nativeInterstitialReady = false;
+        console.warn(`[Blokumi ${BUILD}] Could not preload test interstitial`, error);
+        return false;
+      }
+    }
+
+    async function preloadNativeRewarded() {
+      const adMob = getNativeAdMob();
+      if (!nativeAdsReady || !adMob) return false;
+      try {
+        await adMob.prepareRewardVideoAd({
+          adId: ADMOB_TEST_REWARDED_ID,
+          isTesting: true,
+          immersiveMode: true
+        });
+        nativeRewardedReady = true;
+        return true;
+      } catch (error) {
+        nativeRewardedReady = false;
+        console.warn(`[Blokumi ${BUILD}] Could not preload test rewarded ad`, error);
+        return false;
+      }
+    }
+
+    async function initialiseNativeTestAds() {
+      const adMob = getNativeAdMob();
+      if (!adMob) return;
+      try {
+        await adMob.initialize({ maxAdContentRating: "General" });
+        nativeAdsReady = true;
+        await Promise.allSettled([preloadNativeInterstitial(), preloadNativeRewarded()]);
+        console.info(`[Blokumi ${BUILD}] Native Google test ads ready`);
+      } catch (error) {
+        nativeAdsReady = false;
+        console.warn(`[Blokumi ${BUILD}] Native test ads unavailable`, error);
+      }
+    }
+
+    async function removeAdListenerHandles(handles) {
+      await Promise.allSettled(handles.filter(Boolean).map((handle) => handle.remove()));
+    }
+
+    async function showNativeInterstitialThenContinue() {
+      const adMob = getNativeAdMob();
+      if (!adMob || nativeAdBusy) return;
+      nativeAdBusy = true;
+      if (!nativeInterstitialReady) await preloadNativeInterstitial();
+      if (!nativeInterstitialReady) {
+        nativeAdBusy = false;
+        closeInterstitial(false);
+        return;
+      }
+
+      let settled = false;
+      let fallbackTimer = null;
+      const handles = [];
+      const finish = async (wasShown) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(fallbackTimer);
+        await removeAdListenerHandles(handles);
+        nativeAdBusy = false;
+        closeInterstitial(wasShown);
+        void preloadNativeInterstitial();
+      };
+
+      try {
+        handles.push(await adMob.addListener("interstitialAdDismissed", () => void finish(true)));
+        handles.push(await adMob.addListener("interstitialAdFailedToShow", () => void finish(false)));
+        nativeInterstitialReady = false;
+        fallbackTimer = window.setTimeout(() => void finish(false), 120000);
+        await adMob.showInterstitial({ adId: ADMOB_TEST_INTERSTITIAL_ID });
+      } catch (error) {
+        console.warn(`[Blokumi ${BUILD}] Test interstitial could not be shown`, error);
+        await finish(false);
+      }
+    }
+
+    function setRowRescueAdLoading(loading) {
+      const button = $("removeRowsButton");
+      if (!button.dataset.readyLabel) button.dataset.readyLabel = button.innerHTML;
+      button.disabled = loading;
+      button.innerHTML = loading
+        ? "<strong>LOADING TEST AD…</strong><span>PLEASE WAIT</span>"
+        : button.dataset.readyLabel;
+    }
+
+    async function showNativeRewardedRowsAd() {
+      const adMob = getNativeAdMob();
+      if (!adMob || nativeAdBusy) return;
+      nativeAdBusy = true;
+      setRowRescueAdLoading(true);
+      if (!nativeRewardedReady) await preloadNativeRewarded();
+      if (!nativeRewardedReady) {
+        nativeAdBusy = false;
+        setRowRescueAdLoading(false);
+        cancelRowRescue();
+        return;
+      }
+
+      let settled = false;
+      let rewardEarned = false;
+      let fallbackTimer = null;
+      const handles = [];
+      const finish = async () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(fallbackTimer);
+        await removeAdListenerHandles(handles);
+        nativeAdBusy = false;
+        setRowRescueAdLoading(false);
+        if (rewardEarned) completeRowRescue();
+        else cancelRowRescue();
+        void preloadNativeRewarded();
+      };
+
+      try {
+        handles.push(await adMob.addListener("onRewardedVideoAdReward", () => { rewardEarned = true; }));
+        handles.push(await adMob.addListener("onRewardedVideoAdDismissed", () => void finish()));
+        handles.push(await adMob.addListener("onRewardedVideoAdFailedToShow", () => void finish()));
+        nativeRewardedReady = false;
+        fallbackTimer = window.setTimeout(() => void finish(), 180000);
+        const reward = await adMob.showRewardVideoAd({ adId: ADMOB_TEST_REWARDED_ID });
+        if (reward) rewardEarned = true;
+      } catch (error) {
+        console.warn(`[Blokumi ${BUILD}] Test rewarded ad did not grant a reward`, error);
+        await finish();
+      }
+    }
+
     function revealPostRunChoices() {
       $("postRunContinueButton").classList.add("hidden");
       $("standardPostRunContinueButton").classList.add("hidden");
@@ -5440,13 +5593,16 @@
     }
 
     function continueAfterRun() {
-      if (shouldShowInterstitial()) openOverlay("interstitialOverlay");
+      const interstitialDue = shouldShowInterstitial();
+      if (interstitialDue && getNativeAdMob()) void showNativeInterstitialThenContinue();
+      else if (interstitialDue) openOverlay("interstitialOverlay");
       else revealPostRunChoices();
     }
 
     function requestRowRescue() {
       if (state.mode !== "endless" || state.endlessRescueUsed) return;
-      openOverlay("rewardedRowsOverlay");
+      if (getNativeAdMob()) void showNativeRewardedRowsAd();
+      else openOverlay("rewardedRowsOverlay");
     }
 
     function completeRowRescue() {
@@ -5968,6 +6124,7 @@
 
     createBoard();
     initialiseNativeBackButton();
+    void initialiseNativeTestAds();
     setGameBackVisible(false);
     repairLifetimeScoreFloor();
     initialiseProfile();
