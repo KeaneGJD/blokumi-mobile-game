@@ -1898,6 +1898,44 @@
       68% { transform: translate3d(1px, -.5px, 0); }
     }
 
+    /* CrazyGames embeds portrait titles inside landscape desktop frames. Keep the
+       complete play loop visible without scrolling, while leaving phone layouts
+       untouched. The width follows the available height so the square board and
+       tray remain a single compact group at every supported iframe size. */
+    @media (min-width: 700px) and (min-aspect-ratio: 4 / 3) {
+      body.portal-basic { overflow-y: hidden; }
+      body.portal-basic .app {
+        width: min(540px, calc(100svh * .6));
+        height: 100svh;
+        min-height: 0;
+        padding-top: 7px;
+        padding-bottom: 7px;
+      }
+      body.portal-basic .topbar { min-height: 34px; }
+      body.portal-basic .icon-btn { width: 34px; height: 34px; border-radius: 11px; }
+      body.portal-basic .back-btn { flex-basis: 34px; font-size: 21px; }
+      body.portal-basic .mini-logo { font-size: 17px; }
+      body.portal-basic .logo-cube { width: 24px; border-radius: 7px; }
+      body.portal-basic #gameScreen { padding-top: 3px; }
+      body.portal-basic .mode-banner { margin: 1px 0 3px; padding: 5px 8px; }
+      body.portal-basic .daily-rule-panel,
+      body.portal-basic .rush-timer-panel,
+      body.portal-basic .campaign-rule-panel { margin-bottom: 3px; padding-top: 4px; padding-bottom: 4px; }
+      body.portal-basic .stats { margin: 2px 0 4px; gap: 6px; }
+      body.portal-basic .stat { min-height: 42px; padding: 5px 7px; border-radius: 13px; }
+      body.portal-basic .stat-value { font-size: 18px; }
+      body.portal-basic .power-panel { margin-bottom: 4px; padding: 5px 7px; border-radius: 13px; }
+      body.portal-basic .board-shell { padding: 6px; border-radius: 16px; }
+      body.portal-basic .board { gap: 3px; }
+      body.portal-basic .toast { min-height: 17px; margin: 1px 0; font-size: 11px; }
+      body.portal-basic .tray-panel { margin-top: 3px; padding: 6px; border-radius: 15px; }
+      body.portal-basic .tray-label { margin-bottom: 4px; font-size: 8px; }
+      body.portal-basic .tray-row { gap: 6px; grid-template-columns: minmax(0, 1fr) 54px; }
+      body.portal-basic .tray { gap: 6px; }
+      body.portal-basic .piece-card { min-height: 54px; border-radius: 12px; }
+      body.portal-basic .reroll-control { padding: 4px 3px; border-radius: 12px; }
+    }
+
     @media (max-height: 760px) {
       .app { padding-top: max(10px, env(safe-area-inset-top)); }
       .topbar { min-height: 40px; }
@@ -1933,7 +1971,7 @@
     }
   </style>
 </head>
-<body class="launch-pending">
+<body class="launch-pending portal-basic">
   <main class="app">
     <header class="topbar">
       <button class="icon-btn back-btn" id="backButton" aria-label="Pause game or quit to menu" title="Pause or quit" hidden>←</button>
@@ -1974,7 +2012,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI • WEB EDITION v0.1</div>
+      <div class="version">BLOKUMI • WEB EDITION v0.2</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2327,7 +2365,7 @@
   <script>
     "use strict";
 
-    const BUILD = "web-portal-basic-v0.1";
+    const BUILD = "web-portal-basic-v0.2";
     const SHARE_URL = "";
     const SHARE_SUFFIX = SHARE_URL ? `\n${SHARE_URL}` : "";
     const PORTAL_BASIC = true;
