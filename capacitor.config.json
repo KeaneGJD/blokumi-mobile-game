@@ -1,5 +1,14 @@
 {
   "appId": "com.keanecgames.blokumi",
   "appName": "Blokumi",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1600,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 350,
+      "backgroundColor": "#111827",
+      "showSpinner": false
+    }
+  }
 }
