@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>Blokumi v0.61</title>
+  <title>Blokumi v0.63</title>
   <style>
     :root {
       --ink: #101828;
@@ -828,6 +828,66 @@
       position: relative;
     }
 
+    .end-transition {
+      position: absolute;
+      z-index: 35;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: inherit;
+      background: rgba(7,11,19,.38);
+      backdrop-filter: blur(7px) saturate(.72);
+      -webkit-backdrop-filter: blur(7px) saturate(.72);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .end-transition.show {
+      visibility: visible;
+      animation: endTransitionBackdrop 2.45s ease both;
+    }
+
+    .end-transition-text {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: max-content;
+      max-width: calc(100% - 24px);
+      color: var(--pink);
+      text-shadow: 0 0 16px rgba(255,92,168,.48), 0 6px 18px rgba(0,0,0,.65);
+      font-size: clamp(30px, 10vw, 47px);
+      font-weight: 1000;
+      letter-spacing: -.045em;
+      line-height: .95;
+      text-align: center;
+      opacity: 0;
+      transform: translate(-50%, -42%) scale(.76);
+    }
+
+    .end-transition.rush .end-transition-text {
+      color: var(--orange);
+      text-shadow: 0 0 16px rgba(255,173,66,.52), 0 6px 18px rgba(0,0,0,.65);
+    }
+
+    .end-transition.show .end-transition-text {
+      animation: endTransitionMessage 2.45s cubic-bezier(.2,.82,.2,1) both;
+    }
+
+    @keyframes endTransitionBackdrop {
+      0% { opacity: 0; }
+      10%, 82% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes endTransitionMessage {
+      0% { opacity: 0; transform: translate(-50%, -32%) scale(.72); }
+      12% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+      22%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -360%) rotate(-7deg) scale(.94); }
+    }
+
     .score-burst {
       position: absolute;
       z-index: 25;
@@ -1516,6 +1576,22 @@
 
     .overlay.open { display: grid; }
 
+    #gameOverOverlay.open { animation: resultBackdropFade .24s ease-out both; }
+    #gameOverOverlay.open .modal {
+      transform-origin: 50% 100%;
+      animation: resultCardRise .58s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes resultBackdropFade {
+      from { background-color: rgba(7,11,19,0); backdrop-filter: blur(0); }
+      to { background-color: rgba(7,11,19,.82); backdrop-filter: blur(10px); }
+    }
+
+    @keyframes resultCardRise {
+      0% { opacity: .3; transform: translateY(70svh) scale(.975); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     .modal {
       width: min(100%, 430px);
       max-height: min(86svh, 680px);
@@ -1758,6 +1834,10 @@
       scroll-behavior: auto !important;
     }
     body[data-effects="minimal"] .power-ready-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
+    body[data-effects="minimal"] .end-transition.show { animation: none !important; opacity: 1; visibility: visible; }
+    body[data-effects="minimal"] .end-transition.show .end-transition-text { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
+    body[data-effects="minimal"] #gameOverOverlay.open,
+    body[data-effects="minimal"] #gameOverOverlay.open .modal { animation: none !important; }
 
     .app.bomb-shake-soft { animation: bombShakeSoft .24s ease-out; }
     @keyframes bombShakeSoft {
@@ -1793,6 +1873,10 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
       .power-ready-banner.show { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
+      .end-transition.show { animation: none !important; opacity: 1; visibility: visible; }
+      .end-transition.show .end-transition-text { animation: none !important; opacity: 1; transform: translate(-50%, -50%); }
+      #gameOverOverlay.open,
+      #gameOverOverlay.open .modal { animation: none !important; }
     }
   </style>
 </head>
@@ -1837,7 +1921,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.61 • NATIVE BACK NAVIGATION</div>
+      <div class="version">BLOKUMI BUILD v0.63 • RESULTS CARD ENTRANCE</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -1948,6 +2032,7 @@
 
       <div class="board-shell">
         <div class="power-ready-banner" id="powerReadyBanner" aria-live="polite">POWER TIER 1 READY!</div>
+        <div class="end-transition" id="endTransition" aria-live="assertive" aria-hidden="true"><strong class="end-transition-text" id="endTransitionText">BOARD BLOCKED!</strong></div>
         <div class="board" id="board" role="grid" aria-label="8 by 8 game board"></div>
       </div>
       <div class="toast" id="toast">Press and drag a block onto the board.</div>
@@ -2176,7 +2261,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.61";
+    const BUILD = "v0.63";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -2459,6 +2544,7 @@
     let tutorialSessionSeen = new Set();
     let activeDealRandom = null;
     let rushTimerHandle = null;
+    let endTransitionTimer = null;
 
     function safeAction(name, action) {
       try { return action(); }
@@ -2490,6 +2576,29 @@
 
     function openOverlay(id) { $(id).classList.add("open"); }
     function closeOverlay(id) { $(id).classList.remove("open"); }
+
+    function hideEndTransition() {
+      window.clearTimeout(endTransitionTimer);
+      endTransitionTimer = null;
+      const transition = $("endTransition");
+      transition.classList.remove("show", "rush");
+      transition.setAttribute("aria-hidden", "true");
+    }
+
+    function playEndTransition(message, rushStyle, onComplete) {
+      hideEndTransition();
+      const transition = $("endTransition");
+      $("endTransitionText").textContent = message;
+      transition.classList.toggle("rush", rushStyle);
+      transition.setAttribute("aria-hidden", "false");
+      void transition.offsetWidth;
+      transition.classList.add("show");
+      const duration = effectiveEffectLevel() === "minimal" ? 650 : 2450;
+      endTransitionTimer = window.setTimeout(() => {
+        hideEndTransition();
+        onComplete();
+      }, duration);
+    }
 
     function queueSpecialTutorial(type) {
       if (DEV_MODE && !TEST_TUTORIAL) return;
@@ -5041,6 +5150,7 @@
     }
 
     function startGame(mode = "endless", dailyDate = "", dailyPreview = false, campaignLevelIndex = 0) {
+      hideEndTransition();
       if (mode === "campaign" && !CAMPAIGN_ENABLED) {
         goHome();
         return;
@@ -5267,7 +5377,14 @@
       updateStats();
       sound((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? "achievement" : "gameOver");
       vibrate((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? [30, 25, 45, 25, 75] : [45, 70, 45]);
-      window.setTimeout(() => openOverlay("gameOverOverlay"), 180);
+      const transitionMessage = isRush && reason === "time"
+        ? "TIME'S UP!"
+        : !isDaily && !isCampaign && reason === "blocked" ? "BOARD BLOCKED!" : "";
+      if (transitionMessage) {
+        playEndTransition(transitionMessage, isRush && reason === "time", () => openOverlay("gameOverOverlay"));
+      } else {
+        window.setTimeout(() => openOverlay("gameOverOverlay"), 180);
+      }
     }
 
     function shouldShowInterstitial() {
@@ -5362,6 +5479,7 @@
     }
 
     function goHome() {
+      hideEndTransition();
       stopRushTimer();
       state.running = false;
       state.appBackgrounded = false;
@@ -5444,6 +5562,7 @@
 
     function quitRunToMenu() {
       if (!state.running) return;
+      hideEndTransition();
       const campaignMode = state.mode === "campaign";
       cleanUpDrag();
       stopRushTimer();
@@ -5683,7 +5802,7 @@
         return;
       }
       if ($("rewardedRowsOverlay").classList.contains("open")) {
-        cancelRewardedRows();
+        cancelRowRescue();
         return;
       }
       if ($("interstitialOverlay").classList.contains("open")) {
