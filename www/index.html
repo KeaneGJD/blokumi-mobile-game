@@ -1972,7 +1972,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.70 • DIRECT SOCIAL COMPOSERS</div>
+      <div class="version">BLOKUMI BUILD v0.71 • SINGLE DAILY RESULT</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2324,7 +2324,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.70";
+    const BUILD = "v0.71";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -5675,14 +5675,14 @@
         $("againButton").textContent = "PLAY RUSH AGAIN";
         $("homeButton").textContent = "BACK TO HOME";
       } else {
-        $("againButton").textContent = isDaily ? state.dailyPreview ? "REPLAY PREVIEW" : "PRACTICE TODAY'S SHARD HUNT" : "PLAY AGAIN";
+        $("againButton").textContent = isDaily ? "PRACTICE" : "PLAY AGAIN";
         $("homeButton").textContent = "BACK TO HOME";
       }
-      $("postRunContinueButton").classList.remove("hidden");
       const rescueAvailable = state.mode === "endless" && reason === "blocked" && !state.endlessRescueUsed;
       $("endlessLossActions").hidden = !rescueAvailable;
-      $("standardPostRunContinueButton").classList.toggle("hidden", rescueAvailable);
-      $("postRunChoices").classList.add("hidden");
+      $("postRunContinueButton").classList.toggle("hidden", isDaily);
+      $("standardPostRunContinueButton").classList.toggle("hidden", isDaily || rescueAvailable);
+      $("postRunChoices").classList.toggle("hidden", !isDaily);
       updateStats();
       sound((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? "achievement" : "gameOver");
       vibrate((isDaily && state.dailyCompleted) || (isCampaign && state.campaignCompleted) ? [30, 25, 45, 25, 75] : [45, 70, 45]);
