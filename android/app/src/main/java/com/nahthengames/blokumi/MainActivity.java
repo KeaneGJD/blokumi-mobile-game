@@ -1,4 +1,4 @@
-package com.keanecgames.blokumi;
+package com.nahthengames.blokumi;
 
 import android.graphics.Color;
 import android.os.Bundle;

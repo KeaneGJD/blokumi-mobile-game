@@ -1,4 +1,4 @@
-package com.keanecgames.blokumi;
+package com.nahthengames.blokumi;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;

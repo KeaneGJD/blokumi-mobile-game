@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Blokumi</string>
     <string name="title_activity_main">Blokumi</string>
-    <string name="package_name">com.keanecgames.blokumi</string>
-    <string name="custom_url_scheme">com.keanecgames.blokumi</string>
+    <string name="package_name">com.nahthengames.blokumi</string>
+    <string name="custom_url_scheme">com.nahthengames.blokumi</string>
     <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>
