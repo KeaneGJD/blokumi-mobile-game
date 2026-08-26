@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#111827">
-  <title>Blokumi v0.60</title>
+  <title>Blokumi v0.61</title>
   <style>
     :root {
       --ink: #101828;
@@ -1837,7 +1837,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.60 • COMPACT RUSH PLAY</div>
+      <div class="version">BLOKUMI BUILD v0.61 • NATIVE BACK NAVIGATION</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2176,7 +2176,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.60";
+    const BUILD = "v0.61";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -5669,6 +5669,63 @@
     function vibrate(pattern) { if (state.settings.haptics && navigator.vibrate) navigator.vibrate(pattern); }
     function delay(ms) { return new Promise((resolve) => window.setTimeout(resolve, ms)); }
 
+    function handleNativeBackButton() {
+      if ($("specialTutorialOverlay").classList.contains("open")) {
+        closeSpecialTutorial();
+        return;
+      }
+      if ($("devOverlay").classList.contains("open")) {
+        closeOverlay("devOverlay");
+        return;
+      }
+      if ($("shareOptionsOverlay").classList.contains("open")) {
+        closeOverlay("shareOptionsOverlay");
+        return;
+      }
+      if ($("rewardedRowsOverlay").classList.contains("open")) {
+        cancelRewardedRows();
+        return;
+      }
+      if ($("interstitialOverlay").classList.contains("open")) {
+        closeInterstitial(false);
+        return;
+      }
+      if ($("pauseOverlay").classList.contains("open")) {
+        resumeGame();
+        return;
+      }
+      if ($("howOverlay").classList.contains("open")) {
+        closeOverlay("howOverlay");
+        return;
+      }
+      if ($("achievementsOverlay").classList.contains("open")) {
+        closeOverlay("achievementsOverlay");
+        return;
+      }
+      if ($("gameOverOverlay").classList.contains("open")) {
+        goHome();
+        return;
+      }
+
+      const activeScreen = document.querySelector(".screen.active")?.id;
+      if (activeScreen === "gameScreen" && state.running) {
+        openPauseMenu();
+        return;
+      }
+      if (activeScreen !== "homeScreen") {
+        goHome();
+        return;
+      }
+
+      window.Capacitor?.Plugins?.App?.minimizeApp?.();
+    }
+
+    function initialiseNativeBackButton() {
+      const nativeApp = window.Capacitor?.Plugins?.App;
+      if (!nativeApp?.addListener) return;
+      nativeApp.addListener("backButton", () => safeAction("Android Back navigation", handleNativeBackButton));
+    }
+
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
     $("dailyButton").addEventListener("click", () => safeAction("Start daily challenge", () => startDailyGame()));
     $("rushButton").addEventListener("click", () => safeAction("Start Rush", () => startGame("rush")));
@@ -5764,6 +5821,7 @@
     });
 
     createBoard();
+    initialiseNativeBackButton();
     setGameBackVisible(false);
     repairLifetimeScoreFloor();
     initialiseProfile();

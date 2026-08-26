@@ -20,6 +20,7 @@
   "homepage": "https://github.com/keanegjd/blokumi-mobile-game#readme",
   "dependencies": {
     "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.5.0"
   },
   "devDependencies": {
