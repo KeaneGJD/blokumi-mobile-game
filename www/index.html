@@ -674,28 +674,27 @@
       left: 50%;
       top: 50%;
       width: max-content;
-      max-width: calc(100% - 24px);
-      padding: 12px 18px;
-      border: 1px solid rgba(255,255,255,.7);
-      border-radius: 14px;
+      max-width: calc(100% - 10px);
+      padding: 0;
+      border: 0;
       color: #fff;
-      background: rgba(13,21,35,.9);
-      box-shadow: 0 0 25px var(--milestone-glow, rgba(216,255,79,.38)), 0 8px 22px rgba(0,0,0,.35);
-      text-shadow: 0 0 11px var(--milestone-glow, rgba(216,255,79,.55));
-      font-size: clamp(19px, 6vw, 27px);
+      background: transparent;
+      box-shadow: none;
+      text-shadow: 0 0 6px var(--milestone-glow, rgba(216,255,79,.72)), 0 0 17px var(--milestone-glow, rgba(216,255,79,.64)), 0 3px 9px rgba(0,0,0,.9);
+      font-size: clamp(24px, 7.5vw, 34px);
       font-weight: 1000;
-      letter-spacing: .065em;
+      letter-spacing: .045em;
       text-align: center;
       white-space: nowrap;
       opacity: 0;
       transform: translate(-50%, -42%) scale(.84);
       pointer-events: none;
     }
-    .milestone-banner.chain { --milestone-glow: rgba(255,149,68,.7); color: #ffd29a; border-color: rgba(255,168,82,.82); }
-    .milestone-banner.crossfire { --milestone-glow: rgba(218,104,255,.72); color: #f0bdff; border-color: rgba(218,104,255,.82); }
-    .milestone-banner.overload { --milestone-glow: rgba(57,231,208,.72); color: var(--cyan); border-color: rgba(57,231,208,.82); }
-    .milestone-banner.awesome { --milestone-glow: rgba(255,92,168,.7); color: #ffb2d5; border-color: rgba(255,92,168,.82); }
-    .milestone-banner.clean { --milestone-glow: rgba(216,255,79,.68); color: var(--lime); border-color: rgba(216,255,79,.82); }
+    .milestone-banner.chain { --milestone-glow: rgba(255,149,68,.78); color: #ffd29a; }
+    .milestone-banner.crossfire { --milestone-glow: rgba(218,104,255,.8); color: #f0bdff; }
+    .milestone-banner.overload { --milestone-glow: rgba(57,231,208,.8); color: var(--cyan); }
+    .milestone-banner.awesome { --milestone-glow: rgba(255,92,168,.78); color: #ffb2d5; }
+    .milestone-banner.clean { --milestone-glow: rgba(216,255,79,.76); color: var(--lime); }
     .milestone-banner.show { animation: milestoneFloat 1.08s cubic-bezier(.18,.75,.25,1) both; }
     @keyframes milestoneFloat {
       0% { transform: translate(-50%, -34%) scale(.8); opacity: 0; }
@@ -1972,7 +1971,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.67 • MILESTONE MOMENTS</div>
+      <div class="version">BLOKUMI BUILD v0.68 • BOLDER MILESTONE TEXT</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2322,7 +2321,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.67";
+    const BUILD = "v0.68";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
