@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        registerPlugin(BlokumiSharePlugin.class);
         super.onCreate(savedInstanceState);
 
         // Match the WebView to Blokumi's navy background while HTML loads.

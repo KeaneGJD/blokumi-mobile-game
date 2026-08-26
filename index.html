@@ -1657,7 +1657,7 @@
     .modal .button-stack { margin-top: 20px; }
 
     .final-score {
-      margin: 20px 0;
+      margin: 11px 0 13px;
       padding: 18px;
       border-radius: 20px;
       background: rgba(216,255,79,.1);
@@ -1668,6 +1668,7 @@
     .final-score span { display: block; color: var(--muted); text-transform: uppercase; letter-spacing: .15em; font-size: 9px; font-weight: 900; }
     .final-score strong { display: block; color: var(--lime); font-size: 45px; line-height: 1.05; letter-spacing: -.05em; margin-top: 5px; }
     .new-best { color: var(--pink); font-weight: 950; text-align: center; min-height: 23px; }
+    .new-best:empty { display: none; }
 
     .run-status {
       margin: 11px 0 0;
@@ -1971,7 +1972,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.68 • BOLDER MILESTONE TEXT</div>
+      <div class="version">BLOKUMI BUILD v0.70 • DIRECT SOCIAL COMPOSERS</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2168,6 +2169,8 @@
         <button class="secondary-btn" id="devCrossfireButton">CROSSFIRE</button>
         <button class="secondary-btn" id="devOverloadButton">OVERLOAD</button>
         <button class="secondary-btn" id="devShareButton">SHARE CARD</button>
+        <button class="secondary-btn" id="devRushResultButton">RUSH RESULT</button>
+        <button class="secondary-btn" id="devDailyResultButton">DAILY RESULT</button>
         <button class="secondary-btn" id="devProfileButton">XP RESULT</button>
         <button class="secondary-btn" id="devNeonThemeButton">NEON PREVIEW</button>
         <button class="secondary-btn" id="devSunsetThemeButton">SUNSET PREVIEW</button>
@@ -2242,7 +2245,7 @@
   <div class="overlay" id="shareOptionsOverlay" role="dialog" aria-modal="true" aria-labelledby="shareOptionsTitle">
     <div class="modal share-choice-card">
       <h2 id="shareOptionsTitle">Share result</h2>
-      <p class="share-choice-copy">Choose where to share your result card.</p>
+      <p class="share-choice-copy">Share your result-card image and caption through an installed app.</p>
       <div class="social-share-grid" aria-label="Social sharing options">
         <button class="social-share-button" id="shareFacebookButton"><span>f</span>Facebook</button>
         <button class="social-share-button" id="shareXButton"><span>ᵏ</span>X</button>
@@ -2265,7 +2268,7 @@
   <div class="overlay" id="achievementsOverlay" role="dialog" aria-modal="true" aria-labelledby="achievementsTitle">
     <div class="modal">
       <h2 id="achievementsTitle">Achievements</h2>
-      <p class="achievement-count" id="achievementCount">0 / 12 unlocked</p>
+      <p class="achievement-count" id="achievementCount">0 / 19 unlocked</p>
       <p class="lifetime-title">Lifetime stats</p>
       <div class="lifetime-grid">
         <div class="lifetime-stat"><span>Runs</span><strong id="lifetimeRuns">0</strong></div>
@@ -2321,7 +2324,7 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.68";
+    const BUILD = "v0.70";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
@@ -3565,6 +3568,62 @@
       return new File([bytes], fileName, { type: mime });
     }
 
+    function shareCardBase64(canvas) {
+      return canvas.toDataURL("image/png").split(",")[1] || "";
+    }
+
+    async function shareResultNatively(result, statusId, preferredNetwork = "") {
+      const nativeShare = window.Capacitor?.Plugins?.Share;
+      const nativeFilesystem = window.Capacitor?.Plugins?.Filesystem;
+      if (!nativeShare?.share || !nativeFilesystem?.writeFile) return false;
+      const status = statusId ? $(statusId) : null;
+      try {
+        const canvas = createShareCardCanvas(result);
+        const savedImage = await nativeFilesystem.writeFile({
+          path: `share/${result.fileName}`,
+          data: shareCardBase64(canvas),
+          directory: "CACHE",
+          recursive: true
+        });
+        if (status) status.textContent = preferredNetwork
+          ? `Choose ${preferredNetwork} to post your result card…`
+          : "Choose an app to post your result card…";
+        await nativeShare.share({
+          title: `${result.mode} • Blokumi`,
+          text: result.text,
+          files: [savedImage.uri],
+          dialogTitle: "Share your Blokumi result"
+        });
+        if (status) status.textContent = "Result-card image shared!";
+        return true;
+      } catch (error) {
+        console.warn("Native result sharing unavailable", error);
+        return false;
+      }
+    }
+
+    async function shareResultToPreferredApp(result, statusId, network) {
+      const targetedShare = window.Capacitor?.Plugins?.BlokumiShare;
+      if (!targetedShare?.shareToApp) return false;
+      const status = statusId ? $(statusId) : null;
+      try {
+        const canvas = createShareCardCanvas(result);
+        if (status) status.textContent = `Opening ${network} with your result card…`;
+        await targetedShare.shareToApp({
+          network: network.toLowerCase(),
+          text: result.text,
+          imageBase64: shareCardBase64(canvas),
+          fileName: result.fileName
+        });
+        if (status) status.textContent = `${network} composer opened.`;
+        return true;
+      } catch (error) {
+        console.warn(`Could not open ${network} directly`, error);
+        if (status) status.textContent = `${network} could not be opened directly — showing Android sharing instead.`;
+        return false;
+      }
+    }
+
     async function copyShareText(result, statusId) {
       let copied = false;
       try {
@@ -3591,6 +3650,7 @@
       if (!result) return;
       const status = statusId ? $(statusId) : null;
       try {
+        if (await shareResultNatively(result, statusId)) return;
         const canvas = createShareCardCanvas(result);
         const file = shareCardFile(canvas, result.fileName);
         if (navigator.share) {
@@ -3616,9 +3676,13 @@
       openOverlay("shareOptionsOverlay");
     }
 
-    function openSocialShare(network) {
+    async function openSocialShare(network) {
       const result = state.lastShareResult;
       if (!result) return;
+      const networkNames = { facebook: "Facebook", x: "X", instagram: "Instagram", linkedin: "LinkedIn", discord: "Discord" };
+      const networkName = networkNames[network] || "your chosen app";
+      if (await shareResultToPreferredApp(result, "shareOptionsStatus", networkName)) return;
+      if (await shareResultNatively(result, "shareOptionsStatus", networkName)) return;
       const encodedText = encodeURIComponent(result.text);
       const encodedUrl = encodeURIComponent(SHARE_URL);
       const urls = {
@@ -5284,6 +5348,26 @@
       openOverlay("gameOverOverlay");
     }
 
+    function prepareDevModeResultTest(mode) {
+      if (!DEV_MODE) return;
+      closeOverlay("devOverlay");
+      if (mode === "daily") {
+        startDailyGame(0, true);
+        state.shardsCollected = 7;
+        state.setsCompleted = DAILY_SET_LIMIT;
+        window.setTimeout(() => endGame("setLimit"), 120);
+        return;
+      }
+      startGame("rush");
+      state.score = 8640;
+      state.lines = 17;
+      state.blocks = 118;
+      state.rushBoardsCleared = 4;
+      state.rushTimeCollected = 25;
+      state.rushRemainingMs = 0;
+      window.setTimeout(() => endGame("time"), 120);
+    }
+
     function prepareDevProfileTest() {
       if (!DEV_MODE) return;
       closeOverlay("devOverlay");
@@ -5545,7 +5629,7 @@
       }
       if (!wasFinalized) renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
       state.runFinalized = true;
-      state.lastShareResult = !isCampaign && !TEST_SAVE_DISABLED ? buildRunShareResult(isNewBest, isNewRushBest) : null;
+      state.lastShareResult = !isCampaign ? buildRunShareResult(isNewBest, isNewRushBest) : null;
       $("gameOverTitle").hidden = false;
       $("newBest").hidden = false;
       $("finalScorePanel").hidden = isDaily || isCampaign;
@@ -6305,6 +6389,8 @@
     $("devCrossfireButton").addEventListener("click", () => safeAction("Prepare Crossfire test", () => prepareDevScenario("crossfire")));
     $("devOverloadButton").addEventListener("click", () => safeAction("Prepare Overload test", () => prepareDevScenario("overload")));
     $("devShareButton").addEventListener("click", () => safeAction("Prepare share card test", prepareDevShareTest));
+    $("devRushResultButton").addEventListener("click", () => safeAction("Prepare Rush result test", () => prepareDevModeResultTest("rush")));
+    $("devDailyResultButton").addEventListener("click", () => safeAction("Prepare Daily result test", () => prepareDevModeResultTest("daily")));
     $("devProfileButton").addEventListener("click", () => safeAction("Prepare XP result test", prepareDevProfileTest));
     $("devNeonThemeButton").addEventListener("click", () => safeAction("Preview Neon theme", () => previewDevTheme("neon")));
     $("devSunsetThemeButton").addEventListener("click", () => safeAction("Preview Sunset theme", () => previewDevTheme("sunset")));
