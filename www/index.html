@@ -418,6 +418,11 @@
     .community-confirm-icon svg { width: 40px; height: 31px; }
     .community-confirm-card { text-align: center; }
     .community-confirm-card p { margin-bottom: 4px; }
+    .privacy-card h3 { margin: 18px 0 5px; color: var(--cream); font-size: 15px; }
+    .privacy-card h3:first-of-type { margin-top: 13px; }
+    .privacy-card p { margin: 7px 0; font-size: 12px; line-height: 1.55; }
+    .privacy-card .privacy-date { margin: -3px 0 12px; color: var(--cyan); font-size: 10px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+    .privacy-card a { color: var(--cyan); overflow-wrap: anywhere; }
 
     #recordsScreen { padding: 18px 2px 12px; }
     .records-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -1973,7 +1978,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.75 • DISCORD CONFIRMATION</div>
+      <div class="version">BLOKUMI BUILD v0.77 • ANDROID BACK FIX</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2005,9 +2010,10 @@
         <button class="secondary-btn" id="replayBlastTutorialButton" type="button">REPLAY BLAST</button>
         <button class="secondary-btn" id="replayCrossTutorialButton" type="button">REPLAY CROSS</button>
       </div>
-      <p class="settings-group-title">SUPPORT</p>
-      <div class="settings-actions single">
+      <p class="settings-group-title">SUPPORT &amp; INFORMATION</p>
+      <div class="settings-actions">
         <button class="secondary-btn" id="rateBlokumiButton" type="button">★ RATE BLOKUMI</button>
+        <button class="secondary-btn" id="privacyPolicyButton" type="button">PRIVACY POLICY</button>
       </div>
       <div class="button-stack settings-home-actions"><button class="primary-btn" id="settingsHomeButton">BACK TO HOME</button></div>
     </section>
@@ -2151,6 +2157,37 @@
       <div class="button-stack">
         <button class="primary-btn" id="confirmCommunityButton" type="button">OK</button>
         <button class="secondary-btn" id="cancelCommunityButton" type="button">BACK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="privacyPolicyOverlay" role="dialog" aria-modal="true" aria-labelledby="privacyPolicyTitle">
+    <div class="modal privacy-card">
+      <h2 id="privacyPolicyTitle">Privacy Policy</h2>
+      <p class="privacy-date">Effective 28 August 2026</p>
+      <p>Blokumi is developed by Nah Then Games. This policy explains how the Android game handles information.</p>
+
+      <h3>Information we collect</h3>
+      <p>Blokumi does not collect, transmit, sell or share personal information. The game does not include advertising, analytics, user accounts or cloud tracking.</p>
+
+      <h3>Information stored on your device</h3>
+      <p>Scores, achievements, settings, Daily progress and other game progress are stored locally on your device. Nah Then Games cannot access this information. It can be removed by clearing the app's data or uninstalling the game.</p>
+
+      <h3>Sharing results</h3>
+      <p>If you choose to share a result, Blokumi creates a result card and opens your device's sharing controls. Nothing is shared until you choose a destination. The selected third-party app handles the shared content under its own privacy policy.</p>
+
+      <h3>External services</h3>
+      <p>Blokumi includes optional links to Google Play and the Nah Then Games community on Discord. A confirmation is shown before leaving Blokumi for Discord. Those services operate under their own terms and privacy policies.</p>
+
+      <h3>Children's privacy</h3>
+      <p>Blokumi does not knowingly collect personal information from children or adults.</p>
+
+      <h3>Contact</h3>
+      <p>Questions about this policy can be sent to <a href="mailto:nahthengames@gmail.com">nahthengames@gmail.com</a>.</p>
+
+      <div class="button-stack">
+        <button class="secondary-btn" id="privacyOnlineButton" type="button">VIEW ONLINE COPY</button>
+        <button class="primary-btn" id="closePrivacyPolicyButton" type="button">BACK TO SETTINGS</button>
       </div>
     </div>
   </div>
@@ -2310,9 +2347,10 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.75";
+    const BUILD = "v0.77";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
     const DISCORD_COMMUNITY_URL = "https://discord.gg/6vxuQ8tkvW";
+    const PRIVACY_POLICY_URL = "https://keanegjd.github.io/blokumi-mobile-game/privacy.html";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
     const RUSH_BOARD_BASE_BONUS = 1000;
@@ -3916,6 +3954,14 @@
     function leaveForCommunity() {
       closeOverlay("communityConfirmOverlay");
       window.open(DISCORD_COMMUNITY_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function openPrivacyPolicy() {
+      openOverlay("privacyPolicyOverlay");
+    }
+
+    function openOnlinePrivacyPolicy() {
+      window.open(PRIVACY_POLICY_URL, "_blank", "noopener,noreferrer");
     }
 
     function currentLifetimeTotal(field, runValue, recordedValue) {
@@ -6094,6 +6140,10 @@
         closeOverlay("communityConfirmOverlay");
         return;
       }
+      if ($("privacyPolicyOverlay").classList.contains("open")) {
+        closeOverlay("privacyPolicyOverlay");
+        return;
+      }
       if ($("pauseOverlay").classList.contains("open")) {
         resumeGame();
         return;
@@ -6149,6 +6199,9 @@
     $("replayBlastTutorialButton").addEventListener("click", () => safeAction("Replay Blast tutorial", () => replaySpecialTutorial("bomb")));
     $("replayCrossTutorialButton").addEventListener("click", () => safeAction("Replay Cross tutorial", () => replaySpecialTutorial("cross")));
     $("rateBlokumiButton").addEventListener("click", () => safeAction("Rate Blokumi", rateBlokumi));
+    $("privacyPolicyButton").addEventListener("click", () => safeAction("Open privacy policy", openPrivacyPolicy));
+    $("privacyOnlineButton").addEventListener("click", () => safeAction("Open online privacy policy", openOnlinePrivacyPolicy));
+    $("closePrivacyPolicyButton").addEventListener("click", () => closeOverlay("privacyPolicyOverlay"));
     $("profileButton").addEventListener("click", () => safeAction("Open profile", openProfile));
     $("profileHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
     $("recordsHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
