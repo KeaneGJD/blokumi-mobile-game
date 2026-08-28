@@ -398,6 +398,26 @@
       box-shadow: inset 0 -6px 0 rgba(16,24,40,.16), 0 12px 24px rgba(101,88,232,.2);
       text-align: center;
     }
+    .community-home-button {
+      grid-column: 1 / -1;
+      min-height: 44px;
+      padding: 9px 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--cream);
+      background: rgba(88,101,242,.12);
+      border-color: rgba(124,136,255,.3);
+      box-shadow: 0 9px 22px rgba(0,0,0,.12);
+      font-size: 10px;
+      letter-spacing: .08em;
+    }
+    .community-home-button svg { width: 21px; height: 17px; flex: 0 0 auto; color: #aab4ff; }
+    .community-confirm-icon { display: grid; place-items: center; width: 66px; height: 66px; margin: 0 auto 13px; border-radius: 21px; color: #fff; background: #5865f2; box-shadow: 0 12px 28px rgba(88,101,242,.3); }
+    .community-confirm-icon svg { width: 40px; height: 31px; }
+    .community-confirm-card { text-align: center; }
+    .community-confirm-card p { margin-bottom: 4px; }
 
     #recordsScreen { padding: 18px 2px 12px; }
     .records-heading { margin: 8px 0 3px; font-size: clamp(28px, 8vw, 40px); letter-spacing: -.045em; }
@@ -1724,25 +1744,7 @@
     .share-file-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
     .share-file-actions .secondary-btn { min-height: 42px; padding: 8px; font-size: 9px; }
 
-    .test-ad-card { text-align: center; }
-
-    .test-ad-screen {
-      min-height: 205px;
-      margin: 15px 0 18px;
-      padding: 23px;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background:
-        radial-gradient(circle at 50% 30%, rgba(255,92,168,.18), transparent 34%),
-        #080d16;
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: inset 0 0 35px rgba(0,0,0,.45);
-    }
-
-    .ad-badge {
+    .dev-badge {
       display: inline-flex;
       padding: 5px 9px;
       border-radius: 999px;
@@ -1753,9 +1755,6 @@
       letter-spacing: .12em;
       font-weight: 1000;
     }
-
-    .test-ad-screen strong { margin-top: 18px; font-size: 22px; letter-spacing: -.035em; }
-    .test-ad-screen span:last-child { margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 1.4; }
 
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .summary-box { padding: 13px; border-radius: 15px; background: rgba(255,255,255,.06); text-align: center; }
@@ -1841,7 +1840,7 @@
       cursor: pointer;
     }
     .dev-launch[hidden] { display: none; }
-    .dev-card .ad-badge { margin-bottom: 10px; }
+    .dev-card .dev-badge { margin-bottom: 10px; }
     .dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 16px; }
     .dev-grid .secondary-btn { min-height: 52px; padding: 8px; font-size: 12px; }
     .dev-card .dev-note { margin: 10px 0 0; font-size: 11px; }
@@ -1965,6 +1964,7 @@
           </button>
         </div>
         <button class="secondary-btn rush-home-button home-mode-card" id="rushButton"><strong>⚡ BLOKUMI RUSH</strong></button>
+        <button class="secondary-btn community-home-button" id="communityButton" type="button"><svg viewBox="0 0 127.14 96.36" aria-hidden="true"><path fill="currentColor" d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0 105.89 105.89 0 0 0 19.39 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-8.8 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 8.8 105.25 105.25 0 0 0 32.17-16.14c2.66-27.38-4.54-51.11-18.88-72.15ZM42.45 65.69C36.18 65.69 31 59.94 31 52.86S36 40 42.45 40 54 45.81 53.9 52.86s-5.06 12.83-11.45 12.83Zm42.24 0c-6.27 0-11.42-5.75-11.42-12.83S78.27 40 84.69 40s11.56 5.81 11.45 12.86-5.06 12.83-11.45 12.83Z"/></svg><strong>JOIN OUR COMMUNITY</strong></button>
       </div>
 
       <div class="home-utility-grid" aria-label="More options">
@@ -1973,7 +1973,7 @@
         <button class="secondary-btn home-utility-button" id="settingsButton" aria-label="Settings" title="Settings"><span class="home-utility-icon" aria-hidden="true">⚙</span></button>
         <button class="secondary-btn home-utility-button" id="howButton" aria-label="How to Play" title="How to Play"><span class="home-utility-icon" aria-hidden="true">?</span></button>
       </div>
-      <div class="version">BLOKUMI BUILD v0.73 • NAH THEN GAMES PACKAGE</div>
+      <div class="version">BLOKUMI BUILD v0.75 • DISCORD CONFIRMATION</div>
     </section>
 
     <section class="screen" id="settingsScreen" aria-label="Blokumi settings and accessibility">
@@ -2143,9 +2143,21 @@
     </div>
   </div>
 
+  <div class="overlay" id="communityConfirmOverlay" role="dialog" aria-modal="true" aria-labelledby="communityConfirmTitle">
+    <div class="modal community-confirm-card">
+      <span class="community-confirm-icon" aria-hidden="true"><svg viewBox="0 0 127.14 96.36"><path fill="currentColor" d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0 105.89 105.89 0 0 0 19.39 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-8.8 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 8.8 105.25 105.25 0 0 0 32.17-16.14c2.66-27.38-4.54-51.11-18.88-72.15ZM42.45 65.69C36.18 65.69 31 59.94 31 52.86S36 40 42.45 40 54 45.81 53.9 52.86s-5.06 12.83-11.45 12.83Zm42.24 0c-6.27 0-11.42-5.75-11.42-12.83S78.27 40 84.69 40s11.56 5.81 11.45 12.86-5.06 12.83-11.45 12.83Z"/></svg></span>
+      <h2 id="communityConfirmTitle">Open Discord?</h2>
+      <p>You are leaving Blokumi to visit Discord. Do you wish to continue?</p>
+      <div class="button-stack">
+        <button class="primary-btn" id="confirmCommunityButton" type="button">OK</button>
+        <button class="secondary-btn" id="cancelCommunityButton" type="button">BACK</button>
+      </div>
+    </div>
+  </div>
+
   <div class="overlay" id="devOverlay" role="dialog" aria-modal="true" aria-labelledby="devTitle">
     <div class="modal dev-card">
-      <span class="ad-badge">BROWSER FALLBACK</span>
+      <span class="dev-badge">DEVELOPER TOOLS</span>
       <h2 id="devTitle">Test Menu</h2>
       <p>Load a prepared effect board, or inspect block generation at different stages of a run.</p>
       <div class="dev-grid">
@@ -2179,7 +2191,7 @@
         <button class="secondary-btn" id="devVoidThemeButton">DEEP VOID PREVIEW</button>
         <button class="secondary-btn" id="devBackgroundButton">BACKGROUND PAUSE</button>
       </div>
-      <p class="dev-note">Developer runs never update saved scores, daily results, streaks, achievements, lifetime stats or advert timing.</p>
+      <p class="dev-note">Developer runs never update saved scores, Daily results, streaks, achievements or lifetime stats.</p>
       <div class="button-stack"><button class="primary-btn" id="closeDevButton">CLOSE MENU</button></div>
     </div>
   </div>
@@ -2232,7 +2244,7 @@
           <p class="share-status" id="resultShareStatus" aria-live="polite"></p>
         </div>
         <div class="endless-loss-actions" id="endlessLossActions" hidden>
-          <button class="primary-btn rescue-btn" id="removeRowsButton"><strong>REMOVE 3 ROWS</strong><span>WATCH AN AD TO KEEP PLAYING</span></button>
+          <button class="primary-btn rescue-btn" id="removeRowsButton"><strong>REMOVE 3 ROWS</strong><span>ONE RESCUE PER RUN</span></button>
           <button class="primary-btn continue-btn" id="postRunContinueButton">CONTINUE</button>
         </div>
         <button class="primary-btn continue-btn" id="standardPostRunContinueButton">CONTINUE</button>
@@ -2279,41 +2291,13 @@
         <div class="lifetime-stat"><span>Tiles</span><strong id="lifetimeTiles">0</strong></div>
         <div class="lifetime-stat"><span>Blasts</span><strong id="lifetimeBombs">0</strong></div>
         <div class="lifetime-stat"><span>Crosses</span><strong id="lifetimeCrosses">0</strong></div>
-        <div class="lifetime-stat"><span>Ads shown</span><strong id="lifetimeAds">0</strong></div>
+        <div class="lifetime-stat"><span>Row rescues</span><strong id="lifetimeRescues">0</strong></div>
         <div class="lifetime-stat"><span>Best combo / tier</span><strong id="lifetimePeak">— / —</strong></div>
         <div class="lifetime-stat"><span>Tier II uses</span><strong id="lifetimeTier2">0</strong></div>
         <div class="lifetime-stat"><span>Tier III uses</span><strong id="lifetimeTier3">0</strong></div>
       </div>
       <div class="achievement-list" id="achievementList"></div>
       <div class="button-stack"><button class="primary-btn" id="closeAchievementsButton">DONE</button></div>
-    </div>
-  </div>
-
-  <div class="overlay" id="interstitialOverlay" role="dialog" aria-modal="true" aria-labelledby="interstitialTitle">
-    <div class="modal test-ad-card">
-      <span class="ad-badge">DEVELOPMENT ONLY</span>
-      <div class="test-ad-screen">
-        <strong id="interstitialTitle">TEST INTERSTITIAL AD</strong>
-        <span>Android uses Google's real test advert. This card keeps the browser build testable.</span>
-      </div>
-      <div class="button-stack">
-        <button class="primary-btn" id="closeInterstitialButton">CLOSE TEST AD</button>
-        <button class="secondary-btn" id="adUnavailableButton">SIMULATE AD UNAVAILABLE</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="overlay" id="rewardedRowsOverlay" role="dialog" aria-modal="true" aria-labelledby="rewardedRowsTitle">
-    <div class="modal test-ad-card">
-      <span class="ad-badge">BROWSER FALLBACK</span>
-      <div class="test-ad-screen">
-        <strong id="rewardedRowsTitle">TEST REWARDED AD</strong>
-        <span>Android uses Google's real rewarded test advert and grants rows only after completion.</span>
-      </div>
-      <div class="button-stack">
-        <button class="primary-btn" id="completeRewardedRowsButton">FINISH TEST AD</button>
-        <button class="secondary-btn" id="cancelRewardedRowsButton">AD UNAVAILABLE</button>
-      </div>
     </div>
   </div>
 
@@ -2326,8 +2310,9 @@
   <script>
     "use strict";
 
-    const BUILD = "v0.73";
+    const BUILD = "v0.75";
     const SHARE_URL = "https://keanegjd.github.io/blokumi-mobile-game/";
+    const DISCORD_COMMUNITY_URL = "https://discord.gg/6vxuQ8tkvW";
     const SIZE = 8;
     const RUSH_START_MS = 60 * 1000;
     const RUSH_BOARD_BASE_BONUS = 1000;
@@ -2343,14 +2328,11 @@
     const OPENING_SPECIAL_FREE_SETS = 1;
     const CROSS_FIRE_STEP_MS = 38;
     const CROSS_FIRE_DURATION_MS = 380;
-    const ENDLESS_RUNS_PER_INTERSTITIAL = 3;
     const REVIEW_MIN_ACTIVE_MS = 5 * 60 * 1000;
     const REVIEW_MIN_COMPLETED_GAMES = 3;
     const REVIEW_RETRY_MS = 180 * 24 * 60 * 60 * 1000;
     const PLAY_REVIEW_ENABLED = false;
     const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.nahthengames.blokumi";
-    const ADMOB_TEST_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
-    const ADMOB_TEST_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
     const BEST_KEY = "deblockle_v01_best";
     const CLEAN_BEST_KEY = "deblockle_v07_clean_best";
     const ACHIEVEMENTS_KEY = "deblockle_v010_achievements";
@@ -2386,8 +2368,7 @@
     ];
     const TEST_MODE = new URLSearchParams(window.location.search).get("test") === "1";
     const TEST_TIER = Math.min(3, Math.max(1, Number(new URLSearchParams(window.location.search).get("tier")) || 3));
-    const TEST_INTERSTITIAL = new URLSearchParams(window.location.search).get("adtest") === "1";
-    const TEST_GAME_OVER = new URLSearchParams(window.location.search).get("continue") === "1" || TEST_INTERSTITIAL;
+    const TEST_GAME_OVER = new URLSearchParams(window.location.search).get("continue") === "1";
     const TEST_TUTORIAL = new URLSearchParams(window.location.search).get("tutorial") === "1";
     const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "1";
     const TEST_SAVE_DISABLED = TEST_MODE || TEST_GAME_OVER || TEST_TUTORIAL || DEV_MODE;
@@ -2503,7 +2484,7 @@
 
     const DEFAULT_LIFETIME = {
       runs: 0, score: 0, lines: 0, tiles: 0, bombs: 0, crosses: 0,
-      continues: 0, interstitials: 0, endlessRunsSinceAd: 0,
+      continues: 0,
       highestCombo: 0, highestTier: 0, tier2Activations: 0, tier3Activations: 0
     };
 
@@ -2595,7 +2576,6 @@
       endlessRescueUsed: false,
       runFinalized: false,
       sessionCompletedRuns: 0,
-      lastInterstitialAt: 0,
       appBackgrounded: false,
       pausedByBackground: false,
       locked: false,
@@ -2626,10 +2606,6 @@
     let tutorialSessionSeen = new Set();
     let activeDealRandom = null;
     let rushTimerHandle = null;
-    let nativeAdsReady = false;
-    let nativeInterstitialReady = false;
-    let nativeRewardedReady = false;
-    let nativeAdBusy = false;
     let endTransitionTimer = null;
 
     function safeAction(name, action) {
@@ -3810,7 +3786,7 @@
       $("lifetimeTiles").textContent = formatScore(state.lifetime.tiles);
       $("lifetimeBombs").textContent = formatScore(state.lifetime.bombs);
       $("lifetimeCrosses").textContent = formatScore(state.lifetime.crosses);
-      $("lifetimeAds").textContent = formatScore(state.lifetime.interstitials);
+      $("lifetimeRescues").textContent = formatScore(state.lifetime.continues);
       $("lifetimePeak").textContent = `${state.lifetime.highestCombo ? `×${state.lifetime.highestCombo}` : "—"} / ${state.lifetime.highestTier ? `T${state.lifetime.highestTier}` : "—"}`;
       $("lifetimeTier2").textContent = formatScore(state.lifetime.tier2Activations);
       $("lifetimeTier3").textContent = formatScore(state.lifetime.tier3Activations);
@@ -3907,7 +3883,6 @@
         && state.review.completedGames >= REVIEW_MIN_COMPLETED_GAMES
         && state.review.positiveMoment
         && Date.now() - state.review.lastRequestAt >= REVIEW_RETRY_MS
-        && Date.now() - state.lastInterstitialAt >= 30000
         && $("homeScreen").classList.contains("active");
     }
 
@@ -3932,6 +3907,15 @@
         return;
       }
       window.open(PLAY_STORE_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function openCommunity() {
+      openOverlay("communityConfirmOverlay");
+    }
+
+    function leaveForCommunity() {
+      closeOverlay("communityConfirmOverlay");
+      window.open(DISCORD_COMMUNITY_URL, "_blank", "noopener,noreferrer");
     }
 
     function currentLifetimeTotal(field, runValue, recordedValue) {
@@ -5480,8 +5464,7 @@
       }
       stopRushTimer();
       closeOverlay("gameOverOverlay");
-      closeOverlay("interstitialOverlay");
-      closeOverlay("rewardedRowsOverlay");
+      closeOverlay("communityConfirmOverlay");
       closeOverlay("shareOptionsOverlay");
       closeOverlay("pauseOverlay");
       closeOverlay("specialTutorialOverlay");
@@ -5642,10 +5625,6 @@
       }
       updateBest(true);
       recordRunProgress();
-      if (state.mode === "endless" && !wasFinalized && !TEST_SAVE_DISABLED) {
-        state.lifetime.endlessRunsSinceAd = Math.max(0, Number(state.lifetime.endlessRunsSinceAd) || 0) + 1;
-        localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
-      }
       if (!wasFinalized) renderXpResult(awardRunXp(isNewBest, isNewRushBest, isCampaign));
       state.runFinalized = true;
       state.lastShareResult = !isCampaign ? buildRunShareResult(isNewBest, isNewRushBest) : null;
@@ -5715,159 +5694,6 @@
       }
     }
 
-    function shouldShowInterstitial() {
-      if (TEST_INTERSTITIAL) return true;
-      if (state.mode !== "endless" || TEST_SAVE_DISABLED || state.endlessRescueUsed) return false;
-      return (Number(state.lifetime.endlessRunsSinceAd) || 0) >= ENDLESS_RUNS_PER_INTERSTITIAL;
-    }
-
-    function getNativeAdMob() {
-      if (window.Capacitor?.getPlatform?.() !== "android") return null;
-      return window.Capacitor?.Plugins?.AdMob || null;
-    }
-
-    async function preloadNativeInterstitial() {
-      const adMob = getNativeAdMob();
-      if (!nativeAdsReady || !adMob) return false;
-      try {
-        await adMob.prepareInterstitial({
-          adId: ADMOB_TEST_INTERSTITIAL_ID,
-          isTesting: true,
-          immersiveMode: true
-        });
-        nativeInterstitialReady = true;
-        return true;
-      } catch (error) {
-        nativeInterstitialReady = false;
-        console.warn(`[Blokumi ${BUILD}] Could not preload test interstitial`, error);
-        return false;
-      }
-    }
-
-    async function preloadNativeRewarded() {
-      const adMob = getNativeAdMob();
-      if (!nativeAdsReady || !adMob) return false;
-      try {
-        await adMob.prepareRewardVideoAd({
-          adId: ADMOB_TEST_REWARDED_ID,
-          isTesting: true,
-          immersiveMode: true
-        });
-        nativeRewardedReady = true;
-        return true;
-      } catch (error) {
-        nativeRewardedReady = false;
-        console.warn(`[Blokumi ${BUILD}] Could not preload test rewarded ad`, error);
-        return false;
-      }
-    }
-
-    async function initialiseNativeTestAds() {
-      const adMob = getNativeAdMob();
-      if (!adMob) return;
-      try {
-        await adMob.initialize({ maxAdContentRating: "General" });
-        nativeAdsReady = true;
-        await Promise.allSettled([preloadNativeInterstitial(), preloadNativeRewarded()]);
-        console.info(`[Blokumi ${BUILD}] Native Google test ads ready`);
-      } catch (error) {
-        nativeAdsReady = false;
-        console.warn(`[Blokumi ${BUILD}] Native test ads unavailable`, error);
-      }
-    }
-
-    async function removeAdListenerHandles(handles) {
-      await Promise.allSettled(handles.filter(Boolean).map((handle) => handle.remove()));
-    }
-
-    async function showNativeInterstitialThenContinue() {
-      const adMob = getNativeAdMob();
-      if (!adMob || nativeAdBusy) return;
-      nativeAdBusy = true;
-      if (!nativeInterstitialReady) await preloadNativeInterstitial();
-      if (!nativeInterstitialReady) {
-        nativeAdBusy = false;
-        closeInterstitial(false);
-        return;
-      }
-
-      let settled = false;
-      let fallbackTimer = null;
-      const handles = [];
-      const finish = async (wasShown) => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(fallbackTimer);
-        await removeAdListenerHandles(handles);
-        nativeAdBusy = false;
-        closeInterstitial(wasShown);
-        void preloadNativeInterstitial();
-      };
-
-      try {
-        handles.push(await adMob.addListener("interstitialAdDismissed", () => void finish(true)));
-        handles.push(await adMob.addListener("interstitialAdFailedToShow", () => void finish(false)));
-        nativeInterstitialReady = false;
-        fallbackTimer = window.setTimeout(() => void finish(false), 120000);
-        await adMob.showInterstitial({ adId: ADMOB_TEST_INTERSTITIAL_ID });
-      } catch (error) {
-        console.warn(`[Blokumi ${BUILD}] Test interstitial could not be shown`, error);
-        await finish(false);
-      }
-    }
-
-    function setRowRescueAdLoading(loading) {
-      const button = $("removeRowsButton");
-      if (!button.dataset.readyLabel) button.dataset.readyLabel = button.innerHTML;
-      button.disabled = loading;
-      button.innerHTML = loading
-        ? "<strong>LOADING TEST AD…</strong><span>PLEASE WAIT</span>"
-        : button.dataset.readyLabel;
-    }
-
-    async function showNativeRewardedRowsAd() {
-      const adMob = getNativeAdMob();
-      if (!adMob || nativeAdBusy) return;
-      nativeAdBusy = true;
-      setRowRescueAdLoading(true);
-      if (!nativeRewardedReady) await preloadNativeRewarded();
-      if (!nativeRewardedReady) {
-        nativeAdBusy = false;
-        setRowRescueAdLoading(false);
-        cancelRowRescue();
-        return;
-      }
-
-      let settled = false;
-      let rewardEarned = false;
-      let fallbackTimer = null;
-      const handles = [];
-      const finish = async () => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(fallbackTimer);
-        await removeAdListenerHandles(handles);
-        nativeAdBusy = false;
-        setRowRescueAdLoading(false);
-        if (rewardEarned) completeRowRescue();
-        else cancelRowRescue();
-        void preloadNativeRewarded();
-      };
-
-      try {
-        handles.push(await adMob.addListener("onRewardedVideoAdReward", () => { rewardEarned = true; }));
-        handles.push(await adMob.addListener("onRewardedVideoAdDismissed", () => void finish()));
-        handles.push(await adMob.addListener("onRewardedVideoAdFailedToShow", () => void finish()));
-        nativeRewardedReady = false;
-        fallbackTimer = window.setTimeout(() => void finish(), 180000);
-        const reward = await adMob.showRewardVideoAd({ adId: ADMOB_TEST_REWARDED_ID });
-        if (reward) rewardEarned = true;
-      } catch (error) {
-        console.warn(`[Blokumi ${BUILD}] Test rewarded ad did not grant a reward`, error);
-        await finish();
-      }
-    }
-
     function revealPostRunChoices() {
       $("postRunContinueButton").classList.add("hidden");
       $("standardPostRunContinueButton").classList.add("hidden");
@@ -5888,16 +5714,12 @@
     }
 
     function continueAfterRun() {
-      const interstitialDue = shouldShowInterstitial();
-      if (interstitialDue && getNativeAdMob()) void showNativeInterstitialThenContinue();
-      else if (interstitialDue) openOverlay("interstitialOverlay");
-      else revealPostRunChoices();
+      revealPostRunChoices();
     }
 
     function requestRowRescue() {
       if (state.mode !== "endless" || state.endlessRescueUsed) return;
-      if (getNativeAdMob()) void showNativeRewardedRowsAd();
-      else openOverlay("rewardedRowsOverlay");
+      completeRowRescue();
     }
 
     function completeRowRescue() {
@@ -5920,15 +5742,12 @@
       state.recorded.continue = true;
       if (!TEST_SAVE_DISABLED) {
         state.lifetime.continues += 1;
-        state.lifetime.interstitials += 1;
-        state.lifetime.endlessRunsSinceAd = 0;
         localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
         renderAchievements();
       }
       state.runStartedAt = Date.now() - state.runDurationMs;
       state.running = true;
       state.locked = false;
-      closeOverlay("rewardedRowsOverlay");
       closeOverlay("gameOverOverlay");
       setGameBackVisible(true);
       renderBoard();
@@ -5937,23 +5756,6 @@
       setToast(`${rows.length} row${rows.length === 1 ? "" : "s"} removed — keep the run alive!`, true);
       sound("powerCue");
       vibrate([25, 30, 45]);
-    }
-
-    function cancelRowRescue() {
-      closeOverlay("rewardedRowsOverlay");
-      $("resultShareStatus").textContent = "Ad unavailable — your board was not changed.";
-    }
-
-    function closeInterstitial(wasShown) {
-      closeOverlay("interstitialOverlay");
-      if (wasShown && !TEST_SAVE_DISABLED) {
-        state.lastInterstitialAt = Date.now();
-        state.lifetime.interstitials += 1;
-        if (state.mode === "endless") state.lifetime.endlessRunsSinceAd = 0;
-        localStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(state.lifetime));
-        renderAchievements();
-      }
-      revealPostRunChoices();
     }
 
     function goHome() {
@@ -5965,8 +5767,7 @@
       state.appBackgrounded = false;
       state.pausedByBackground = false;
       closeOverlay("gameOverOverlay");
-      closeOverlay("interstitialOverlay");
-      closeOverlay("rewardedRowsOverlay");
+      closeOverlay("communityConfirmOverlay");
       closeOverlay("shareOptionsOverlay");
       closeOverlay("pauseOverlay");
       closeOverlay("devOverlay");
@@ -6289,12 +6090,8 @@
         closeOverlay("shareOptionsOverlay");
         return;
       }
-      if ($("rewardedRowsOverlay").classList.contains("open")) {
-        cancelRowRescue();
-        return;
-      }
-      if ($("interstitialOverlay").classList.contains("open")) {
-        closeInterstitial(false);
+      if ($("communityConfirmOverlay").classList.contains("open")) {
+        closeOverlay("communityConfirmOverlay");
         return;
       }
       if ($("pauseOverlay").classList.contains("open")) {
@@ -6336,6 +6133,9 @@
     $("playButton").addEventListener("click", () => safeAction("Start game", startGame));
     $("dailyButton").addEventListener("click", () => safeAction("Start daily challenge", () => startDailyGame()));
     $("rushButton").addEventListener("click", () => safeAction("Start Rush", () => startGame("rush")));
+    $("communityButton").addEventListener("click", () => safeAction("Open community", openCommunity));
+    $("confirmCommunityButton").addEventListener("click", () => safeAction("Leave for Discord", leaveForCommunity));
+    $("cancelCommunityButton").addEventListener("click", () => closeOverlay("communityConfirmOverlay"));
     $("leaderboardsButton").addEventListener("click", () => safeAction("Open leaderboards", openRecords));
     $("settingsButton").addEventListener("click", () => safeAction("Open settings", openSettings));
     $("settingsHomeButton").addEventListener("click", () => safeAction("Return home", goHome));
@@ -6371,10 +6171,6 @@
     $("postRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("standardPostRunContinueButton").addEventListener("click", () => safeAction("Continue after run", continueAfterRun));
     $("removeRowsButton").addEventListener("click", () => safeAction("Request row rescue", requestRowRescue));
-    $("completeRewardedRowsButton").addEventListener("click", () => safeAction("Complete row rescue advert", completeRowRescue));
-    $("cancelRewardedRowsButton").addEventListener("click", () => safeAction("Cancel row rescue advert", cancelRowRescue));
-    $("closeInterstitialButton").addEventListener("click", () => safeAction("Close test interstitial", () => closeInterstitial(true)));
-    $("adUnavailableButton").addEventListener("click", () => safeAction("Simulate unavailable ad", () => closeInterstitial(false)));
     $("shareResultButton").addEventListener("click", () => safeAction("Share result", shareLastResult));
     $("shareFacebookButton").addEventListener("click", () => safeAction("Share to Facebook", () => openSocialShare("facebook")));
     $("shareXButton").addEventListener("click", () => safeAction("Share to X", () => openSocialShare("x")));
@@ -6418,6 +6214,7 @@
     $("devBackgroundButton").addEventListener("click", () => safeAction("Prepare background pause test", prepareBackgroundPauseTest));
     $("howOverlay").addEventListener("click", (event) => { if (event.target === $("howOverlay")) closeOverlay("howOverlay"); });
     $("achievementsOverlay").addEventListener("click", (event) => { if (event.target === $("achievementsOverlay")) closeOverlay("achievementsOverlay"); });
+    $("communityConfirmOverlay").addEventListener("click", (event) => { if (event.target === $("communityConfirmOverlay")) closeOverlay("communityConfirmOverlay"); });
     $("pauseOverlay").addEventListener("click", (event) => { if (event.target === $("pauseOverlay")) resumeGame(); });
     $("devOverlay").addEventListener("click", (event) => { if (event.target === $("devOverlay")) closeOverlay("devOverlay"); });
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -6428,6 +6225,7 @@
       if (event.key === "Escape") {
         if ($("specialTutorialOverlay").classList.contains("open")) closeSpecialTutorial();
         else if ($("devOverlay").classList.contains("open")) closeOverlay("devOverlay");
+        else if ($("communityConfirmOverlay").classList.contains("open")) closeOverlay("communityConfirmOverlay");
         else if ($("pauseOverlay").classList.contains("open")) resumeGame();
         else if ($("howOverlay").classList.contains("open")) closeOverlay("howOverlay");
         else if ($("achievementsOverlay").classList.contains("open")) closeOverlay("achievementsOverlay");
@@ -6438,7 +6236,6 @@
 
     createBoard();
     initialiseNativeBackButton();
-    void initialiseNativeTestAds();
     setGameBackVisible(false);
     repairLifetimeScoreFloor();
     initialiseProfile();
@@ -6455,7 +6252,7 @@
     window.setInterval(renderDailyHome, 1000);
     window.setInterval(trackActiveReviewPlaytime, 1000);
     if (TEST_MODE) document.querySelector(".version").textContent += ` • TEST TIER ${TEST_TIER}`;
-    if (TEST_GAME_OVER) document.querySelector(".version").textContent += TEST_INTERSTITIAL ? " • INTERSTITIAL TEST" : " • GAME OVER TEST";
+    if (TEST_GAME_OVER) document.querySelector(".version").textContent += " • GAME OVER TEST";
     if (TEST_TUTORIAL) document.querySelector(".version").textContent += " • TUTORIAL TEST";
     if (DEV_MODE) {
       $("devMenuButton").hidden = false;
